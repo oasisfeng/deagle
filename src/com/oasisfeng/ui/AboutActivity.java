@@ -67,6 +67,8 @@ public class AboutActivity extends PreferenceActivity {
                 final Locale default_locale = Locale.getDefault();
                 final Locale locale = Locales.getFrom(getActivity());
                 Locales.switchTo(getActivity(), locale == null || default_locale.equals(locale) ? new Locale("en") : default_locale);
+                getActivity().recreate();
+                return true;
             }
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
