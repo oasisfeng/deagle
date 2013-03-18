@@ -11,6 +11,10 @@ import android.os.Build;
 /** @author Oasis */
 public class Locales {
 
+    public static Locale getFrom(final Context context) {
+        return context.getResources().getConfiguration().locale;
+    }
+
     /**
      * Switch the locale of current app to explicitly specified or default one
      *
