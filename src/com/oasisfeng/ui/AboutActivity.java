@@ -50,7 +50,7 @@ public class AboutActivity extends PreferenceActivity {
             final Preference version_pref = getPreferenceScreen().findPreference("version");
             if (version_pref != null) try {
                 final PackageInfo package_info = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-                version_pref.setSummary(package_info.versionName);
+                version_pref.setTitle(version_pref.getTitle() + " " + package_info.versionName);
             } catch (final NameNotFoundException e) {}
         }
 
