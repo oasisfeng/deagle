@@ -22,39 +22,31 @@ import com.oasisfeng.i18n.Locales;
  * <p>Declare the activity in AndroidManifest.xml:
  * <pre>
        &lt;activity android:name="com.oasisfeng.ui.About"
-           android:theme="@android:style/Theme.Holo.DialogWhenLarge.NoActionBar"&gt;
-           &lt;meta-data android:name="android.preference" android:resource="@xml/about"/&gt;
-       &lt;/activity&gt;
+           android:theme="@android:style/Theme.Holo.DialogWhenLarge.NoActionBar" /&gt;
    </pre>
-   Show the dialog in code: <pre>AboutActivity.show(context);</pre>
+   Show the dialog in code: <pre>AboutActivity.show(context, R.xml.about);</pre>
 
  * @author Oasis
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)       // TODO: Support 2.x
 public class AboutActivity extends PreferenceActivity {
 
-    public static void show(final Context context) {
-        context.startActivity(new Intent(context, AboutActivity.class));
-    }
+    private static final String EXTRA_XML_RESOURCE_ID = "xml";
 
-    /** Show with custom AboutFragment */
-    public static void show(final Context context, final AboutFragment fragment) {
-        context.startActivity(new Intent(context, AboutActivity.class).putExtra(EXTRA_SHOW_FRAGMENT, fragment.getClass().getName()));
+    public static void show(final Context context, final int xml_res) {
+        context.startActivity(new Intent(context, AboutActivity.class).putExtra(EXTRA_XML_RESOURCE_ID, xml_res));
     }
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
-        final Intent intent = getIntent().putExtra(EXTRA_NO_HEADERS, true);
-        if (! intent.hasExtra(EXTRA_SHOW_FRAGMENT)) intent.putExtra(EXTRA_SHOW_FRAGMENT, AboutFragment.class.getName());
-        setIntent(intent);      // We just prepare the intent, onCreate() of PreferenceActivity takes care of the rest.
         super.onCreate(savedInstanceState);
-
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new AboutFragment()).commit();
     }
 
     public static class AboutFragment extends PreferenceFragment {
 
         @Override public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromIntent(getActivity().getIntent());
+            addPreferencesFromResource(getActivity().getIntent().getIntExtra(EXTRA_XML_RESOURCE_ID, 0));
             final Preference version_pref = getPreferenceScreen().findPreference("version");
             if (version_pref != null) try {
                 final PackageInfo package_info = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
