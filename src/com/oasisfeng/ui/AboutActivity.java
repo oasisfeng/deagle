@@ -14,6 +14,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
+import com.oasisfeng.google.play.GooglePlayStore;
 import com.oasisfeng.i18n.Locales;
 
 /**
@@ -61,7 +62,8 @@ public class AboutActivity extends PreferenceActivity {
                 Locales.switchTo(getActivity(), locale == null || default_locale.equals(locale) ? new Locale("en") : default_locale);
                 getActivity().recreate();
                 return true;
-            }
+            } else if (preference.getIntent() != null)
+                GooglePlayStore.updatePreferenceIntent(getActivity(), preference);
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
     }
