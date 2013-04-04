@@ -1,4 +1,4 @@
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 import android.app.Notification;
 

@@ -1,4 +1,4 @@
-package com.oasisfeng.ui;
+package com.oasisfeng.android.ui;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Window;
 
-import com.oasisfeng.base.Versions;
+import com.oasisfeng.android.base.Versions;
 
 /**
  * Shared busy indicator (indeterminate progress bar) for activity, with reference count.

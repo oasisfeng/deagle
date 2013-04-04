@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 /**
  * SparseArrays map integers to Objects.  Unlike a normal array of Objects,

@@ -1,4 +1,4 @@
-package com.oasisfeng.google.play;
+package com.oasisfeng.android.google;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;

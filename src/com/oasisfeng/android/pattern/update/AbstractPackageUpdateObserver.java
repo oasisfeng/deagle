@@ -1,4 +1,4 @@
-package com.oasisfeng.pattern.update;
+package com.oasisfeng.android.pattern.update;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;

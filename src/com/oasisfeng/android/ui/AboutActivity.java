@@ -1,4 +1,4 @@
-package com.oasisfeng.ui;
+package com.oasisfeng.android.ui;
 
 import java.util.Locale;
 
@@ -14,8 +14,8 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
-import com.oasisfeng.google.play.GooglePlayStore;
-import com.oasisfeng.i18n.Locales;
+import com.oasisfeng.android.google.GooglePlayStore;
+import com.oasisfeng.android.i18n.Locales;
 
 /**
  * A helper class to simply build an "About" dialog.

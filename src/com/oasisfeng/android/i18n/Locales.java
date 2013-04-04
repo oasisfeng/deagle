@@ -1,4 +1,4 @@
-package com.oasisfeng.i18n;
+package com.oasisfeng.android.i18n;
 
 import java.util.Locale;
 

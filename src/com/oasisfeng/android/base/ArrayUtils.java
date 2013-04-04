@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 import java.lang.reflect.Array;
 

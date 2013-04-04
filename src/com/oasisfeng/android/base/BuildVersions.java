@@ -1,4 +1,4 @@
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 import android.os.Build;
 import android.os.Build.VERSION_CODES;

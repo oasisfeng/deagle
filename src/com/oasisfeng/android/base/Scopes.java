@@ -1,4 +1,4 @@
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -8,7 +8,7 @@ import java.util.Set;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.oasisfeng.base.Scopes.Scope;
+import com.oasisfeng.android.base.Scopes.Scope;
 
 /** @author Oasis */
 public class Scopes {

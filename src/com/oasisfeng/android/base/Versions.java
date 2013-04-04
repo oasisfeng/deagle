@@ -1,4 +1,4 @@
-package com.oasisfeng.base;
+package com.oasisfeng.android.base;
 
 import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
 import android.content.Context;
