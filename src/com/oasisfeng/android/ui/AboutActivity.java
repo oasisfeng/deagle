@@ -3,6 +3,8 @@ package com.oasisfeng.android.ui;
 import java.util.Locale;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -34,13 +36,21 @@ public class AboutActivity extends PreferenceActivity {
 
     private static final String EXTRA_XML_RESOURCE_ID = "xml";
 
+    /** Override to provide your own fragment implementation */
+    protected Fragment createAboutFragment() { return new AboutFragment(); }
+
     public static void show(final Context context, final int xml_res) {
-        context.startActivity(new Intent(context, AboutActivity.class).putExtra(EXTRA_XML_RESOURCE_ID, xml_res));
+        show(context, xml_res, AboutActivity.class);
+    }
+
+    /** Show about activity of your own implementation */
+    public static void show(final Context context, final int xml_res, final Class<? extends Activity> activity) {
+        context.startActivity(new Intent(context, activity).putExtra(EXTRA_XML_RESOURCE_ID, xml_res));
     }
 
     @Override protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new AboutFragment()).commit();
+        getFragmentManager().beginTransaction().replace(android.R.id.content, createAboutFragment()).commit();
     }
 
     public static class AboutFragment extends PreferenceFragment {
