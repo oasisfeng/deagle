@@ -1,8 +1,10 @@
 package com.oasisfeng.android.base;
 
 import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 /** @author Oasis */
@@ -22,10 +24,28 @@ public class Versions {
     }
 
     public static int code(final Context context) {
-        if (sVersionCode == 0) try {
-            sVersionCode = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-        } catch (final NameNotFoundException e) { /* Should never happen */ return 0; }
+        if (sVersionCode == 0) loadVersionInfo(context);
         return sVersionCode;
     }
+
+    public static String name(final Context context) {
+        if (sVersionName == null) loadVersionInfo(context);
+        return sVersionName;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static boolean isVersionOf(final Context context, final String tag) {
+        return name(context).toLowerCase().contains(tag);
+    }
+
+    private static void loadVersionInfo(final Context context) {
+        try {
+            final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            sVersionCode = info.versionCode;
+            sVersionName = info.versionName;
+        } catch (final NameNotFoundException e) { /* Should never happen */ }
+    }
+
     private static int sVersionCode;
+    private static String sVersionName;
 }
