@@ -9,31 +9,42 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.oasisfeng.android.base.Scopes.Scope;
+import com.oasisfeng.android.base.Scopes.ScopeRunnable;
 
 /** @author Oasis */
 public class Scopes {
 
     public interface Scope {
 
+        public void ifNotYet(String tag, ScopeRunnable runnable);
         public boolean firstTime(String tag);
+    }
+
+    public interface ScopeRunnable {
+        boolean run();
     }
 
     public static Scope app(final Context context) { return new AppScope(context); }
     public static Scope version(final Context context) { return new VersionScope(context); }
-    public static Scope process() { return ProcessScope.singleton(); }
-
-    /** @planned */ Scope context(final Context context) { throw new UnsupportedOperationException(); }
+    public static Scope process() { return ProcessScope.mSingleton; }
 
     private Scopes() {}
 }
 
 class ProcessScope implements Scope {
 
-    @Override public boolean firstTime(final String tag) { return mSeen.add(tag); }
-    static Scope singleton() { return mSingleton; }
+    @Override public void ifNotYet(final String tag, final ScopeRunnable runnable) {
+        if (mSeen.contains(tag))
+            if (runnable.run())
+                mSeen.add(tag);
+    }
+
+    @Override public boolean firstTime(final String tag) {
+        return mSeen.add(tag);
+    }
 
     private final Set<String> mSeen = new HashSet<String>();
-    private static final Scope mSingleton = new ProcessScope();
+    static final Scope mSingleton = new ProcessScope();
 }
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
@@ -59,7 +70,15 @@ class AppScope extends SharedPrefsBasedScopeImpl {
 
 class SharedPrefsBasedScopeImpl implements Scope {
 
+    private static final String KPrefsKeyNotYet = "not-yet-";
     private static final String KPrefsKeyFirstTime = "first-time-";
+
+    @Override public void ifNotYet(final String tag, final ScopeRunnable runnable) {
+        final String key = KPrefsKeyNotYet + tag;
+        if (! mPrefs.getBoolean(key, true)) return;
+        if (runnable.run())
+            mPrefs.edit().putBoolean(key, false).commit();
+    }
 
     @Override public boolean firstTime(final String tag) {
         final String key = KPrefsKeyFirstTime + tag;
