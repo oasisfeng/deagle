@@ -64,11 +64,11 @@ public class SparseArray<E> implements Cloneable {
      * require any additional memory allocation to store the specified
      * number of mappings.
      */
-    public SparseArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+    public SparseArray(final int initialCapacity) {
+        final int ideal_capacity = ArrayUtils.idealIntArraySize(initialCapacity);
 
-        mKeys = new int[initialCapacity];
-        mValues = new Object[initialCapacity];
+        mKeys = new int[ideal_capacity];
+        mValues = new Object[ideal_capacity];
         mSize = 0;
     }
 

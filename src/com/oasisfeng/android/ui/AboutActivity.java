@@ -36,7 +36,7 @@ public class AboutActivity extends PreferenceActivity {
 
     private static final String EXTRA_XML_RESOURCE_ID = "xml";
 
-    /** Override to provide your own fragment implementation */
+    @SuppressWarnings("static-method") /** Override to provide your own fragment implementation */
     protected Fragment createAboutFragment() { return new AboutFragment(); }
 
     public static void show(final Context context, final int xml_res) {
