@@ -9,19 +9,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.oasisfeng.android.base.Scopes.Scope;
-import com.oasisfeng.android.base.Scopes.ScopeRunnable;
 
 /** @author Oasis */
 public class Scopes {
 
     public interface Scope {
 
-        public void ifNotYet(String tag, ScopeRunnable runnable);
-        public boolean firstTime(String tag);
-    }
-
-    public interface ScopeRunnable {
-        boolean run();
+        public boolean isMarked(String tag);
+        public boolean mark(String tag);
+        public boolean unmark(String tag);
     }
 
     public static Scope app(final Context context) { return new AppScope(context); }
@@ -33,14 +29,16 @@ public class Scopes {
 
 class ProcessScope implements Scope {
 
-    @Override public void ifNotYet(final String tag, final ScopeRunnable runnable) {
-        if (! mSeen.contains(tag))
-            if (runnable.run())
-                mSeen.add(tag);
+    @Override public boolean isMarked(final String tag) {
+        return mSeen.contains(tag);
     }
 
-    @Override public boolean firstTime(final String tag) {
+    @Override public boolean mark(final String tag) {
         return mSeen.add(tag);
+    }
+
+    @Override public boolean unmark(final String tag) {
+        return mSeen.remove(tag);
     }
 
     private final Set<String> mSeen = new HashSet<String>();
@@ -58,7 +56,7 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
     private static SharedPreferences resetIfVersionChanges(final Context context, final SharedPreferences prefs) {
         final int version = Versions.code(context);
         if (version != prefs.getInt(KPrefsKeyVersionCode, 0))
-            prefs.edit().clear().putInt(KPrefsKeyVersionCode, version).commit();
+            prefs.edit().clear().putInt(KPrefsKeyVersionCode, version).apply();
         return prefs;
     }
 }
@@ -70,20 +68,24 @@ class AppScope extends SharedPrefsBasedScopeImpl {
 
 class SharedPrefsBasedScopeImpl implements Scope {
 
-    private static final String KPrefsKeyNotYet = "not-yet-";
-    private static final String KPrefsKeyFirstTime = "first-time-";
+    private static final String KPrefsKeyPrefix = "first-time-";        // Old name, for backward-compatibility
 
-    @Override public void ifNotYet(final String tag, final ScopeRunnable runnable) {
-        final String key = KPrefsKeyNotYet + tag;
-        if (! mPrefs.getBoolean(key, true)) return;
-        if (runnable.run())
-            mPrefs.edit().putBoolean(key, false).commit();
+    @Override public boolean isMarked(final String tag) {
+        final String key = KPrefsKeyPrefix + tag;
+        return ! mPrefs.getBoolean(key, true);
     }
 
-    @Override public boolean firstTime(final String tag) {
-        final String key = KPrefsKeyFirstTime + tag;
+    @Override public boolean mark(final String tag) {
+        final String key = KPrefsKeyPrefix + tag;
         if (! mPrefs.getBoolean(key, true)) return false;
-        mPrefs.edit().putBoolean(key, false).commit();
+        mPrefs.edit().putBoolean(key, false).apply();
+        return true;
+    }
+
+    @Override public boolean unmark(final String tag) {
+        final String key = KPrefsKeyPrefix + tag;
+        if (mPrefs.getBoolean(key, true)) return false;
+        mPrefs.edit().putBoolean(key, true).apply();
         return true;
     }
 
