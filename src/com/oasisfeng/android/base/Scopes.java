@@ -34,7 +34,7 @@ public class Scopes {
 class ProcessScope implements Scope {
 
     @Override public void ifNotYet(final String tag, final ScopeRunnable runnable) {
-        if (mSeen.contains(tag))
+        if (! mSeen.contains(tag))
             if (runnable.run())
                 mSeen.add(tag);
     }
