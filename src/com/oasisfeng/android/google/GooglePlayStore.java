@@ -1,12 +1,13 @@
 package com.oasisfeng.android.google;
 
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.preference.Preference;
+
+import com.oasisfeng.android.util.Apps;
 
 /** @author Oasis */
 public class GooglePlayStore {
@@ -15,13 +16,7 @@ public class GooglePlayStore {
     private static final String PLAY_URL_PREFIX = "https://play.google.com/store/apps/details?id=";
 
     public static boolean isAvailable(final Context context) {
-        try {
-            final ApplicationInfo play_app = context.getPackageManager().getApplicationInfo(PLAY_PACKAGE_NAME, 0);
-            return play_app.enabled;
-        } catch (final NameNotFoundException e) {
-            return false;
-        }
-
+        return Apps.isAvailable(context, PLAY_PACKAGE_NAME);
     }
 
     public static void showApp(final Context context, final String pkg) {
@@ -47,7 +42,8 @@ public class GooglePlayStore {
         final Uri uri = intent.getData();
         if (uri == null) return;
         intent.setPackage(PLAY_PACKAGE_NAME);
-        if (intent.resolveActivity(context.getPackageManager()) != null) return;
-        intent.setPackage(null);
+        final ComponentName component = intent.resolveActivity(context.getPackageManager());
+        if (component != null) intent.setComponent(component);
+        else intent.setPackage(null);
     }
 }
