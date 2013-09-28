@@ -7,17 +7,35 @@ import android.content.pm.PackageManager.NameNotFoundException;
 /** @author Oasis */
 public class Apps {
 
-    public static boolean isEnabled(final Context context, final String pkg) throws NameNotFoundException {
-        final ApplicationInfo app_info = context.getPackageManager().getApplicationInfo(pkg, 0);
+    public static Apps of(final Context context) {
+        return new Apps(context);
+    }
+
+    public boolean isEnabled(final String pkg) throws NameNotFoundException {
+        final ApplicationInfo app_info = mContext.getPackageManager().getApplicationInfo(pkg, 0);
         return app_info.enabled;
     }
 
-    public static boolean isAvailable(final Context context, final String pkg) {
+    public boolean isAvailable(final String pkg) {
         try {
-            final ApplicationInfo app_info = context.getPackageManager().getApplicationInfo(pkg, 0);
+            final ApplicationInfo app_info = mContext.getPackageManager().getApplicationInfo(pkg, 0);
             return app_info.enabled;
         } catch (final NameNotFoundException e) {
             return false;
         }
     }
+
+    public boolean isInstalledBy(final String installer_pkg) {
+        try {
+            return installer_pkg.equals(mContext.getPackageManager().getInstallerPackageName(mContext.getPackageName()));
+        } catch(final IllegalArgumentException e) {
+            return false;       // Should never happen
+        }
+    }
+
+    private Apps(final Context context) {
+        mContext = context;
+    }
+
+    private final Context mContext;
 }

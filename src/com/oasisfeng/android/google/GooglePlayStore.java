@@ -7,28 +7,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.preference.Preference;
 
-import com.oasisfeng.android.util.Apps;
-
 /** @author Oasis */
 public class GooglePlayStore {
 
-    private static final String PLAY_PACKAGE_NAME = "com.android.vending";
-    private static final String PLAY_URL_PREFIX = "https://play.google.com/store/apps/details?id=";
-
-    public static boolean isAvailable(final Context context) {
-        return Apps.isAvailable(context, PLAY_PACKAGE_NAME);
-    }
+    public static final String PACKAGE_NAME = "com.android.vending";
+    private static final String APP_URL_PREFIX = "https://play.google.com/store/apps/details?id=";
 
     public static void showApp(final Context context, final String pkg) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_URL_PREFIX + pkg));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_URL_PREFIX + pkg));
         updatePlayUrlIntent(context, intent);
         try { context.startActivity(intent);
         } catch(final ActivityNotFoundException e) { /* In case of Google Play malfunction */ }
-    }
-
-    public static boolean isInstalledByGooglePlay(final Context context) {
-        final String installer = context.getPackageManager().getInstallerPackageName(context.getPackageName());
-        return PLAY_PACKAGE_NAME.equals(installer);
     }
 
     public static void updatePreferenceIntent(final Context context, final Preference preference) {
@@ -41,7 +30,7 @@ public class GooglePlayStore {
         if (intent == null || intent.getPackage() != null) return;      // Skip intent with explicit target package
         final Uri uri = intent.getData();
         if (uri == null) return;
-        intent.setPackage(PLAY_PACKAGE_NAME);
+        intent.setPackage(PACKAGE_NAME);
         final ComponentName component = intent.resolveActivity(context.getPackageManager());
         if (component != null) intent.setComponent(component);
         else intent.setPackage(null);
