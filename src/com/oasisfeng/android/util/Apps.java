@@ -1,5 +1,7 @@
 package com.oasisfeng.android.util;
 
+import java.util.Arrays;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -25,9 +27,9 @@ public class Apps {
         }
     }
 
-    public boolean isInstalledBy(final String installer_pkg) {
+    public boolean isInstalledBy(final String... installer_pkgs) {
         try {
-            return installer_pkg.equals(mContext.getPackageManager().getInstallerPackageName(mContext.getPackageName()));
+            return Arrays.asList(installer_pkgs).contains(mContext.getPackageManager().getInstallerPackageName(mContext.getPackageName()));
         } catch(final IllegalArgumentException e) {
             return false;       // Should never happen
         }
