@@ -26,7 +26,7 @@ public class SafeSharedPreferences {
         }
 
         @Override public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-            if (args.length == 2 && method.getName().startsWith("get")) {       // getAll() is excluded by "args.length == 2"
+            if (args != null && args.length == 2 && method.getName().startsWith("get")) {   // getAll() is excluded by "args.length == 2"
                 try {
                     return method.invoke(mPrefs, args);
                 } catch (final ClassCastException e) {
