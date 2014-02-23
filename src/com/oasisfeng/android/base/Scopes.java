@@ -13,6 +13,9 @@ import com.oasisfeng.android.base.Scopes.Scope;
 /** @author Oasis */
 public class Scopes {
 
+    public static final String KPrefsNameAppScope = "app.scope";
+    public static final String KPrefsNameVersionScope = "version.scope";
+
     public interface Scope {
 
         public boolean isMarked(String tag);
@@ -47,10 +50,10 @@ class ProcessScope implements Scope {
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
 
-    private static final String KPrefsKeyVersionCode = "version-code";
+	private static final String KPrefsKeyVersionCode = "version-code";
 
     VersionScope(final Context context) {
-        super(resetIfVersionChanges(context, context.getSharedPreferences("version.scope", MODE_PRIVATE)));
+        super(resetIfVersionChanges(context, context.getSharedPreferences(Scopes.KPrefsNameVersionScope, MODE_PRIVATE)));
     }
 
     private static SharedPreferences resetIfVersionChanges(final Context context, final SharedPreferences prefs) {
@@ -63,7 +66,7 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
 
 class AppScope extends SharedPrefsBasedScopeImpl {
 
-    AppScope(final Context context) { super(context.getSharedPreferences("app.scope", MODE_PRIVATE)); }
+	AppScope(final Context context) { super(context.getSharedPreferences(Scopes.KPrefsNameAppScope, MODE_PRIVATE)); }
 }
 
 class SharedPrefsBasedScopeImpl implements Scope {
