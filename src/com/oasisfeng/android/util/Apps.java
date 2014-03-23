@@ -20,8 +20,7 @@ public class Apps {
 
     public boolean isAvailable(final String pkg) {
         try {
-            final ApplicationInfo app_info = mContext.getPackageManager().getApplicationInfo(pkg, 0);
-            return app_info.enabled;
+            return isEnabled(pkg);
         } catch (final NameNotFoundException e) {
             return false;
         }
