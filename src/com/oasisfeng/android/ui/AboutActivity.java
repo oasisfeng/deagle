@@ -69,8 +69,8 @@ public class AboutActivity extends PreferenceActivity {
             if ("translation".equals(preference.getKey())) {
                 final Locale default_locale = Locale.getDefault();
                 final Locale locale = Locales.getFrom(getActivity());
-                Locales.switchTo(getActivity(), locale == null || default_locale.equals(locale) ? new Locale("en") : default_locale);
-                getActivity().recreate();
+                if (Locales.switchTo(getActivity(), locale == null || default_locale.equals(locale) ? new Locale("en") : default_locale))
+                	getActivity().recreate();
                 return true;
             } else if (preference.getIntent() != null)
                 GooglePlayStore.updatePreferenceIntent(getActivity(), preference);
