@@ -20,11 +20,13 @@ public class Locales {
      *
      * @param locale null for default
      */
-    public static void switchTo(final Context context, final Locale locale) {
+    public static boolean switchTo(final Context context, final Locale locale) {
         final Resources resources = context.getResources();
         final Configuration configuration = resources.getConfiguration();
+        if (match(locale, configuration.locale)) return false;
         setConfigurationLocale(configuration, locale);
         resources.updateConfiguration(configuration, null);
+        return true;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -32,5 +34,16 @@ public class Locales {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
             configuration.locale = locale;
         else configuration.setLocale(locale);
+    }
+
+    private static boolean match(final Locale locale1, final Locale locale2) {
+    	return match(locale1.getLanguage(), locale2.getLanguage())
+    			&& match(locale1.getCountry(), locale2.getCountry())
+    			&& match(locale1.getVariant(), locale2.getVariant());
+	}
+
+    private static boolean match(final String value1, final String value2) {
+    	return (value1 == null && value2 == null) || "".equals(value1) || "".equals(value2)
+    			|| (value1 != null && value1.equals(value2));
     }
 }
