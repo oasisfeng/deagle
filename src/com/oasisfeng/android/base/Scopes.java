@@ -5,8 +5,11 @@ import static android.content.Context.MODE_PRIVATE;
 import java.util.HashSet;
 import java.util.Set;
 
+import android.app.Activity;
+import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import com.oasisfeng.android.base.Scopes.Scope;
 
@@ -26,13 +29,51 @@ public class Scopes {
     public static Scope app(final Context context) { return new AppScope(context); }
     public static Scope version(final Context context) { return new VersionScope(context); }
     public static Scope process() { return ProcessScope.mSingleton; }
+    public static Scope session(final Activity activity) {
+    	if (SessionScope.mSingleton == null) SessionScope.mSingleton = new SessionScope(activity);
+    	return SessionScope.mSingleton;
+    }
 
     private Scopes() {}
 }
 
-class ProcessScope implements Scope {
+class SessionScope extends MemoryBasedScopeImpl {
 
-    @Override public boolean isMarked(final String tag) {
+	private static final int KSessionTimeout = 30 * 60 * 1000;		// TODO: Configurable
+
+	public SessionScope(final Activity activity) {
+		activity.getApplication().registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+
+			@Override public void onActivityResumed(final Activity a) {
+				if (System.currentTimeMillis() >= mTimeLastSession + KSessionTimeout)
+					mSeen.clear();
+			}
+
+			@Override public void onActivityPaused(final Activity a) {
+				mTimeLastSession = System.currentTimeMillis();
+			}
+
+			@Override public void onActivityStopped(final Activity a) {}
+			@Override public void onActivityStarted(final Activity a) {}
+			@Override public void onActivitySaveInstanceState(final Activity a, final Bundle s) {}
+			@Override public void onActivityCreated(final Activity a, final Bundle s) {}
+			@Override public void onActivityDestroyed(final Activity a) {}
+		});
+	}
+
+	private long mTimeLastSession = 0;
+
+	static SessionScope mSingleton;
+}
+
+class ProcessScope extends MemoryBasedScopeImpl {
+
+	static final Scope mSingleton = new ProcessScope();
+}
+
+class MemoryBasedScopeImpl implements Scope {
+
+	@Override public boolean isMarked(final String tag) {
         return mSeen.contains(tag);
     }
 
@@ -44,8 +85,7 @@ class ProcessScope implements Scope {
         return mSeen.remove(tag);
     }
 
-    private final Set<String> mSeen = new HashSet<String>();
-    static final Scope mSingleton = new ProcessScope();
+    protected final Set<String> mSeen = new HashSet<String>();
 }
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
