@@ -14,7 +14,7 @@ public class Dialogs {
 
 	public static Builder buildAlert(final Context context, final CharSequence title, final CharSequence message) {
 		final Builder builder = new Builder(context);
-		builder.setCancelable(false);
+		builder.setCancelable(true);
 		if (title != null) builder.setTitle(title);
 		if (message != null) builder.setMessage(message);
 		return builder;
