@@ -101,7 +101,7 @@ public class Hack {
 		@SuppressWarnings("unchecked")
 		public HackedField<C, T> ofType(final String type_name) throws HackDeclaration.HackAssertionException {
 			try {
-				return (HackedField<C, T>) ofType(Class.forName(type_name));
+				return (HackedField<C, T>) ofType(Class.forName(type_name, false, mField.getDeclaringClass().getClassLoader()));
 			} catch (final ClassNotFoundException e) {
 				fail(new HackDeclaration.HackAssertionException(e)); return this;
 			}
@@ -184,32 +184,38 @@ public class Hack {
 		private final Object mInstance;		// Instance type is already checked
 	}
 
-	public interface HackedMethod<C, R> {
+	public interface HackedUnsafeMethod<C> {
 
-		R invoke(C target, Object... args) throws IllegalArgumentException, InvocationTargetException;
-		HackedTargetMethod on(Object target);
+		<R> HackedMethod<R, C> returning(Class<R> return_type) throws HackDeclaration.HackAssertionException;
+	}
+
+	public interface HackedMethod<R, C> {
+		HackedTargetMethod<R> on(C target);
 	}
 
 	public interface HackedTargetMethod<R> {
 		R invoke(Object... args) throws IllegalArgumentException, InvocationTargetException;
 	}
 
-	private static class HackedMethodImpl<C, R> implements HackedMethod<C, R> {
+	public interface HackedMethod1<R, C, A1> { R invoke(C target, A1 arg) throws InvocationTargetException; }
+	public interface HackedMethod2<R, C, A1, A2> { R invoke(C target, A1 arg1, A2 arg2) throws InvocationTargetException; }
+	public interface HackedMethod3<R, C, A1, A2, A3> { R invoke(C target, A1 arg1, A2 arg2, A3 arg3) throws InvocationTargetException; }
+	public interface HackedMethod4<R, C, A1, A2, A3, A4> { R invoke(C target, A1 arg1, A2 arg2, A3 arg3, A4 arg4) throws InvocationTargetException; }
 
-		public R invoke(final C target, final Object... args) throws IllegalArgumentException, InvocationTargetException {
+	private static class HackedMethodImplBase<C, R> {
+
+		protected R invoke(final C target, final Object... args) throws IllegalArgumentException, InvocationTargetException {
 			try {
 				@SuppressWarnings("unchecked") final R obj = (R) mMethod.invoke(target, args);
 				return obj;
-			} catch (final IllegalAccessException e) { /* Should never happen */
-				return null;
-			}
+			} catch (final IllegalAccessException e) { return null; }	// Should never happen
 		}
 
-		@Override public HackedTargetMethod on(final Object target) {
-			return new HackedTargetMethodImpl(mMethod, target);
+		protected HackedTargetMethod<R> onTarget(final @Nullable C target) {
+			return new HackedTargetMethodImpl<>(mMethod, target);
 		}
 
-		HackedMethodImpl(final Class<C> clazz, final String name, final Class<?>[] arg_types, final int modifiers) throws HackDeclaration.HackAssertionException {
+		HackedMethodImplBase(final Class<C> clazz, final String name, final int modifiers, final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
 			Method method = null;
 			try {
 				if (clazz == null) return;
@@ -234,16 +240,88 @@ public class Hack {
 		}		
 	}
 
-	private static class HackedTargetMethodImpl<T> implements HackedTargetMethod<T> {
+	private static class HackedMethodImpl<R, C> extends HackedMethodImplBase<C, R> implements HackedMethod<R, C> {
 
-		private HackedTargetMethodImpl(final Method mMethod, final Object mTarget) { this.mMethod = mMethod; this.mTarget = mTarget; }
+		HackedMethodImpl(final Class<C> clazz, final String name, final int modifiers, final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
+			super(clazz, name, modifiers, arg_types);
+		}
 
-		@Override public T invoke(final Object... args) throws IllegalArgumentException, InvocationTargetException {
-			return null;
+		@Override public R invoke(final C target, final Object... args) throws IllegalArgumentException, InvocationTargetException {
+			return super.invoke(target, args);
+		}
+
+		@Override public HackedTargetMethod<R> on(final C target) {
+			if (target == null) throw new IllegalArgumentException("target is null");
+			return onTarget(target);
+		}
+	}
+
+	private static class HackedMethod1Impl<C, R, A1> extends HackedMethodImplBase<C, R> implements HackedMethod1<R, C, A1> {
+
+		@Override public R invoke(final C target, final A1 arg) throws InvocationTargetException {
+			return super.invoke(target, arg);
+		}
+
+		HackedMethod1Impl(final Class<C> clazz, final String name, final int modifiers, final Class<A1> arg_type) throws HackDeclaration.HackAssertionException {
+			super(clazz, name, modifiers, arg_type);
+		}
+	}
+
+	private static class HackedMethod2Impl<C, R, A1, A2> extends HackedMethodImplBase<C, R> implements HackedMethod2<R, C, A1, A2> {
+
+		@Override public R invoke(final C target, final A1 arg1, final A2 arg2) throws InvocationTargetException {
+			return super.invoke(target, arg1, arg2);
+		}
+
+		HackedMethod2Impl(final Class<C> clazz, final String name, final int modifiers, final Class<A1> arg1_type, final Class<A2> arg2_type) throws HackDeclaration.HackAssertionException {
+			super(clazz, name, modifiers, arg1_type, arg2_type);
+		}
+	}
+
+	private static class HackedMethod3Impl<C, R, A1, A2, A3> extends HackedMethodImplBase<C, R> implements HackedMethod3<R, C, A1, A2, A3> {
+
+		@Override public R invoke(final C target, final A1 arg1, final A2 arg2, final A3 arg3) throws InvocationTargetException {
+			return super.invoke(target, arg1, arg2, arg3);
+		}
+
+		HackedMethod3Impl(final Class<C> clazz, final String name, final int modifiers, final Class<A1> arg1_type, final Class<A2> arg2_type, final Class<A3> arg3_type) throws HackDeclaration.HackAssertionException {
+			super(clazz, name, modifiers, arg1_type, arg2_type, arg3_type);
+		}
+	}
+
+	private static class HackedMethod4Impl<C, R, A1, A2, A3, A4> extends HackedMethodImplBase<C, R> implements HackedMethod4<R, C, A1, A2, A3, A4> {
+
+		@Override public R invoke(final C target, final A1 arg1, final A2 arg2, final A3 arg3, final A4 arg4) throws InvocationTargetException {
+			return super.invoke(target, arg1, arg2, arg3, arg4);
+		}
+
+		HackedMethod4Impl(final Class<C> clazz, final String name, final int modifiers, final Class<A1> arg1_type, final Class<A2> arg2_type, final Class<A3> arg3_type, final Class<A4> arg4_type) throws HackDeclaration.HackAssertionException {
+			super(clazz, name, modifiers, arg1_type, arg2_type, arg3_type, arg4_type);
+		}
+	}
+
+	private static class HackedTargetMethodImplBase<R> {
+
+		HackedTargetMethodImplBase(final Method mMethod, final Object mTarget) { this.mMethod = mMethod; this.mTarget = mTarget; }
+
+		protected R invoke(final Object... args) throws IllegalArgumentException, InvocationTargetException {
+			try {
+				@SuppressWarnings("unchecked") final R result = (R) mMethod.invoke(mTarget, args);
+				return result;
+			} catch (final IllegalAccessException e) { return null; }	// Should never happen
 		}
 
 		protected final Method mMethod;
 		protected final Object mTarget;
+	}
+
+	private static class HackedTargetMethodImpl<R> extends HackedTargetMethodImplBase<R> implements HackedTargetMethod<R> {
+
+		HackedTargetMethodImpl(final Method method, final Object target) { super(method, target); }
+
+		@Override public R invoke(final Object... args) throws IllegalArgumentException, InvocationTargetException {
+			return super.invoke(args);
+		}
 	}
 
 	public static class HackedConstructor {
@@ -281,12 +359,32 @@ public class Hack {
 			return new HackedField<C, T>(mClass, name, Modifier.STATIC).onTarget(null);
 		}
 
-		public <T> HackedMethod<C, T> method(final String name, final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
-			return new HackedMethodImpl<>(mClass, name, arg_types, 0);
+		public HackedUnsafeMethod<C> method(final String name, final Class<?>... arg_types) {
+			return new HackedUnsafeMethod<C>() {
+				@Override public <R> HackedMethod<R, C> returning(final Class<R> return_type) throws HackDeclaration.HackAssertionException {
+					return new HackedMethodImpl<>(mClass, name, 0, arg_types);
+				}
+			};
 		}
 
-		public <T> HackedMethod<C, T> staticMethod(final String name, final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
-			return new HackedMethodImpl<>(mClass, name, arg_types, Modifier.STATIC);
+		public <R, A1> HackedMethod1<R, C, A1> method(final String name, final Class<A1> arg1_type) throws HackDeclaration.HackAssertionException {
+			return new HackedMethod1Impl<>(mClass, name, 0, arg1_type);
+		}
+
+		public <R, A1, A2> HackedMethod2<R, C, A1, A2> method(final String name, final Class<A1> arg1_type, final Class<A2> arg2_type) throws HackDeclaration.HackAssertionException {
+			return new HackedMethod2Impl<>(mClass, name, 0, arg1_type, arg2_type);
+		}
+
+		public <R, A1, A2, A3> HackedMethod3<R, C, A1, A2, A3> method(final String name, final Class<A1> arg1_type, final Class<A2> arg2_type, final Class<A3> arg3_type) throws HackDeclaration.HackAssertionException {
+			return new HackedMethod3Impl<>(mClass, name, 0, arg1_type, arg2_type, arg3_type);
+		}
+
+		public <R, A1, A2, A3, A4> HackedMethod4<R, C, A1, A2, A3, A4> method(final String name, final Class<A1> arg1_type, final Class<A2> arg2_type, final Class<A3> arg3_type, final Class<A4> arg4_type) throws HackDeclaration.HackAssertionException {
+			return new HackedMethod4Impl<>(mClass, name, 0, arg1_type, arg2_type, arg3_type, arg4_type);
+		}
+
+		public <R> HackedTargetMethod<R> staticMethod(final String name, final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
+			return new HackedMethodImpl<R, C>(mClass, name, Modifier.STATIC, arg_types).onTarget(null);
 		}
 
 		public HackedConstructor constructor(final Class<?>... arg_types) throws HackDeclaration.HackAssertionException {
