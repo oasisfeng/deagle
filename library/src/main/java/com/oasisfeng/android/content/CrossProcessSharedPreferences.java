@@ -1,12 +1,5 @@
 package com.oasisfeng.android.content;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -19,6 +12,13 @@ import android.os.Build;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Make changes of SharedPreferences in one process propagate to all other processes with the same SharedPreferences (only after commit/apply).
@@ -33,19 +33,15 @@ public class CrossProcessSharedPreferences {
 	static final String KExtraPid = "pid";
 
 	public static SharedPreferences get(final Context context, final String name, final int mode) {
-		if (mSingleton == null) {
-			synchronized(mLock) {
-				if (mSingleton == null) {
-					mSingleton = new CrossProcessSharedPreferences(context);
-				}
-			}
+		if (mSingleton == null) synchronized(mLock) {
+			if (mSingleton == null) mSingleton = new CrossProcessSharedPreferences(context);
 		}
 
 		return mSingleton.getSharedPreferences(context, name, mode);
 	}
 
 	private SharedPreferencesWrapper getSharedPreferences(final Context context, final String name, final int mode) {
-		final SharedPreferences prefs = context.getSharedPreferences(name, mode | Context.MODE_MULTI_PROCESS);
+		final SharedPreferences prefs = context.getSharedPreferences(name, mode);
 		if (prefs == null) return null;		// Should not happen, but still check for safety (in case of custom implementation)
 		SharedPreferencesWrapper wrapper = mTracked.get(prefs);		// SharedPreferences instance should be singleton.
 		if (wrapper != null) return wrapper;
@@ -75,6 +71,7 @@ public class CrossProcessSharedPreferences {
 		if (pid == my_pid || TextUtils.isEmpty(name) || TextUtils.isEmpty(key)) return;
 
 		Log.d(TAG, "Shared preferences updated in process " + pid + ": " + name + " (key: " + key + ")");
+		@SuppressWarnings("deprecation")	// Force reload from disk
 		final SharedPreferences prefs = mAppContext.getSharedPreferences(name, Context.MODE_MULTI_PROCESS);
 		final SharedPreferencesWrapper wrapper = mTracked.get(prefs);
 		if (wrapper == null) return;
