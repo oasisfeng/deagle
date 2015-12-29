@@ -4,9 +4,13 @@ import android.app.Application;
 import android.util.Log;
 
 /** @author Oasis */
-class Applications {
+public class Applications {
 
     private static final String TAG = "Applications";
+
+    public static Application getCurrent() {
+        return CURRENT;
+    }
 
     static final Application CURRENT;
     static {

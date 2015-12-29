@@ -1,7 +1,5 @@
 package com.oasisfeng.android.ui;
 
-import java.util.Locale;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
@@ -18,6 +16,8 @@ import android.preference.PreferenceScreen;
 
 import com.oasisfeng.android.google.GooglePlayStore;
 import com.oasisfeng.android.i18n.Locales;
+
+import java.util.Locale;
 
 /**
  * A helper class to simply build an "About" dialog.
@@ -62,7 +62,7 @@ public class AboutActivity extends PreferenceActivity {
             if (version_pref != null) try {
                 final PackageInfo package_info = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
                 version_pref.setTitle(version_pref.getTitle() + " " + package_info.versionName);
-            } catch (final NameNotFoundException e) {}
+            } catch (final NameNotFoundException ignored) {}
         }
 
         @Override public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, final Preference preference) {
