@@ -1,17 +1,18 @@
 package com.oasisfeng.android.base;
 
-import static android.content.Context.MODE_PRIVATE;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.oasisfeng.android.base.Scopes.Scope;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /** @author Oasis */
 public class Scopes {
@@ -21,9 +22,9 @@ public class Scopes {
 
     public interface Scope {
 
-        public boolean isMarked(String tag);
-        public boolean mark(String tag);
-        public boolean unmark(String tag);
+        boolean isMarked(@NonNull String tag);
+        boolean mark(@NonNull String tag);
+        boolean unmark(@NonNull String tag);
     }
 
     public static Scope app(final Context context) { return new AppScope(context); }
@@ -73,19 +74,19 @@ class ProcessScope extends MemoryBasedScopeImpl {
 
 class MemoryBasedScopeImpl implements Scope {
 
-	@Override public boolean isMarked(final String tag) {
+	@Override public boolean isMarked(@NonNull final String tag) {
         return mSeen.contains(tag);
     }
 
-    @Override public boolean mark(final String tag) {
+    @Override public boolean mark(@NonNull final String tag) {
         return mSeen.add(tag);
     }
 
-    @Override public boolean unmark(final String tag) {
+    @Override public boolean unmark(@NonNull final String tag) {
         return mSeen.remove(tag);
     }
 
-    protected final Set<String> mSeen = new HashSet<String>();
+    protected final Set<String> mSeen = new HashSet<>();
 }
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
@@ -113,19 +114,19 @@ class SharedPrefsBasedScopeImpl implements Scope {
 
     private static final String KPrefsKeyPrefix = "first-time-";        // Old name, for backward-compatibility
 
-    @Override public boolean isMarked(final String tag) {
+    @Override public boolean isMarked(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
         return ! mPrefs.getBoolean(key, true);
     }
 
-    @Override public boolean mark(final String tag) {
+    @Override public boolean mark(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
         if (! mPrefs.getBoolean(key, true)) return false;
         mPrefs.edit().putBoolean(key, false).apply();
         return true;
     }
 
-    @Override public boolean unmark(final String tag) {
+    @Override public boolean unmark(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
         if (mPrefs.getBoolean(key, true)) return false;
         mPrefs.edit().putBoolean(key, true).apply();
