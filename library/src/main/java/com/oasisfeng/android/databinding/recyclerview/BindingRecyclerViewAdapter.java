@@ -9,8 +9,6 @@ import android.view.ViewGroup;
 
 import com.oasisfeng.android.databinding.ObservableSortedList;
 
-import java.util.Collection;
-
 /**
  * Adapter of RecycleView for data-binding
  *
@@ -18,15 +16,11 @@ import java.util.Collection;
  */
 public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<T>> extends RecyclerView.Adapter<BindingRecyclerViewAdapter.ViewHolder> {
 
-	public BindingRecyclerViewAdapter(final Collection<T> items) {
-		@SuppressWarnings("unchecked") final Class<T> clazz = (Class<T>) items.iterator().next().getClass();
-		this.mItems = new ObservableSortedList<>(clazz);
-		this.mItems.addOnListChangedCallback(new OnListChangedCallback<ObservableSortedList<T>>(this));
-		this.mItems.addAll(items);
-	}
-
-	public void setItemBinder(final ItemBinder<T> itemBinder) {
-		this.mItemBinder = itemBinder;
+	public BindingRecyclerViewAdapter(final ObservableSortedList<T> items, final ItemBinder<T> binder) {
+		this.mItems = items;
+		this.mItemBinder = binder;
+		items.addOnListChangedCallback(new OnListChangedCallback<ObservableSortedList<T>>(this));
+		notifyDataSetChanged();
 	}
 
 	@Override public ViewHolder onCreateViewHolder(final ViewGroup view_group, final int layout_id) {
@@ -50,7 +44,7 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 	}
 
 	private final ObservableSortedList<T> mItems;
-	private ItemBinder<T> mItemBinder;
+	private final ItemBinder<T> mItemBinder;
 	private transient LayoutInflater mInflater;
 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
