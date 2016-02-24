@@ -30,6 +30,10 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> ex
 	/** @see SortedList#endBatchedUpdates() */
 	public void endBatchedUpdates() { mList.endBatchedUpdates(); }
 
+	public void updateItemAt(final int index, final T item) {
+		mList.updateItemAt(index, item);
+	}
+
 	@Override public boolean add(final T item) {
 		sTlsUpdated.set(false);
 		mList.add(item);
