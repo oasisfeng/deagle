@@ -1,5 +1,7 @@
 package com.oasisfeng.android.databinding.recyclerview;
 
+import android.databinding.ViewDataBinding;
+
 /**
  * The binder interface for items in {@link android.support.v7.widget.RecyclerView}.
  *
@@ -7,5 +9,5 @@ package com.oasisfeng.android.databinding.recyclerview;
  */
 public interface ItemBinder<T> {
 	int getLayoutRes(T model);
-	int getBindingVariable(T model);
+	void onBind(ViewDataBinding container, T model, ViewDataBinding item);
 }

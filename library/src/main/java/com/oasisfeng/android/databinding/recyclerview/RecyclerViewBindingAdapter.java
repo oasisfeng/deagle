@@ -18,4 +18,8 @@ public class RecyclerViewBindingAdapter {
 		final BindingRecyclerViewAdapter<T> adapter = new BindingRecyclerViewAdapter<>(items, binder);
 		recycler_view.setAdapter(adapter);
 	}
+
+	interface OnItemClickListener<T extends ObservableSortedList.Sortable<T>> {
+		void onClick(T data);
+	}
 }

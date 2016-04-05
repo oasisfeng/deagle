@@ -31,8 +31,16 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 
 	@Override public void onBindViewHolder(final ViewHolder holder, final int position) {
 		final T item = mItems.get(position);
-		holder.binding.setVariable(mItemBinder.getBindingVariable(item), item);
+		mItemBinder.onBind(mBinding, item, holder.binding);
 		holder.binding.executePendingBindings();
+	}
+
+	@Override public void onAttachedToRecyclerView(final RecyclerView view) {
+		mBinding = DataBindingUtil.findBinding(view);
+	}
+
+	@Override public void onDetachedFromRecyclerView(final RecyclerView recyclerView) {
+		mBinding = null;
 	}
 
 	@Override public int getItemViewType(final int position) {
@@ -43,6 +51,7 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 		return mItems == null ? 0 : mItems.size();
 	}
 
+	private ViewDataBinding mBinding;
 	private final ObservableSortedList<T> mItems;
 	private final ItemBinder<T> mItemBinder;
 	private transient LayoutInflater mInflater;
