@@ -16,7 +16,7 @@ import com.oasisfeng.android.databinding.ObservableSortedList;
  */
 public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<T>> extends RecyclerView.Adapter<BindingRecyclerViewAdapter.ViewHolder> {
 
-	public BindingRecyclerViewAdapter(final ObservableSortedList<T> items, final ItemBinder<T> binder) {
+	public BindingRecyclerViewAdapter(final ObservableList<T> items, final ItemBinder<T> binder) {
 		this.mItems = items;
 		this.mItemBinder = binder;
 		items.addOnListChangedCallback(new OnListChangedCallback<ObservableSortedList<T>>(this));
@@ -52,7 +52,7 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 	}
 
 	private ViewDataBinding mBinding;
-	private final ObservableSortedList<T> mItems;
+	private final ObservableList<T> mItems;
 	private final ItemBinder<T> mItemBinder;
 	private transient LayoutInflater mInflater;
 
