@@ -35,9 +35,8 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> ex
 	}
 
 	@Override public boolean add(final T item) {
-		sTlsUpdated.set(false);
 		mList.add(item);
-		return sTlsUpdated.get();	// May be set by Callback.onInserted() or onChanged().
+		return true;	// Even if item is the same, it is still replaced in the list.
 	}
 
 	@Override public T set(final int location, final T object) {
@@ -84,13 +83,11 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> ex
 	}
 
 	private final SortedList<T> mList;
-	private static final ThreadLocal<Boolean> sTlsUpdated = new ThreadLocal<>();
 	private transient @Nullable ListChangeRegistry mListeners = new ListChangeRegistry();
 
 	public class CallbackWrapper extends SortedList.Callback<T> {
 
 		@Override public final void onInserted(final int position, final int count) {
-			sTlsUpdated.set(true);
 			if (mListeners != null) mListeners.notifyInserted(ObservableSortedList.this, position, count);
 		}
 
@@ -103,7 +100,6 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> ex
 		}
 
 		@Override public final void onChanged(final int position, final int count) {
-			sTlsUpdated.set(true);
 			if (mListeners != null) mListeners.notifyChanged(ObservableSortedList.this, position, count);
 		}
 
