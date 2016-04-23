@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
+import android.support.annotation.UiThread;
 
 /**
  * Utility class to resize icons to match default icon size.
@@ -18,9 +19,7 @@ import android.graphics.drawable.PaintDrawable;
  */
 public class IconResizer {
 	// Code is borrowed from com.android.launcher.Utilities.
-	private int mIconWidth = -1;
-	private int mIconHeight = -1;
-
+	private final int mIconWidth, mIconHeight;
 	private final Rect mOldBounds = new Rect();
 	private final Canvas mCanvas = new Canvas();
 
@@ -45,7 +44,7 @@ public class IconResizer {
 	 * @return A thumbnail for the specified icon or the icon itself if the
 	 *         thumbnail could not be created.
 	 */
-	public Drawable createIconThumbnail(Drawable icon) {
+	@UiThread public Drawable createIconThumbnail(Drawable icon) {
 		int width = mIconWidth;
 		int height = mIconHeight;
 
