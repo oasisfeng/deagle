@@ -13,12 +13,13 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.util.Pair;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Non-UI fragment to load and cache label text and icon of applications.
@@ -29,76 +30,138 @@ public class AppLabelCache {
 
 	private static final boolean DEBUG = true;
 
+	private static class Entry {
+		final String pkg;
+		CharSequence label;
+		Drawable raw_icon;
+		Drawable icon;
+		int flags;
+
+		public Entry(final String pkg) { this.pkg = pkg; }
+	}
+
 	public interface LabelLoadCallback {
 		/** Must be thread-safe */ boolean isCancelled(String pkg);
-		@UiThread void onTextLoaded(CharSequence text);
-		@UiThread void onIconLoaded(Drawable icon);
-		@WorkerThread void onError(Throwable error);
+		@UiThread void onTextLoaded(String pkg, CharSequence text, final int flags);
+		@UiThread void onIconLoaded(String pkg, Drawable icon);
+		@WorkerThread void onError(String pkg, Throwable error);
 	}
 
-	@UiThread public void loadLabelTextOnly(final String pkg, final LabelLoadCallback callback) {
-		load(pkg, false, callback);
+	@UiThread public void loadLabelTextOnly(final Collection<String> pkgs, final LabelLoadCallback callback) {
+		if (DEBUG) Log.d(TAG, "Start batch text loading: " + pkgs.size());
+		load(pkgs, false, callback);
 	}
 
+	/** Load text and icon */
 	@UiThread public void loadLabel(final String pkg, final LabelLoadCallback callback) {
-		load(pkg, true, callback);
+		if (DEBUG) Log.d(TAG, "Start single full loading: " + pkg);
+		load(Collections.singleton(pkg), true, callback);
 	}
 
-	@UiThread private void load(final String pkg, final boolean load_icon, final LabelLoadCallback callback) {
+	@UiThread private void load(final Collection<String> pkgs, final boolean load_icon, final LabelLoadCallback callback) {
 		if (mContext == null) throw new IllegalStateException("Not attached");
 		final PackageManager pm = mContext.getPackageManager();
-		final Pair<CharSequence, Drawable> cached = mLruCache.get(pkg);
-		final CharSequence cached_text;
-		if (cached != null) {
-			cached_text = cached.first;
-			callback.onTextLoaded(cached_text);
-			if (cached.second != null) {
-				callback.onIconLoaded(cached.second);
-				return;		// Both text and icon are cached
-			}	// Fall-through to load icon.
-		} else cached_text = null;
 
-		new AsyncTask<CharSequence/* cached text */, CharSequence/* loaded text */, Drawable/* loaded icon */>() {
+		// Early callback if cached
+		final Entry[] pending = new Entry[pkgs.size()]; int i = 0;
+		for (final String pkg : pkgs) {
+			Entry entry = getCache(pkg);
+			if (entry != null) {
+				if (entry.label != null) {
+					callback.onTextLoaded(pkg, entry.label, entry.flags);
+					if (entry.icon != null) {
+						callback.onIconLoaded(pkg, entry.icon);
+						if (DEBUG) Log.v(TAG, "Cache hit (text + icon): " + pkg);
+						continue;		// Both text and icon are cached, no need to load
+					} else if (DEBUG) Log.v(TAG, "Cache hit (text): " + pkg);
+				} else if (DEBUG) Log.d(TAG, "Empty cache: " + pkg);
+			} else {
+				if (DEBUG) Log.v(TAG, "Cache missed: " + pkg);
+				putCache(pkg, entry = new Entry(pkg));
+			}
+			pending[i ++] = entry;
+		}
 
-			@Override protected Drawable doInBackground(final CharSequence... params) {
-				mLabelText = params[0];
-				//noinspection WrongThread, skip the heavy work if the TextView was already re-used.
-				if (callback.isCancelled(pkg)) {    //noinspection ConstantConditions
-					if (DEBUG) Log.d(TAG, "Skip loading task for " + pkg);
-					return null;
+		if (i > 0) new AsyncTask<Entry, Entry, Integer>() {
+
+			@Override @WorkerThread protected Integer doInBackground(final Entry... pending) {
+				if (pending.length > 0) Log.d(TAG, "App label batch loading started.");
+				for (final Entry entry : pending) {
+					if (entry == null) break;		// No more
+					final String pkg = entry.pkg;
+					if (entry.label != null && entry.icon != null) {
+						Log.w(TAG, "Loaded already: " + pkg);
+						continue;	// Already loaded elsewhere
+					}
+					// Skip the heavy work if the TextView was already re-used.
+					if (callback.isCancelled(pkg)) {
+						if (DEBUG) Log.d(TAG, "Skip loading (cancelled): " + pkg);
+						continue;
+					}
+
+					final ApplicationInfo info;
+					try { //noinspection WrongConstant
+						info = pm.getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+					} catch (final PackageManager.NameNotFoundException e) {
+						callback.onError(pkg, e);
+						continue;
+					}
+
+					entry.flags = info.flags;
+					if (entry.label == null) try {
+						if (DEBUG) Log.d(TAG, "Load text: " + pkg);
+						entry.label = info.loadLabel(pm);
+						publishProgress(entry);
+					} catch (final RuntimeException e) {
+						callback.onError(pkg, e);
+					}
+
+					if (load_icon && entry.icon == null && entry.raw_icon == null) try {
+						if (DEBUG) Log.d(TAG, "Load icon: " + pkg);
+						// Avoid PackageItemInfo.loadIcon() for unbadged icon.
+						Drawable dr = null;
+						if (info.packageName != null)
+							dr = pm.getDrawable(info.packageName, info.icon, info);
+						if (dr == null)
+							dr = pm.getDefaultActivityIcon();
+						entry.raw_icon = dr;
+						publishProgress(entry);
+					} catch (final RuntimeException e) {
+						callback.onError(pkg, e);
+					}
 				}
-
-				final ApplicationInfo info;
-				try {
-					info = pm.getApplicationInfo(pkg, 0);
-				} catch (final PackageManager.NameNotFoundException e) {
-					cancel(false);
-					callback.onError(e);
-					return null;
-				}
-				if (mLabelText == null) publishProgress(mLabelText = info.loadLabel(pm));
-				return load_icon ? mIconResizer.createIconThumbnail(info.loadIcon(pm)) : null;
+				return pending.length;
 			}
 
-			@Override protected void onProgressUpdate(final CharSequence... label) {
-				mLruCache.put(pkg, new Pair<>(mLabelText, (Drawable) null));	// Partially cache text first
+			@Override @UiThread protected void onProgressUpdate(final Entry... entries) {
+				final Entry entry = entries[0];
+				final String pkg = entry.pkg;
+
+				final Drawable raw_icon = entry.raw_icon;
+				if (raw_icon != null) {
+					entry.raw_icon = null;
+					if (DEBUG) Log.d(TAG, "Resize icon: " + pkg);
+					entry.icon = mIconResizer.createIconThumbnail(raw_icon);
+				}
+
 				if (callback.isCancelled(pkg)) {    // The TextView was already re-used, discard this update.
-					cancel(false);
 					//noinspection ConstantConditions
 					if (DEBUG) Log.d(TAG, "Discard loaded label for " + pkg);
 					return;
 				}
-				callback.onTextLoaded(this.mLabelText = label[0]);
+
+				if (DEBUG) Log.d(TAG, "Update text: " + pkg);
+				callback.onTextLoaded(pkg, entry.label, entry.flags);
+				if (entry.icon != null) {
+					if (DEBUG) Log.d(TAG, "Update icon: " + pkg);
+					callback.onIconLoaded(pkg, entry.icon);
+				}
 			}
 
-			@Override protected void onPostExecute(final @Nullable Drawable icon) {
-				if (icon == null) return;
-				callback.onIconLoaded(icon);
-				mLruCache.put(pkg, new Pair<>(mLabelText, icon));
+			@Override protected void onPostExecute(final Integer count) {
+				if (count > 0) Log.d(TAG, "App label batch loading finished.");
 			}
-
-			private CharSequence mLabelText;
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, cached_text);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, pending);	// To improve efficiency and avoid blocking other AsyncTasks
 	}
 
 	@UiThread public static AppLabelCache load(final Activity activity) {
@@ -114,9 +177,14 @@ public class AppLabelCache {
 		return new_fragment.mCache;
 	}
 
+	@UiThread private Entry getCache(final String pkg) { return mLruCache.get(pkg); }
+	@UiThread private Entry putCache(final String pkg, final Entry entry) { return mLruCache.put(pkg, entry); }
+	@UiThread private Entry removeCache(final String pkg) { return mLruCache.remove(pkg); }
+	@UiThread private void trimCacheToSize(final int max_size) { mLruCache.trimToSize(max_size); }
+
 	private AppLabelCache() {}
 
-	private final LruCache<String, Pair<CharSequence, Drawable>> mLruCache = new LruCache<>(KMaxCacheCapacity);
+	private final LruCache<String, Entry> mLruCache = new LruCache<>(KMaxCacheCapacity);
 	private Activity mContext;
 
 	private static final int KMaxCacheCapacity = 100;
@@ -148,18 +216,18 @@ public class AppLabelCache {
 		@Override public void onTrimMemory(final int level) {
 			super.onTrimMemory(level);
 			if (level < TRIM_MEMORY_RUNNING_LOW) return;
-			mCache.mLruCache.trimToSize(KMinCacheSizeToTrim);
+			mCache.trimCacheToSize(KMinCacheSizeToTrim);
 		}
 
 		private final BroadcastReceiver mPackageChangeReceiver = new BroadcastReceiver() { @Override public void onReceive(final Context context, final Intent intent) {
 			final Uri data = intent.getData();
 			if (data != null) {
 				final String pkg = data.getSchemeSpecificPart();
-				mCache.mLruCache.remove(pkg);
+				mCache.removeCache(pkg);
 			} else {
 				final String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
 				if (pkgs != null) for (final String pkg : pkgs)
-					mCache.mLruCache.remove(pkg);
+					mCache.removeCache(pkg);
 			}
 		}};
 
