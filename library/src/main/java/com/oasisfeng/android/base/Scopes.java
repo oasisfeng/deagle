@@ -112,30 +112,41 @@ class AppScope extends SharedPrefsBasedScopeImpl {
 
 class SharedPrefsBasedScopeImpl implements Scope {
 
-    private static final String KPrefsKeyPrefix = "first-time-";        // Old name, for backward-compatibility
+	private static final String KPrefsKeyPrefix = "mark-";
+	private static final String KPrefsKeyPrefixLegacy = "first-time-";	// Old name, for backward-compatibility
 
     @Override public boolean isMarked(@NonNull final String tag) {
-        final String key = KPrefsKeyPrefix + tag;
-        return ! mPrefs.getBoolean(key, true);
+        return mPrefs.getBoolean(KPrefsKeyPrefix + tag, false);
     }
 
     @Override public boolean mark(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
-        if (! mPrefs.getBoolean(key, true)) return false;
-        mPrefs.edit().putBoolean(key, false).apply();
+		if (mPrefs.getBoolean(key, false)) return false;
+        mPrefs.edit().putBoolean(key, true).apply();
         return true;
     }
 
     @Override public boolean unmark(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
-        if (mPrefs.getBoolean(key, true)) return false;
-        mPrefs.edit().putBoolean(key, true).apply();
+        if (! mPrefs.getBoolean(key, false)) return false;
+        mPrefs.edit().putBoolean(key, false).apply();
         return true;
     }
 
     protected SharedPrefsBasedScopeImpl(final SharedPreferences prefs) {
         mPrefs = prefs;
-    }
+		// Migrate legacy entries
+		SharedPreferences.Editor editor = null;
+		for (final String key : prefs.getAll().keySet()) {
+			if (! key.startsWith(KPrefsKeyPrefixLegacy)) continue;
+			if (editor == null) editor = prefs.edit();
+			try {
+				editor.putBoolean(KPrefsKeyPrefix + key.substring(KPrefsKeyPrefixLegacy.length()), ! prefs.getBoolean(key, true));
+			} catch (final ClassCastException ignored) {}
+			editor.remove(key);
+		}
+		if (editor != null) editor.apply();
+	}
 
     private final SharedPreferences mPrefs;
 }
