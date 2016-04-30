@@ -13,15 +13,9 @@ public class IntentFilters {
 
 	public static class FluentIntentFilter extends IntentFilter {
 
-		public FluentIntentFilter withAction(final String action) {
-			super.addAction(action);
-			return this;
-		}
-
-		public FluentIntentFilter withActions(final String... actions) {
-			for (final String action : actions) super.addAction(action);
-			return this;
-		}
+		public FluentIntentFilter withAction(final String action) { addAction(action); return this; }
+		public FluentIntentFilter withActions(final String... actions) { for (final String action : actions) addAction(action); return this; }
+		public IntentFilter withDataScheme(final String scheme) { addDataScheme(scheme); return this; }
 
 		public FluentIntentFilter(final IntentFilter filter) { super(filter); }
 		public FluentIntentFilter() {}
@@ -35,6 +29,10 @@ public class IntentFilters {
 	}
 
 	public static FluentIntentFilter build() { return new FluentIntentFilter(); }
+
+	public static FluentIntentFilter forAction(final String action) {
+		return new FluentIntentFilter().withAction(action);
+	}
 
 	public static FluentIntentFilter forActions(final String... actions) {
 		return new FluentIntentFilter().withActions(actions);
