@@ -154,46 +154,136 @@ public class Hack {
 		void onAssertionFailure(AssertionException failure);
 	}
 
-	public static class HackedField<C, T> {
+	public static class FieldToHack<C> {
 
-		/** Assert the field type. */
-		public <T2> HackedField<C, T2> ofType(final Class<T2> type) {
-			if (type != ANY_TYPE && mField != null && ! type.isAssignableFrom(mField.getType()))
-				fail(new AssertionException(new ClassCastException(mField + " is not of type " + type)).setHackedField(mField));
-			@SuppressWarnings("unchecked") final HackedField<C, T2> casted = (HackedField<C, T2>) this;
-			return casted;
+		protected @Nullable <T> Field findField(final @Nullable Class<T> type) {
+			if (mClass == AnyType.class) return null;		// AnyType as a internal indicator for class not found.
+			Field field = null;
+			try {
+				field = mClass.getDeclaredField(mName);
+				if (Modifier.isStatic(mModifiers) != Modifier.isStatic(field.getModifiers())) {
+					fail(new AssertionException(field + (Modifier.isStatic(mModifiers) ? " is not static" : "is static")).setHackedFieldName(mName));
+					field = null;
+				} else if (mModifiers > 0 && (field.getModifiers() & mModifiers) != mModifiers) {
+					fail(new AssertionException(field + " does not match modifiers: " + mModifiers).setHackedFieldName(mName));
+					field = null;
+				} else if (! field.isAccessible()) field.setAccessible(true);
+			} catch (final NoSuchFieldException e) {
+				final AssertionException hae = new AssertionException(e);
+				hae.setHackedClass(mClass);
+				hae.setHackedFieldName(mName);
+				fail(hae);
+			}
+
+			if (type != null && field != null && ! type.isAssignableFrom(field.getType()))
+				fail(new AssertionException(new ClassCastException(field + " is not of type " + type)).setHackedField(field));
+			return field;
 		}
 
-		public HackedField<C, T> ofType(final String type_name) {
-			try {
-				@SuppressWarnings("unchecked") final HackedField<C, T> casted = mField == null ? this
-						: (HackedField<C, T>) ofType(Class.forName(type_name, false, mField.getDeclaringClass().getClassLoader()));
-				return casted;
+		/** @param modifiers the modifiers this field must have */
+		protected FieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+			mClass = clazz;
+			mName = name;
+			mModifiers = modifiers;
+		}
+
+		protected final Class<C> mClass;
+		protected final String mName;
+		protected final int mModifiers;
+	}
+
+	public static class MemberFieldToHack<C> extends FieldToHack<C> {
+
+		/** Assert the field type. */
+		public @Nullable <T> HackedField<C, T> ofType(final Class<T> type) {
+			return ofType(type, false, null);
+		}
+
+		public @Nullable <T> HackedField<C, T> ofType(final String type_name) {
+			try { //noinspection unchecked
+				return ofType((Class<T>) Class.forName(type_name, false, mClass.getClassLoader()));
 			} catch (final ClassNotFoundException e) {
-				fail(new AssertionException(e)); return this;
+				fail(new AssertionException(e));
+				return null;
 			}
 		}
 
 		/** Fallback to the given value if this field is unavailable at runtime */
-		public @NonNull HackedField<C, T> fallbackTo(final T value) {
-			mFallbackValue = value;
-			return this;
+		public @NonNull <T> HackedField<C, T> fallbackTo(final T value) {
+			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
+			//noinspection ConstantConditions
+			return ofType(type, true, value);
 		}
 
-		@SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
-			return mField != null ? (Class<T>) mField.getType() : null;
+		private <T> HackedField<C, T> ofType(final Class<T> type, boolean fallback, T fallback_value) {
+			final Field field = findField(type);
+			return field != null ? new HackedFieldImpl<C, T>(field) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
 
-		public HackedTargetField<T> on(final C target) {
+		/** @param modifiers the modifiers this field must have */
+		private MemberFieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+			super(clazz, name, modifiers);
+		}
+	}
+
+	public static class StaticFieldToHack<C> extends FieldToHack<C> {
+
+		/** Assert the field type. */
+		public @Nullable <T> HackedTargetField<T> ofType(final Class<T> type) {
+			return ofType(type, false, null);
+		}
+
+		public @Nullable <T> HackedTargetField<T> ofType(final String type_name) {
+			try { //noinspection unchecked
+				return ofType((Class<T>) Class.forName(type_name, false, mClass.getClassLoader()));
+			} catch (final ClassNotFoundException e) {
+				fail(new AssertionException(e));
+				return null;
+			}
+		}
+
+		/** Fallback to the given value if this field is unavailable at runtime */
+		public @NonNull <T> HackedTargetField<T> fallbackTo(final T value) {
+			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
+			//noinspection ConstantConditions
+			return ofType(type, true, value);
+		}
+
+		private <T> HackedTargetField<T> ofType(final Class<T> type, boolean fallback, T fallback_value) {
+			final Field field = findField(type);
+			return field != null ? new HackedFieldImpl<C, T>(field).onTarget(null) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
+		}
+
+		/** @param modifiers the modifiers this field must have */
+		private StaticFieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+			super(clazz, name, modifiers);
+		}
+	}
+
+	public interface HackedField<C, T> {
+		T get(C instance);
+		void set(C instance, T value);
+		HackedTargetField<T> on(C target);
+		Class<T> getType();
+	}
+
+	public interface HackedTargetField<T> {
+		T get();
+		void set(T value);
+		Class<T> getType();
+	}
+
+	private static class HackedFieldImpl<C, T> implements HackedField<C, T> {
+
+		@Override public HackedTargetFieldImpl<T> on(final C target) {
 			if (target == null) throw new IllegalArgumentException("target is null");
 			return onTarget(target);
 		}
 
-		private HackedTargetField<T> onTarget(final @Nullable C target) { return new HackedTargetField<>(mField, target); }
+		private HackedTargetFieldImpl<T> onTarget(final @Nullable C target) { return new HackedTargetFieldImpl<>(mField, target); }
 
 		/** Get current value of this field */
-		public T get(final C instance) {
-			if (mField == null) return mFallbackValue;
+		@Override public T get(final C instance) {
 			try {
 				@SuppressWarnings("unchecked") final T value = (T) mField.get(instance);
 				return value;
@@ -205,42 +295,40 @@ public class Hack {
 		 * 
 		 * <p>No type enforced here since most type mismatch can be easily tested and exposed early.</p>
 		 */
-		public void set(final C instance,final Object value) {
+		@Override public void set(final C instance, final T value) {
 			try {
-				if (mField != null) mField.set(instance, value);
+				mField.set(instance, value);
 			} catch (final IllegalAccessException ignored) {}	// Should never happen
 		}
 
-		/** @param modifiers the modifiers this field must have */
-		HackedField(final Class<C> clazz, final String name, final int modifiers) {
-			Field field = null;
-			try {
-				if (clazz == null) return;
-				field = clazz.getDeclaredField(name);
-				if (Modifier.isStatic(modifiers) != Modifier.isStatic(field.getModifiers())) {
-					fail(new AssertionException(field + (Modifier.isStatic(modifiers) ? " is not static" : "is static")).setHackedFieldName(name));
-					field = null;
-				} else if (modifiers > 0 && (field.getModifiers() & modifiers) != modifiers) {
-					fail(new AssertionException(field + " does not match modifiers: " + modifiers).setHackedFieldName(name));
-					field = null;
-				} else if (! field.isAccessible()) field.setAccessible(true);
-			} catch (final NoSuchFieldException e) {
-				final AssertionException hae = new AssertionException(e);
-				hae.setHackedClass(clazz);
-				hae.setHackedFieldName(name);
-				fail(hae);
-			} finally { mField = field; }
+		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
+			return (Class<T>) mField.getType();
 		}
+
+		HackedFieldImpl(final @NonNull Field field) { mField = field; }
 
 		public @Nullable Field getField() { return mField; }
 
-		private final @Nullable Field mField;
-		private @Nullable T mFallbackValue;
+		private final @NonNull Field mField;
 	}
 
-	public static class HackedTargetField<T> {
+	private static class FallbackField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
 
-		public T get() {
+		@Override public T get(final C instance) { return mValue; }
+		@Override public void set(final C instance, final T value) {}
+		@Override public T get() { return mValue; }
+		@Override public void set(final T value) {}
+		@Override public HackedTargetField<T> on(final C target) { return this; }
+		@Override public Class<T> getType() { return mType; }
+		private FallbackField(Class<T> type, T value) { mType = type; mValue = value; }
+
+		private final Class<T> mType;
+		private final T mValue;
+	}
+
+	public static class HackedTargetFieldImpl<T> implements HackedTargetField<T> {
+
+		@Override public T get() {
 			if (mField == null) return mFallbackValue;
 			try {
 				@SuppressWarnings("unchecked") final T value = (T) mField.get(mInstance);
@@ -248,42 +336,22 @@ public class Hack {
 			} catch (final IllegalAccessException e) { return null; }	// Should never happen
 		}
 
-		public void set(final T value) {
+		@Override public void set(final T value) {
 			if (mField != null) try {
 				mField.set(mInstance, value);
 			} catch (final IllegalAccessException ignored) {}			// Should never happen
 		}
 
-		public <TT> HackedTargetField<TT> ofType(final Class<TT> type) {
-			if (mField != null && ! type.isAssignableFrom(mField.getType()))
-				fail(new AssertionException(new ClassCastException(mField + " is not of type " + type)).setHackedField(mField));
-			@SuppressWarnings("unchecked") final HackedTargetField<TT> casted = (HackedTargetField<TT>) this;
-			return casted;
+		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
+			return (Class<T>) mField.getType();
 		}
 
-		public HackedTargetField<T> ofType(final String type_name) {
-			if (mField == null) return this;
-			try { @SuppressWarnings("unchecked")
-				final HackedTargetField<T> casted = (HackedTargetField<T>) ofType(Class.forName(type_name, false, mField.getDeclaringClass().getClassLoader()));
-				return casted;
-			} catch (final ClassNotFoundException e) {
-				fail(new AssertionException(e));
-				return this;
-			}
-		}
-
-		/** Fallback to the given value if this field is unavailable at runtime */
-		public @NonNull HackedTargetField<T> fallbackTo(final T value) {
-			mFallbackValue = value;
-			return this;
-		}
-
-		HackedTargetField(final @Nullable Field field, final @Nullable Object instance) {
+		HackedTargetFieldImpl(final Field field, final @Nullable Object instance) {
 			mField = field;
 			mInstance = instance;
 		}
 
-		private final @Nullable Field mField;
+		private final Field mField;
 		private final Object mInstance;		// Instance type is already checked
 		private @Nullable T mFallbackValue;
 	}
@@ -487,16 +555,25 @@ public class Hack {
 		}
 
 		private @Nullable Invokable<C> findInvokable(final Class<?>... param_types) {
-			final int modifiers; final Invokable<C> invokable; final AccessibleObject accessible; final Class<?>[] ex_types;
+			if (mClass == AnyType.class) return null;		// AnyType as a internal indicator for class not found.
+			final int modifiers; Invokable<C> invokable; final AccessibleObject accessible; final Class<?>[] ex_types;
 			try {
 				if (mName != null) {
-					final Method method = mClass.getDeclaredMethod(mName, param_types);
-					modifiers = method.getModifiers(); invokable = new InvokableMethod<>(method); accessible = method;
-					ex_types = method.getExceptionTypes();
-					if (Modifier.isStatic(mModifiers) != Modifier.isStatic(method.getModifiers()))
-						fail(new AssertionException(method + (Modifier.isStatic(mModifiers) ? " is not static" : "is static")).setHackedMethod(method));
-					if (mReturnType != null && mReturnType != ANY_TYPE && ! method.getReturnType().equals(mReturnType))
-						fail(new AssertionException("Return type mismatch: " + method));
+					final Method candidate = mClass.getDeclaredMethod(mName, param_types); Method method = candidate;
+					ex_types = candidate.getExceptionTypes();
+					modifiers = method.getModifiers();
+					if (Modifier.isStatic(mModifiers) != Modifier.isStatic(candidate.getModifiers())) {
+						fail(new AssertionException(candidate + (Modifier.isStatic(mModifiers) ? " is not static" : "is static")).setHackedMethod(method));
+						method = null;
+					}
+					if (mReturnType != null && mReturnType != ANY_TYPE && ! candidate.getReturnType().equals(mReturnType)) {
+						fail(new AssertionException("Return type mismatch: " + candidate));
+						method = null;
+					}
+					if (method != null) {
+						invokable = new InvokableMethod<>(method);
+						accessible = method;
+					} else { invokable = null; accessible = null; }
 				} else {
 					final Constructor<C> ctor = mClass.getDeclaredConstructor(param_types);
 					modifiers = ctor.getModifiers(); invokable = new InvokableConstructor<>(ctor); accessible = ctor;
@@ -511,12 +588,20 @@ public class Hack {
 			if (mModifiers > 0 && (modifiers & mModifiers) != mModifiers)
 				fail(new AssertionException(invokable + " does not match modifiers: " + mModifiers).setHackedMethodName(mName));
 
-			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && ex_types.length == 0)
+			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && ex_types.length == 0) {
 				fail(new AssertionException("Checked exception(s) not match: " + invokable));
-			else if (mThrowTypes != null) {
+				if (mThrowTypes != null) invokable = null;		// Invalidate the invokable only if thrown types are explicitly checked.
+			} else if (mThrowTypes != null) {
 				Arrays.sort(ex_types, CLASS_COMPARATOR);
-				if (! Arrays.equals(ex_types, mThrowTypes))
+				if (! Arrays.equals(ex_types, mThrowTypes)) {
 					fail(new AssertionException("Checked exception(s) not match: " + invokable));
+					invokable = null;
+				}
+			}
+
+			if (invokable == null) {
+				if (! mHasFallback) return null;
+				return new FallbackInvokable<>(mFallbackReturnValue);
 			}
 
 			if (! accessible.isAccessible()) accessible.setAccessible(true);
@@ -529,7 +614,7 @@ public class Hack {
 		private Class<?> mReturnType;
 		private Class<?>[] mThrowTypes;
 		private R mFallbackReturnValue;
-		private boolean mHasFallback = true;		// Default to true for method returning void
+		private boolean mHasFallback;
 		private static final Comparator<Class> CLASS_COMPARATOR = new Comparator<Class>() {
 			@Override public int compare(final Class lhs, final Class rhs) {
 				return lhs.toString().compareTo(rhs.toString());
@@ -592,12 +677,12 @@ public class Hack {
 
 	public static class HackedClass<C> {
 
-		public <T> HackedField<C, T> field(final String name) {
-			return new HackedField<C, T>(mClass, name, 0) {};	// Anonymous derived class ensures
+		public @CheckResult <T> MemberFieldToHack<C> field(final @NonNull String name) {
+			return new MemberFieldToHack<>(mClass, name, 0);
 		}
 
-		public <T> HackedTargetField<T> staticField(final String name) {
-			return new HackedField<C, T>(mClass, name, Modifier.STATIC).onTarget(null);
+		public @CheckResult <T> StaticFieldToHack<C> staticField(final @NonNull String name) {
+			return new StaticFieldToHack<>(mClass, name, Modifier.STATIC);
 		}
 
 		public @CheckResult NonNullHackedMethod<Void, C, Unchecked, Unchecked, Unchecked> method(final String name) {
@@ -617,7 +702,7 @@ public class Hack {
 		private final Class<C> mClass;
 	}
 
-	public static <T> HackedClass<T> into(final Class<T> clazz) {
+	public static <T> HackedClass<T> into(final @NonNull Class<T> clazz) {
 		return new HackedClass<>(clazz);
 	}
 
@@ -627,7 +712,7 @@ public class Hack {
 			return new HackedClass(Class.forName(class_name));
 		} catch (final ClassNotFoundException e) {
 			fail(new AssertionException(e));
-			return new HackedClass(null);	// TODO: Better solution to avoid null?
+			return new HackedClass(AnyType.class);		// Use AnyType as a lazy trick to make fallback working and avoid null.
 		}
 	}
 	
@@ -663,7 +748,7 @@ public class Hack {
 				Demo_ctor = Hack.into(Demo.class).constructor().withParam(int.class);
 				Demo_methodThrows = Hack.into(Demo.class).method("methodThrows").returning(Void.class).throwing(InterruptedException.class, IOException.class).withoutParams();
 				Demo_staticMethod = Hack.into(Demo.class).staticMethod("methodWith2Params").returning(boolean.class).withParams(int.class, String.class);
-				Demo_mField = Hack.into(Demo.class).field("mField").ofType(boolean.class).fallbackTo(false);
+				Demo_mField = Hack.into(Demo.class).field("mField").fallbackTo(false);
 				Demo_sField = Hack.into(Demo.class).staticField("sField").ofType(String.class);
 			}
 
