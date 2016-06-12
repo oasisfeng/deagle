@@ -19,4 +19,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'       // class Dialogs
     compile 'com.android.support:customtabs:23.3.0'         // class WebContent
     compile 'com.android.support:recyclerview-v7:23.3.0'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
+
+    testCompile 'junit:junit:4.12'
 }
