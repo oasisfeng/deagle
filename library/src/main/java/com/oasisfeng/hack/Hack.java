@@ -17,6 +17,7 @@ import java.util.Comparator;
 
 /**
  * Java reflection helper optimized for hacking non-public APIs.
+ * The core design philosophy behind is compile-time consistency enforcement.
  *
  * It's suggested to declare all hacks in a centralized point, typically as static fields in a class.
  * Then call it during application initialization, thus they are verified all together in an early stage.
@@ -31,12 +32,8 @@ import java.util.Comparator;
 @SuppressWarnings({"Convert2Lambda", "WeakerAccess", "unused"})
 public class Hack {
 
-	public static Class<?> ANY_TYPE = AnyType.class;
-	private static class AnyType {}
+	public static Class<?> ANY_TYPE = $.class; private static class $ {}
 
-	/** This exception is purposely defined as "protected" and not extending Exception to avoid
-	 * developers unconsciously catch it outside the centralized hacks declaration, which results
-	 * in potentially pre-checked usage of hacks. */
 	public static class AssertionException extends Throwable {
 
 		private Class<?> mClass;
@@ -157,7 +154,7 @@ public class Hack {
 	public static class FieldToHack<C> {
 
 		protected @Nullable <T> Field findField(final @Nullable Class<T> type) {
-			if (mClass == AnyType.class) return null;		// AnyType as a internal indicator for class not found.
+			if (mClass == ANY_TYPE) return null;		// AnyType as a internal indicator for class not found.
 			Field field = null;
 			try {
 				field = mClass.getDeclaredField(mName);
@@ -371,8 +368,10 @@ public class Hack {
 	}
 
 	public interface HackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedInvokable<R, C, T1,T2,T3> {
+		/** Optional */
+		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
 		/** Fallback to the given value if this field is unavailable at runtime. (Optional) */
-		@CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(R return_value);
+		@Deprecated @CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(R return_value);
 
 		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
@@ -384,6 +383,10 @@ public class Hack {
 	public interface NonNullHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedMethod<R, C, T1,T2,T3> {
 		/** Optional */
 		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
+
+		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
 
 		@NonNull HackedMethod0<R, C, T1, T2, T3> withoutParams();
 		@NonNull <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(Class<A1> type);
@@ -555,7 +558,7 @@ public class Hack {
 		}
 
 		private @Nullable Invokable<C> findInvokable(final Class<?>... param_types) {
-			if (mClass == AnyType.class) return null;		// AnyType as a internal indicator for class not found.
+			if (mClass == ANY_TYPE) return null;		// AnyType as a internal indicator for class not found.
 			final int modifiers; Invokable<C> invokable; final AccessibleObject accessible; final Class<?>[] ex_types;
 			try {
 				if (mName != null) {
@@ -712,7 +715,7 @@ public class Hack {
 			return new HackedClass(Class.forName(class_name));
 		} catch (final ClassNotFoundException e) {
 			fail(new AssertionException(e));
-			return new HackedClass(AnyType.class);		// Use AnyType as a lazy trick to make fallback working and avoid null.
+			return new HackedClass(ANY_TYPE);		// Use AnyType as a lazy trick to make fallback working and avoid null.
 		}
 	}
 	
