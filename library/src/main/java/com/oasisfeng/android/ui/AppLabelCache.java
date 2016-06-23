@@ -187,7 +187,7 @@ public class AppLabelCache {
 	private final LruCache<String, Entry> mLruCache = new LruCache<>(KMaxCacheCapacity);
 	private Activity mContext;
 
-	private static final int KMaxCacheCapacity = 100;
+	private static final int KMaxCacheCapacity = 500;
 	private static final int KMinCacheSizeToTrim = 12;
 	private static final String TAG = "AppLabelCache";
 
