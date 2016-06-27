@@ -4,12 +4,14 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Process;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -20,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import static android.R.attr.mode;
+
 /**
  * Make changes of SharedPreferences in one process propagate to all other processes with the same SharedPreferences (only after commit/apply).
  *
@@ -27,17 +31,32 @@ import java.util.WeakHashMap;
  */
 public class CrossProcessSharedPreferences {
 
-	static final String KActionSharedPrefsUpdated = "com.oasisfeng.android.content.ACTION_SHARED_PREFS_CHANGED";
-	static final String KExtraName = "name";
-	static final String KExtraKey = "key";
-	static final String KExtraPid = "pid";
+	private static final String KActionSharedPrefsUpdated = "com.oasisfeng.android.content.ACTION_SHARED_PREFS_CHANGED";
+	private static final String KExtraName = "name";
+	private static final String KExtraKey = "key";
+	private static final String KExtraPid = "pid";
 
-	public static SharedPreferences get(final Context context, final String name, final int mode) {
+	/** Cross process version of {@link Context#getSharedPreferences(String, int)} except for the mode is always {@link Context#MODE_PRIVATE} */
+	public static SharedPreferences get(final Context context, final String name) {
 		if (mSingleton == null) synchronized(mLock) {
 			if (mSingleton == null) mSingleton = new CrossProcessSharedPreferences(context);
 		}
-
 		return mSingleton.getSharedPreferences(context, name, mode);
+	}
+
+	/** Cross process version of {@link PreferenceManager#getDefaultSharedPreferences(Context)} */
+	public static SharedPreferences getDefault(final Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(new ContextWrapper(context) {
+			@Override public SharedPreferences getSharedPreferences(final String name, final int mode) {
+				return get(context, name);
+			}
+		});
+	}
+
+	/** @deprecated mode is not supported any more
+	 *  @see #get(Context, String) */
+	@Deprecated public static SharedPreferences get(final Context context, final String name, final int mode) {
+		return get(context, name);
 	}
 
 	private SharedPreferencesWrapper getSharedPreferences(final Context context, final String name, final int mode) {
@@ -60,6 +79,7 @@ public class CrossProcessSharedPreferences {
 	@Override protected void finalize() throws Throwable {
 		try {
 			mAppContext.unregisterReceiver(mUpdateReceiver);
+		} catch (final RuntimeException ignored) {
 		} finally { super.finalize(); }
 	}
 
@@ -84,9 +104,9 @@ public class CrossProcessSharedPreferences {
 	private static CrossProcessSharedPreferences mSingleton;
 	private static final Object mLock = new Object();
 
-	static final String TAG = "MPSharedPrefs";
+	private static final String TAG = "MPSharedPrefs";
 
-	class SharedPreferencesWrapper implements SharedPreferences, OnSharedPreferenceChangeListener {
+	private class SharedPreferencesWrapper implements SharedPreferences, OnSharedPreferenceChangeListener {
 
 		@Override public void registerOnSharedPreferenceChangeListener(final OnSharedPreferenceChangeListener listener) {
 			synchronized (this) {
@@ -119,7 +139,7 @@ public class CrossProcessSharedPreferences {
 			} finally { super.finalize(); }
 		}
 
-		public SharedPreferencesWrapper(final String name, final SharedPreferences prefs) {
+		SharedPreferencesWrapper(final String name, final SharedPreferences prefs) {
 			mName = name;
 			mDelegate = prefs;
 			prefs.registerOnSharedPreferenceChangeListener(this);
