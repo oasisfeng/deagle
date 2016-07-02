@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import static android.R.attr.mode;
-
 /**
  * Make changes of SharedPreferences in one process propagate to all other processes with the same SharedPreferences (only after commit/apply).
  *
@@ -38,6 +36,12 @@ public class CrossProcessSharedPreferences {
 
 	/** Cross process version of {@link Context#getSharedPreferences(String, int)} except for the mode is always {@link Context#MODE_PRIVATE} */
 	public static SharedPreferences get(final Context context, final String name) {
+		//noinspection deprecation
+		return get(context, name, Context.MODE_PRIVATE);
+	}
+
+	/** @deprecated mode is officially deprecated by Android SDK, use {@link #get(Context, String)} instead. */
+	@Deprecated public static SharedPreferences get(final Context context, final String name, final int mode) {
 		if (mSingleton == null) synchronized(mLock) {
 			if (mSingleton == null) mSingleton = new CrossProcessSharedPreferences(context);
 		}
@@ -51,12 +55,6 @@ public class CrossProcessSharedPreferences {
 				return get(context, name);
 			}
 		});
-	}
-
-	/** @deprecated mode is not supported any more
-	 *  @see #get(Context, String) */
-	@Deprecated public static SharedPreferences get(final Context context, final String name, final int mode) {
-		return get(context, name);
 	}
 
 	private SharedPreferencesWrapper getSharedPreferences(final Context context, final String name, final int mode) {
