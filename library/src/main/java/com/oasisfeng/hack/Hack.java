@@ -367,26 +367,10 @@ public class Hack {
 		@Nullable HackedMethodN<R, C, T1, T2, T3> withParams(Class<?>... types);
 	}
 
-	public interface HackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedInvokable<R, C, T1,T2,T3> {
-		/** Optional */
-		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
-		/** Fallback to the given value if this field is unavailable at runtime. (Optional) */
-		@Deprecated @CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(R return_value);
-
-		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
-		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
-		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
-		@CheckResult HackedMethod<R, C, Exception, T2, T3> throwing(Class<?>... types);
-	}
-
-	@SuppressWarnings("NullableProblems")	// Force to NonNull
-	public interface NonNullHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedMethod<R, C, T1,T2,T3> {
-		/** Optional */
-		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
-
-		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
-		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
-		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
+	public interface NonNullHackedInvokable<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedInvokable<R, C, T1,T2,T3> {
+		@CheckResult <TT1 extends Throwable> NonNullHackedInvokable<R, C, TT1, T2, T3> throwing(Class<TT1> type);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> NonNullHackedInvokable<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> NonNullHackedInvokable<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
 
 		@NonNull HackedMethod0<R, C, T1, T2, T3> withoutParams();
 		@NonNull <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(Class<A1> type);
@@ -397,11 +381,35 @@ public class Hack {
 		@NonNull HackedMethodN<R, C, T1, T2, T3> withParams(Class<?>... types);
 	}
 
+	public interface HackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedInvokable<R, C, T1,T2,T3> {
+		/** Optional */
+		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
+		/** Fallback to the given value if this field is unavailable at runtime. (Optional) */
+		@CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(R return_value);
+
+		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
+		@CheckResult HackedMethod<R, C, Exception, T2, T3> throwing(Class<?>... types);
+	}
+
+	@SuppressWarnings("NullableProblems")	// Force to NonNull
+	public interface NonNullHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedMethod<R, C, T1,T2,T3>, NonNullHackedInvokable<R, C, T1,T2,T3> {
+		/** Optional */
+		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
+
+		@CheckResult <TT1 extends Throwable> NonNullHackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
+		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
+	}
+
 	public static class CheckedHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
 
 		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
 		@SuppressWarnings("unchecked") public Class<R> getReturnType() { return (Class<R>) mInvokable.getReturnType(); }
 		protected HackInvocation<R, C, T1, T2, T3> invoke(Object... args) { return new HackInvocation<>(mInvokable, args); }
+		/** Whether this hack is absent, thus will be fallen-back when invoked */
+		public boolean isAbsent() { return mInvokable instanceof FallbackInvokable; }
 
 		private final Invokable mInvokable;
 	}
@@ -486,25 +494,25 @@ public class Hack {
 			mFallbackReturnValue = value; mHasFallback = true; return this;
 		}
 
-		@Override public <TT extends Throwable> HackedMethod<R, C, TT, T2, T3> throwing(final Class<TT> type) {
+		@Override public <TT extends Throwable> NonNullHackedMethod<R, C, TT, T2, T3> throwing(final Class<TT> type) {
 			mThrowTypes = new Class[] { type };
-			@SuppressWarnings("unchecked") final HackedMethod<R, C, TT, T2, T3> casted = (HackedMethod<R, C, TT, T2, T3>) this;
+			@SuppressWarnings("unchecked") final NonNullHackedMethod<R, C, TT, T2, T3> casted = (NonNullHackedMethod<R, C, TT, T2, T3>) this;
 			return casted;
 		}
 
-		@Override public <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3>
+		@Override public <TT1 extends Throwable, TT2 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, T3>
 				throwing(final Class<TT1> type1, final Class<TT2> type2) {
 			mThrowTypes = new Class<?>[] { type1, type2 };
 			Arrays.sort(mThrowTypes, CLASS_COMPARATOR);
-			@SuppressWarnings("unchecked") final HackedMethod<R, C, TT1, TT2, T3> cast = (HackedMethod<R, C, TT1, TT2, T3>) this;
+			@SuppressWarnings("unchecked") final NonNullHackedMethod<R, C, TT1, TT2, T3> cast = (NonNullHackedMethod<R, C, TT1, TT2, T3>) this;
 			return cast;
 		}
 
-		@Override public <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedMethod<R, C, TT1, TT2, TT3>
+		@Override public <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, TT3>
 				throwing(final Class<TT1> type1, final Class<TT2> type2, final Class<TT3> type3) {
 			mThrowTypes = new Class<?>[] { type1, type2, type3 };
 			Arrays.sort(mThrowTypes, CLASS_COMPARATOR);
-			@SuppressWarnings("unchecked") final HackedMethod<R, C, TT1, TT2, TT3> cast = (HackedMethod<R, C, TT1, TT2, TT3>) this;
+			@SuppressWarnings("unchecked") final NonNullHackedMethod<R, C, TT1, TT2, TT3> cast = (NonNullHackedMethod<R, C, TT1, TT2, TT3>) this;
 			return cast;
 		}
 
@@ -558,7 +566,9 @@ public class Hack {
 		}
 
 		private @Nullable Invokable<C> findInvokable(final Class<?>... param_types) {
-			if (mClass == ANY_TYPE) return null;		// AnyType as a internal indicator for class not found.
+			if (mClass == ANY_TYPE)		// AnyType as a internal indicator for class not found.
+				return mHasFallback ? new FallbackInvokable<C>(mFallbackReturnValue) : null;
+
 			final int modifiers; Invokable<C> invokable; final AccessibleObject accessible; final Class<?>[] ex_types;
 			try {
 				if (mName != null) {
@@ -584,8 +594,7 @@ public class Hack {
 				}
 			} catch (final NoSuchMethodException e) {
 				fail(new AssertionException(e).setHackedClass(mClass).setHackedMethodName(mName).setParamTypes(param_types));
-				if (! mHasFallback) return null;
-				return new FallbackInvokable<>(mFallbackReturnValue);
+				return mHasFallback ? new FallbackInvokable<C>(mFallbackReturnValue) : null;
 			}
 
 			if (mModifiers > 0 && (modifiers & mModifiers) != mModifiers)
@@ -593,10 +602,10 @@ public class Hack {
 
 			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && ex_types.length == 0) {
 				fail(new AssertionException("Checked exception(s) not match: " + invokable));
-				if (mThrowTypes != null) invokable = null;		// Invalidate the invokable only if thrown types are explicitly checked.
+				if (ex_types.length > 0) invokable = null;		// No need to fall-back if expected checked exceptions are absent.
 			} else if (mThrowTypes != null) {
 				Arrays.sort(ex_types, CLASS_COMPARATOR);
-				if (! Arrays.equals(ex_types, mThrowTypes)) {
+				if (! Arrays.equals(ex_types, mThrowTypes)) {	// TODO: Check derived relation of exceptions
 					fail(new AssertionException("Checked exception(s) not match: " + invokable));
 					invokable = null;
 				}
@@ -696,8 +705,10 @@ public class Hack {
 			return new HackedMethodImpl<>(mClass, name, Modifier.STATIC);
 		}
 
-		public @CheckResult HackedInvokable<C, Void, Unchecked, Unchecked, Unchecked> constructor() {
-			return new HackedMethodImpl<>(mClass, null, 0);
+		public @CheckResult NonNullHackedInvokable<C, Void, Unchecked, Unchecked, Unchecked> constructor() {
+			final HackedMethodImpl<C, Void, Unchecked, Unchecked, Unchecked> constructor = new HackedMethodImpl<>(mClass, null, 0);
+			constructor.fallbackReturning(null);	// Always fallback to null.
+			return constructor;
 		}
 		
 		HackedClass(final Class<C> clazz) { mClass = clazz; }
@@ -718,7 +729,30 @@ public class Hack {
 			return new HackedClass(ANY_TYPE);		// Use AnyType as a lazy trick to make fallback working and avoid null.
 		}
 	}
-	
+
+	public interface ConditionalHack {
+		<T> HackedClass<T> into(final @NonNull Class<T> clazz);
+		<T> HackedClass<T> into(final String class_name);
+	}
+
+	public static ConditionalHack onlyIf(boolean condition) {
+		return condition ? new ConditionalHack() {
+			@Override public <T> HackedClass<T> into(@NonNull final Class<T> clazz) {
+				return Hack.into(clazz);
+			}
+			@Override public <T> HackedClass<T> into(final String class_name) {
+				return Hack.into(class_name);
+			}
+		} : new ConditionalHack() {
+			@SuppressWarnings("unchecked") @Override public <T> HackedClass<T> into(@NonNull final Class<T> clazz) {
+				return new HackedClass(ANY_TYPE);
+			}
+			@SuppressWarnings("unchecked") @Override public <T> HackedClass<T> into(final String class_name) {
+				return new HackedClass(ANY_TYPE);
+			}
+		};
+	}
+
 	private static void fail(final AssertionException e) {
 		if (sFailureHandler != null) sFailureHandler.onAssertionFailure(e);
 	}
@@ -742,21 +776,25 @@ public class Hack {
 		static class Hacks {
 
 			/** Call this method before any hack is used, usually in your application initialization */
-			static void defineAndVerify() {
+			static {
 				Hack.setAssertionFailureHandler(new AssertionFailureHandler() { @Override public void onAssertionFailure(final AssertionException failure) {
 					Log.w("Demo", "Partially incompatible: " + failure.getDebugInfo());
 					// Report the incompatibility silently.
 					//...
 				}});
 				Demo_ctor = Hack.into(Demo.class).constructor().withParam(int.class);
-				Demo_methodThrows = Hack.into(Demo.class).method("methodThrows").returning(Void.class).throwing(InterruptedException.class, IOException.class).withoutParams();
-				Demo_staticMethod = Hack.into(Demo.class).staticMethod("methodWith2Params").returning(boolean.class).withParams(int.class, String.class);
+				// Method without fallback (will be null if absent)
+				Demo_methodThrows = Hack.into(Demo.class).method("methodThrows").returning(Void.class)
+						.throwing(InterruptedException.class, IOException.class).withoutParams();
+				// Method with fallback (will never be null)
+				Demo_staticMethod = Hack.into(Demo.class).staticMethod("methodWith2Params").returning(boolean.class)
+						.fallbackReturning(false).withParams(int.class, String.class);
 				Demo_mField = Hack.into(Demo.class).field("mField").fallbackTo(false);
 				Demo_sField = Hack.into(Demo.class).staticField("sField").ofType(String.class);
 			}
 
 			static HackedMethod1<Demo, Void, Unchecked, Unchecked, Unchecked, Integer> Demo_ctor;
-			static Hack.HackedMethod0<Void, Demo, InterruptedException, IOException, Unchecked> Demo_methodThrows;
+			static @Nullable Hack.HackedMethod0<Void, Demo, InterruptedException, IOException, Unchecked> Demo_methodThrows;
 			static Hack.HackedMethod2<Boolean, Void, Unchecked, Unchecked, Unchecked, Integer, String> Demo_staticMethod;
 			static @Nullable HackedField<Demo, Boolean> Demo_mField;		// Optional hack may be null if assertion failed
 			static @Nullable HackedTargetField<String> Demo_sField;
