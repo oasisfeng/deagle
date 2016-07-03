@@ -17,4 +17,11 @@ public class BuildVersions extends VERSION_CODES {
     public static void since(final int level, final Runnable code) {
         if (Build.VERSION.SDK_INT >= level) code.run();
     }
+
+    public static void until(final int level, final Runnable code) {
+        if (Build.VERSION.SDK_INT <= level) code.run();
+    }
+    public static void between(final int lower_level, final int upper_level, final Runnable code) {
+        if (Build.VERSION.SDK_INT >= lower_level && Build.VERSION.SDK_INT <= upper_level) code.run();
+    }
 }
