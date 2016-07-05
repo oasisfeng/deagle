@@ -2,6 +2,7 @@ package com.oasisfeng.android.ui;
 
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.customtabs.CustomTabsSession;
 import android.support.design.widget.Snackbar;
@@ -75,6 +76,7 @@ public class Snackbars {
 	}
 
 	private static Snackbar tweak(final Snackbar snackbar) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) snackbar.getView().setZ(999);
 		final TextView msg_view = SnackbarHack.getMessageView(snackbar);
 		msg_view.setMaxLines(KMaxLines);	// Extend max lines
 		msg_view.setTextColor(0xffffffff);	// Workaround the light theme conflict
