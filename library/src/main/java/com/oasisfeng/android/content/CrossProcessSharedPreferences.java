@@ -10,8 +10,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -28,6 +32,8 @@ import java.util.WeakHashMap;
  * @author Oasis
  */
 public class CrossProcessSharedPreferences {
+
+	private static final long DELAY_BEFORE_PREFS_RELOAD = 500;
 
 	private static final String KActionSharedPrefsUpdated = "com.oasisfeng.android.content.ACTION_SHARED_PREFS_CHANGED";
 	private static final String KExtraName = "name";
@@ -74,32 +80,36 @@ public class CrossProcessSharedPreferences {
 		mAppContext.registerReceiver(mUpdateReceiver, new IntentFilter(KActionSharedPrefsUpdated));
 	}
 
-	@Override protected void finalize() throws Throwable {
-		try {
-			mAppContext.unregisterReceiver(mUpdateReceiver);
-		} catch (final RuntimeException ignored) {
-		} finally { super.finalize(); }
-	}
-
 	private final BroadcastReceiver mUpdateReceiver = new BroadcastReceiver() { @Override public void onReceive(final Context c, final Intent intent) {
 		final int my_pid = Process.myPid();
 		final int pid = intent.getIntExtra(KExtraPid, my_pid);
 		final String name = intent.getStringExtra(KExtraName);
 		final String key = intent.getStringExtra(KExtraKey);
 		if (pid == my_pid || TextUtils.isEmpty(name) || TextUtils.isEmpty(key)) return;
-
 		Log.d(TAG, "Shared preferences updated in process " + pid + ": " + name + " (key: " + key + ")");
+
+		// Do actual update in a small delay to workaround the synchronization issue in most time.
+		final String handler_token = name + ":" + key;
+		mHandler.removeCallbacksAndMessages(handler_token);
+		mHandler.postAtTime(new Runnable() { @Override public void run() {
+			updateNow(name, key);
+		}}, handler_token, SystemClock.uptimeMillis() + DELAY_BEFORE_PREFS_RELOAD);
+	}};
+
+	private void updateNow(final String name, final String key) {
+		if (mTracked.isEmpty()) return;
 		@SuppressWarnings("deprecation")	// Force reload from disk
 		final SharedPreferences prefs = mAppContext.getSharedPreferences(name, Context.MODE_MULTI_PROCESS);
 		final SharedPreferencesWrapper wrapper = mTracked.get(prefs);
 		if (wrapper == null) return;
 		wrapper.notifyListeners(key);
-	}};
+	}
 
 	private final Context mAppContext;
 	private final Map<SharedPreferences, SharedPreferencesWrapper> mTracked = new HashMap<>();
+	private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-	private static CrossProcessSharedPreferences mSingleton;
+	private static @Nullable CrossProcessSharedPreferences mSingleton;
 	private static final Object mLock = new Object();
 
 	private static final String TAG = "MPSharedPrefs";
@@ -129,12 +139,6 @@ public class CrossProcessSharedPreferences {
 				Log.d(CrossProcessSharedPreferences.TAG, "Notify listener: " + listener);
 				listener.onSharedPreferenceChanged(this, key);
 			}
-		}
-
-		@Override protected void finalize() throws Throwable {
-			try {
-				mDelegate.unregisterOnSharedPreferenceChangeListener(this);
-			} finally { super.finalize(); }
 		}
 
 		SharedPreferencesWrapper(final String name, final SharedPreferences prefs) {
