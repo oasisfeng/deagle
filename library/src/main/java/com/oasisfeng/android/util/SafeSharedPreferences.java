@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.os.Build;
 
+import com.oasisfeng.deagle.BuildConfig;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -28,8 +30,8 @@ public class SafeSharedPreferences implements SharedPreferences {
     }
 
 	@Override public void registerOnSharedPreferenceChangeListener(final OnSharedPreferenceChangeListener listener) {
-		if (listener.getClass().isAnonymousClass())
-			throw new Error("Never use anonymous class for listener, since it is weakly-referenced in Android SDK.");
+		if (BuildConfig.DEBUG && listener.getClass().isAnonymousClass())
+			throw new Error("Never use anonymous inner class for listener, since it is weakly-referenced by SharedPreferences instance.");
 		mDelegate.registerOnSharedPreferenceChangeListener(listener);
 	}
 
