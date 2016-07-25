@@ -67,9 +67,9 @@ public class Apps {
         final PackageManager pm = mContext.getPackageManager();
         for (final String pkg : pkgs) {
         	app_names.append(separator);
-            ApplicationInfo info;
-            try {
-            	info = pm.getApplicationInfo(pkg, 0);
+            final ApplicationInfo info;
+            try { //noinspection WrongConstant,deprecation
+                info = pm.getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
             } catch (final NameNotFoundException e) {
             	app_names.append("<?>");
             	continue;
