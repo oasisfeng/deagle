@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,13 +16,30 @@ public class Apps {
         return new Apps(context);
     }
 
-    public boolean isInstalled(final String pkg) {
-        try {   // Despite stated in JavaDocs, this API actually never throws exceptions and returns empty array for non-existent package.
-            final int[] gids = mContext.getPackageManager().getPackageGids(pkg);
-            return gids == null || gids.length > 0;     // Null is the normal case for installed app
-        } catch (final NameNotFoundException e) {       // Still catch the checked exception in case the implementation of this API
-            return false;                               //   get corrected to properly reflect the JavaDocs.
+    /** Check whether specified app is installed on the device, even if not installed in current user (Android 4.2+). */
+    public boolean isInstalledOnDevice(final String pkg) {
+        try { //noinspection WrongConstant,deprecation
+            mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
+        } catch (final NameNotFoundException e) {
+            return false;
         }
+    }
+
+    /** Check whether specified app is installed in current user, even if hidden by system (Android 5+). */
+    public boolean isInstalledInCurrentUser(final String pkg) {
+        try { //noinspection WrongConstant,deprecation
+            final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) return true;
+            return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+        } catch (final NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    /** Use {@link #isInstalledInCurrentUser(String)} or {@link #isInstalledOnDevice(String)} instead */
+    @Deprecated public boolean isInstalled(final String pkg) {
+        return isInstalledInCurrentUser(pkg);
     }
 
     public boolean isEnabled(final String pkg) throws NameNotFoundException {
@@ -29,6 +47,7 @@ public class Apps {
         return app_info.enabled;
     }
 
+    /** Check whether specified app is installed in current user, enabled and not hidden */
     public boolean isAvailable(final String pkg) {
         try {
             return isEnabled(pkg);
