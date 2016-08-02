@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.support.annotation.CheckResult;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +18,7 @@ public class Apps {
     }
 
     /** Check whether specified app is installed on the device, even if not installed in current user (Android 4.2+). */
-    public boolean isInstalledOnDevice(final String pkg) {
+    public @CheckResult boolean isInstalledOnDevice(final String pkg) {
         try { //noinspection WrongConstant,deprecation
             mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
             return true;
@@ -27,7 +28,7 @@ public class Apps {
     }
 
     /** Check whether specified app is installed in current user, even if hidden by system (Android 5+). */
-    public boolean isInstalledInCurrentUser(final String pkg) {
+    public @CheckResult boolean isInstalledInCurrentUser(final String pkg) {
         try { //noinspection WrongConstant,deprecation
             final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) return true;
@@ -38,17 +39,17 @@ public class Apps {
     }
 
     /** Use {@link #isInstalledInCurrentUser(String)} or {@link #isInstalledOnDevice(String)} instead */
-    @Deprecated public boolean isInstalled(final String pkg) {
+    @Deprecated public @CheckResult boolean isInstalled(final String pkg) {
         return isInstalledInCurrentUser(pkg);
     }
 
-    public boolean isEnabled(final String pkg) throws NameNotFoundException {
+    public @CheckResult boolean isEnabled(final String pkg) throws NameNotFoundException {
         final ApplicationInfo app_info = mContext.getPackageManager().getApplicationInfo(pkg, 0);
         return app_info.enabled;
     }
 
     /** Check whether specified app is installed in current user, enabled and not hidden */
-    public boolean isAvailable(final String pkg) {
+    public @CheckResult boolean isAvailable(final String pkg) {
         try {
             return isEnabled(pkg);
         } catch (final NameNotFoundException e) {
@@ -56,7 +57,7 @@ public class Apps {
         }
     }
 
-    public boolean isInstalledBy(final String... installer_pkgs) {
+    public @CheckResult boolean isInstalledBy(final String... installer_pkgs) {
         try {
             return Arrays.asList(installer_pkgs).contains(mContext.getPackageManager().getInstallerPackageName(mContext.getPackageName()));
         } catch(final IllegalArgumentException e) {
@@ -64,16 +65,16 @@ public class Apps {
         }
     }
 
-    public CharSequence getAppName(final String pkg) {
-        try {
-        	final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, 0);
+    public @CheckResult CharSequence getAppName(final String pkg) {
+        try { //noinspection WrongConstant,deprecation
+        	final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
             return getAppName(info);
         } catch (final NameNotFoundException e) {
         	return "<?>";
         }
     }
 
-    public CharSequence getAppName(final ApplicationInfo app_info) {
+    public @CheckResult CharSequence getAppName(final ApplicationInfo app_info) {
         try {
         	return app_info.loadLabel(mContext.getPackageManager());
         } catch (final RuntimeException e) {	// Including Resources.NotFoundException
@@ -81,7 +82,7 @@ public class Apps {
         }
     }
 
-    public String getAppNames(final Collection<String> pkgs, final String separator) {
+    public @CheckResult String getAppNames(final Collection<String> pkgs, final String separator) {
         final StringBuilder app_names = new StringBuilder();
         final PackageManager pm = mContext.getPackageManager();
         for (final String pkg : pkgs) {
