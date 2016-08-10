@@ -11,15 +11,15 @@ import android.widget.TextView;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 /**
- * Binding adapter for click events on compound drawables.
+ * Binding adapter for click listeners on compound drawables of {@link TextView}.
  *
  * Created by Oasis on 2016/4/21.
  */
 @SuppressWarnings("unused")
-public class TextViewDrawableBindingAdapter {
+public class TextViewDrawableClickBindingAdapter {
 
 	@BindingAdapter(value = {"onDrawableStartClick", "onDrawableEndClick", "onDrawableLeftClick", "onDrawableRightClick"}, requireAll = false)
-	public static void setOnDrawableStartClick(final TextView view, final OnClickListener start_listener,
+	public static void setOnDrawableClickListener(final TextView view, final OnClickListener start_listener,
 			final OnClickListener end_listener, final OnClickListener left_listener, final OnClickListener right_listener) {
 		view.setOnTouchListener(new View.OnTouchListener() { @Override public boolean onTouch(final View v, final MotionEvent event) {
 			final boolean fire = event.getAction() == MotionEvent.ACTION_UP;	// Non-up action should still be consumed to avoid unexpected asymmetric behaviors
