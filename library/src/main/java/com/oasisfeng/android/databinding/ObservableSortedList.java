@@ -2,17 +2,19 @@ package com.oasisfeng.android.databinding;
 
 import android.databinding.ListChangeRegistry;
 import android.databinding.ObservableList;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.util.SortedList;
 
 import java.util.AbstractList;
+import java.util.Collection;
 
 /**
  * Observable wrapper of {@link SortedList}, which implements {@link ObservableList}.
  *
  * Created by Oasis on 2015/7/20.
  */
-public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> extends AbstractList<T> implements ObservableList<T> {
+public class ObservableSortedList<T extends ObservableSortedList.Sortable<? super T>> extends AbstractList<T> implements ObservableList<T> {
 
 	public interface Sortable<T> extends Comparable<T> {
 		/** @see android.support.v7.util.SortedList.Callback#areItemsTheSame(Object, Object) */
@@ -37,6 +39,12 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<T>> ex
 	@Override public boolean add(final T item) {
 		mList.add(item);
 		return true;	// Even if item is the same, it is still replaced in the list.
+	}
+
+	@Override public boolean addAll(final @NonNull Collection<? extends T> c) {
+		@SuppressWarnings("unchecked") final Collection<T> casted = (Collection<T>) c;
+		mList.addAll(casted);
+		return true;
 	}
 
 	@Override public T set(final int location, final T object) {
