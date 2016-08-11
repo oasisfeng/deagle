@@ -24,7 +24,7 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 	}
 
 	public ObservableSortedList(final Class<T> clazz) {
-		mList = new SortedList<>(clazz, new CallbackWrapper());
+		mList = new SortedList<>(clazz, new SortedList.BatchedCallback<>(new CallbackWrapper()));
 	}
 
 	/** @see SortedList#beginBatchedUpdates() */
@@ -93,7 +93,7 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 	private final SortedList<T> mList;
 	private transient @Nullable ListChangeRegistry mListeners = new ListChangeRegistry();
 
-	public class CallbackWrapper extends SortedList.Callback<T> {
+	private class CallbackWrapper extends SortedList.Callback<T> {
 
 		@Override public final void onInserted(final int position, final int count) {
 			if (mListeners != null) mListeners.notifyInserted(ObservableSortedList.this, position, count);
