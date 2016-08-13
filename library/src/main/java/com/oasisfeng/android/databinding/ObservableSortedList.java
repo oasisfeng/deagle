@@ -24,7 +24,7 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 	}
 
 	public ObservableSortedList(final Class<T> clazz) {
-		mList = new SortedList<>(clazz, new SortedList.BatchedCallback<>(new CallbackWrapper()));
+		mList = new SortedList<>(clazz, new CallbackWrapper());
 	}
 
 	/** @see SortedList#beginBatchedUpdates() */
