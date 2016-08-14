@@ -212,7 +212,7 @@ public class Hack {
 			return ofType(type, true, value);
 		}
 
-		private <T> HackedField<C, T> ofType(final Class<T> type, boolean fallback, T fallback_value) {
+		private <T> HackedField<C, T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
@@ -246,7 +246,7 @@ public class Hack {
 			return ofType(type, true, value);
 		}
 
-		private <T> HackedTargetField<T> ofType(final Class<T> type, boolean fallback, T fallback_value) {
+		private <T> HackedTargetField<T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field).onTarget(null) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
@@ -317,7 +317,7 @@ public class Hack {
 		@Override public void set(final T value) {}
 		@Override public HackedTargetField<T> on(final C target) { return this; }
 		@Override public Class<T> getType() { return mType; }
-		private FallbackField(Class<T> type, T value) { mType = type; mValue = value; }
+		private FallbackField(final Class<T> type, final T value) { mType = type; mValue = value; }
 
 		private final Class<T> mType;
 		private final T mValue;
@@ -407,7 +407,7 @@ public class Hack {
 
 		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
 		@SuppressWarnings("unchecked") public Class<R> getReturnType() { return (Class<R>) mInvokable.getReturnType(); }
-		protected HackInvocation<R, C, T1, T2, T3> invoke(Object... args) { return new HackInvocation<>(mInvokable, args); }
+		protected HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
 		/** Whether this hack is absent, thus will be fallen-back when invoked */
 		public boolean isAbsent() { return mInvokable instanceof FallbackInvokable; }
 
@@ -420,27 +420,27 @@ public class Hack {
 	}
 	public static class HackedMethod1<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod1(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(A1 arg) { return super.invoke(arg); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg) { return super.invoke(arg); }
 	}
 	public static class HackedMethod2<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod2(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(A1 arg1, A2 arg2) { return super.invoke(arg1, arg2); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2) { return super.invoke(arg1, arg2); }
 	}
 	public static class HackedMethod3<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod3(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(A1 arg1, A2 arg2, A3 arg3) { return super.invoke(arg1, arg2, arg3); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3) { return super.invoke(arg1, arg2, arg3); }
 	}
 	public static class HackedMethod4<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod4(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(A1 arg1, A2 arg2, A3 arg3, A4 arg4) { return super.invoke(arg1, arg2, arg3, arg4); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3, final A4 arg4) { return super.invoke(arg1, arg2, arg3, arg4); }
 	}
 	public static class HackedMethod5<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4, A5> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod5(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5) { return super.invoke(arg1, arg2, arg3, arg4, arg5); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3, final A4 arg4, final A5 arg5) { return super.invoke(arg1, arg2, arg3, arg4, arg5); }
 	}
 	public static class HackedMethodN<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethodN(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(Object... args) { return super.invoke(args); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return super.invoke(args); }
 	}
 
 	public static class HackInvocation<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
@@ -735,7 +735,7 @@ public class Hack {
 		<T> HackedClass<T> into(final String class_name);
 	}
 
-	public static ConditionalHack onlyIf(boolean condition) {
+	public static ConditionalHack onlyIf(final boolean condition) {
 		return condition ? new ConditionalHack() {
 			@Override public <T> HackedClass<T> into(@NonNull final Class<T> clazz) {
 				return Hack.into(clazz);
