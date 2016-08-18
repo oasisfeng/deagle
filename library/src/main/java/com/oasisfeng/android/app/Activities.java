@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Service;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 
 /**
@@ -21,5 +22,11 @@ public class Activities {
 		final Context base_context = ((ContextWrapper) context).getBaseContext();
 		if (base_context == context) return null;
 		return findActivityFrom(base_context);
+	}
+
+	public static void startActivity(final Context context, final Intent intent) {
+		final Activity activity = findActivityFrom(context);
+		if (activity != null) activity.startActivity(intent);
+		else context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 	}
 }
