@@ -730,10 +730,12 @@ public class Hack {
 		}
 	}
 
-	public interface ConditionalHack {
-		<T> HackedClass<T> into(final @NonNull Class<T> clazz);
-		<T> HackedClass<T> into(final String class_name);
+	@SuppressWarnings("unchecked") public static <C> Hack.HackedClass<C> onlyIf(final boolean condition, final Hacking<Hack.HackedClass<C>> hacking) {
+		if (condition) return hacking.hack();
+		return (Hack.HackedClass<C>) FALLBACK;
 	}
+	public interface Hacking<T> { T hack(); }
+	private static final Hack.HackedClass<?> FALLBACK = new HackedClass<>(ANY_TYPE);
 
 	public static ConditionalHack onlyIf(final boolean condition) {
 		return condition ? new ConditionalHack() {
@@ -745,12 +747,17 @@ public class Hack {
 			}
 		} : new ConditionalHack() {
 			@SuppressWarnings("unchecked") @Override public <T> HackedClass<T> into(@NonNull final Class<T> clazz) {
-				return new HackedClass(ANY_TYPE);
+				return (HackedClass<T>) FALLBACK;
 			}
 			@SuppressWarnings("unchecked") @Override public <T> HackedClass<T> into(final String class_name) {
-				return new HackedClass(ANY_TYPE);
+				return (HackedClass<T>) FALLBACK;
 			}
 		};
+	}
+	public interface ConditionalHack {
+		/** WARNING: Never use this method if the target class may not exist when the condition is not met, use {@link #onlyIf(boolean, Hacking)} instead. */
+		<T> HackedClass<T> into(final @NonNull Class<T> clazz);
+		<T> HackedClass<T> into(final String class_name);
 	}
 
 	private static void fail(final AssertionException e) {
