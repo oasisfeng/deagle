@@ -205,6 +205,31 @@ public class Hack {
 			}
 		}
 
+		public @NonNull HackedField<C, Byte> fallbackTo(final byte value) { //noinspection ConstantConditions
+			return ofType(byte.class, true, value);
+		}
+		public @NonNull HackedField<C, Character> fallbackTo(final char value) { //noinspection ConstantConditions
+			return ofType(char.class, true, value);
+		}
+		public @NonNull HackedField<C, Short> fallbackTo(final short value) { //noinspection ConstantConditions
+			return ofType(short.class, true, value);
+		}
+		public @NonNull HackedField<C, Integer> fallbackTo(final int value) { //noinspection ConstantConditions
+			return ofType(int.class, true, value);
+		}
+		public @NonNull HackedField<C, Long> fallbackTo(final long value) { //noinspection ConstantConditions
+			return ofType(long.class, true, value);
+		}
+		public @NonNull HackedField<C, Boolean> fallbackTo(final boolean value) { //noinspection ConstantConditions
+			return ofType(boolean.class, true, value);
+		}
+		public @NonNull HackedField<C, Float> fallbackTo(final float value) { //noinspection ConstantConditions
+			return ofType(float.class, true, value);
+		}
+		public @NonNull HackedField<C, Double> fallbackTo(final double value) { //noinspection ConstantConditions
+			return ofType(double.class, true, value);
+		}
+
 		/** Fallback to the given value if this field is unavailable at runtime */
 		public @NonNull <T> HackedField<C, T> fallbackTo(final T value) {
 			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
