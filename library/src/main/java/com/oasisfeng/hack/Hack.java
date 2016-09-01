@@ -287,12 +287,14 @@ public class Hack {
 		void set(C instance, T value);
 		HackedTargetField<T> on(C target);
 		Class<T> getType();
+		boolean isAbsent();
 	}
 
 	public interface HackedTargetField<T> {
 		T get();
 		void set(T value);
 		Class<T> getType();
+		boolean isAbsent();
 	}
 
 	private static class HackedFieldImpl<C, T> implements HackedField<C, T> {
@@ -326,6 +328,7 @@ public class Hack {
 		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
 			return (Class<T>) mField.getType();
 		}
+		@Override public boolean isAbsent() { return false; }
 
 		HackedFieldImpl(final @NonNull Field field) { mField = field; }
 
@@ -342,6 +345,8 @@ public class Hack {
 		@Override public void set(final T value) {}
 		@Override public HackedTargetField<T> on(final C target) { return this; }
 		@Override public Class<T> getType() { return mType; }
+		@Override public boolean isAbsent() { return true; }
+
 		private FallbackField(final Class<T> type, final T value) { mType = type; mValue = value; }
 
 		private final Class<T> mType;
@@ -367,6 +372,7 @@ public class Hack {
 		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
 			return (Class<T>) mField.getType();
 		}
+		@Override public boolean isAbsent() { return mField == null; }
 
 		HackedTargetFieldImpl(final Field field, final @Nullable Object instance) {
 			mField = field;
