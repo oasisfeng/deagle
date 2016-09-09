@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.1'
+    buildToolsVersion '24.0.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -15,10 +15,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:24.2.0'             // class BottomSheetBindingAdapter
-    compile 'com.android.support:appcompat-v7:24.2.0'       // class Dialogs
-    compile 'com.android.support:customtabs:24.2.0'         // class WebContent
-    compile 'com.android.support:recyclerview-v7:24.2.0'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
+    compile 'com.android.support:design:24.1.1'             // class BottomSheetBindingAdapter
+    compile 'com.android.support:appcompat-v7:24.1.1'       // class Dialogs
+    compile 'com.android.support:customtabs:24.1.1'         // class WebContent
+    compile 'com.android.support:recyclerview-v7:24.1.1'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
 
     testCompile 'junit:junit:4.12'
 }
