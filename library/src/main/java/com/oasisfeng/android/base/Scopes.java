@@ -40,7 +40,7 @@ public class Scopes {
 
 class SessionScope extends MemoryBasedScopeImpl {
 
-	private static final int KSessionTimeout = 30 * 60 * 1000;		// TODO: Configurable
+	private static final int KSessionTimeout = 5 * 60 * 1000;		// TODO: Configurable
 
 	public SessionScope(final Activity activity) {
 		activity.getApplication().registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
