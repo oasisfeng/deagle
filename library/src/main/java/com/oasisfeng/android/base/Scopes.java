@@ -8,11 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.oasisfeng.android.base.Scopes.Scope;
+import com.oasisfeng.android.content.CrossProcessSharedPreferences;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /** @author Oasis */
 public class Scopes {
@@ -42,7 +41,7 @@ class SessionScope extends MemoryBasedScopeImpl {
 
 	private static final int KSessionTimeout = 5 * 60 * 1000;		// TODO: Configurable
 
-	public SessionScope(final Activity activity) {
+	SessionScope(final Activity activity) {
 		activity.getApplication().registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 
 			@Override public void onActivityResumed(final Activity a) {
@@ -86,7 +85,7 @@ class MemoryBasedScopeImpl implements Scope {
         return mSeen.remove(tag);
     }
 
-    protected final Set<String> mSeen = new HashSet<>();
+    final Set<String> mSeen = new HashSet<>();
 }
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
@@ -94,7 +93,7 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
 	private static final String KPrefsKeyVersionCode = "version-code";
 
     VersionScope(final Context context) {
-        super(resetIfVersionChanges(context, context.getSharedPreferences(Scopes.KPrefsNameVersionScope, MODE_PRIVATE)));
+        super(resetIfVersionChanges(context, CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameVersionScope)));
     }
 
     private static SharedPreferences resetIfVersionChanges(final Context context, final SharedPreferences prefs) {
@@ -107,7 +106,7 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
 
 class AppScope extends SharedPrefsBasedScopeImpl {
 
-	AppScope(final Context context) { super(context.getSharedPreferences(Scopes.KPrefsNameAppScope, MODE_PRIVATE)); }
+	AppScope(final Context context) { super(CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameVersionScope)); }
 }
 
 class SharedPrefsBasedScopeImpl implements Scope {
@@ -133,7 +132,7 @@ class SharedPrefsBasedScopeImpl implements Scope {
         return true;
     }
 
-    protected SharedPrefsBasedScopeImpl(final SharedPreferences prefs) {
+    SharedPrefsBasedScopeImpl(final SharedPreferences prefs) {
         mPrefs = prefs;
 		// Migrate legacy entries
 		SharedPreferences.Editor editor = null;
