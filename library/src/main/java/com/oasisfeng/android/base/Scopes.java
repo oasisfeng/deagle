@@ -105,7 +105,7 @@ class UpdateScope extends SharedPrefsBasedScopeImpl {
 
 	private static SharedPreferences resetIfLastUpdateTimeChanged(final Context context, final SharedPreferences prefs) {
 		final long last_update_time = Versions.lastUpdateTime(context);
-		if (last_update_time != prefs.getInt(KPrefsKeyLastUpdateTime, 0))
+		if (last_update_time != prefs.getLong(KPrefsKeyLastUpdateTime, 0))
 			prefs.edit().clear().putLong(KPrefsKeyLastUpdateTime, last_update_time).apply();
 		return prefs;
 	}
