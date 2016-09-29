@@ -16,6 +16,7 @@ import java.util.Set;
 /** @author Oasis */
 public class Scopes {
 
+	/* These preferences file should be included in backup configuration of your app */
     public static final String KPrefsNameAppScope = "app.scope";
     public static final String KPrefsNameVersionScope = "version.scope";
 
@@ -26,9 +27,15 @@ public class Scopes {
         boolean unmark(@NonNull String tag);
     }
 
+	/** Throughout the whole lifecycle of this installed app, until uninstalled. (can also be extended to re-installation if configured with backup) */
     public static Scope app(final Context context) { return new AppScope(context); }
+	/** Throughout the current version (code) of this installed app, until the version changes. */
     public static Scope version(final Context context) { return new VersionScope(context); }
+	/** Throughout the current update of this installed app, until being updated by in-place re-installation. */
+	public static Scope update(final Context context) { return new UpdateScope(context); }
+	/** Throughout the current running process of this installed app, until being terminated. */
     public static Scope process() { return ProcessScope.mSingleton; }
+	/** Throughout the time-limited session within current running process of this installed app, until session time-out. */
     public static Scope session(final Activity activity) {
     	if (SessionScope.mSingleton == null) SessionScope.mSingleton = new SessionScope(activity);
     	return SessionScope.mSingleton;
@@ -86,6 +93,22 @@ class MemoryBasedScopeImpl implements Scope {
     }
 
     final Set<String> mSeen = new HashSet<>();
+}
+
+class UpdateScope extends SharedPrefsBasedScopeImpl {
+
+	private static final String KPrefsKeyLastUpdateTime = "update-time";
+
+	UpdateScope(final Context context) {
+		super(resetIfLastUpdateTimeChanged(context, CrossProcessSharedPreferences.get(context, "update.scope")));
+	}
+
+	private static SharedPreferences resetIfLastUpdateTimeChanged(final Context context, final SharedPreferences prefs) {
+		final long last_update_time = Versions.lastUpdateTime(context);
+		if (last_update_time != prefs.getInt(KPrefsKeyLastUpdateTime, 0))
+			prefs.edit().clear().putLong(KPrefsKeyLastUpdateTime, last_update_time).apply();
+		return prefs;
+	}
 }
 
 class VersionScope extends SharedPrefsBasedScopeImpl {
