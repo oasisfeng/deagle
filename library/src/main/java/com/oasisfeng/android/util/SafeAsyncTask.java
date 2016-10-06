@@ -23,10 +23,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
 
-	public interface Consumer<T> {
-		void accept(T object);
-	}
-
 	public static void execute(final Activity activity, final Consumer<Activity> runnable) {
 		final WeakReference<Activity> reference = new WeakReference<>(activity);
 		AsyncTask.execute(new SafeTask<>(new Supplier<Activity>() { @Override public Activity get() {
