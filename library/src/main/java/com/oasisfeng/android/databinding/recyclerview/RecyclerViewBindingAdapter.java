@@ -16,11 +16,6 @@ public class RecyclerViewBindingAdapter {
 
 	@BindingAdapter({"items", "item_binder"}) public static <T extends ObservableSortedList.Sortable<T>>
 	void setItemsAndBinder(final RecyclerView recycler_view, final ObservableList<T> items, final ItemBinder<T> binder) {
-		final BindingRecyclerViewAdapter<T> adapter = new BindingRecyclerViewAdapter<>(items, binder);
-		recycler_view.setAdapter(adapter);
-	}
-
-	interface OnItemClickListener<T extends ObservableSortedList.Sortable<T>> {
-		void onClick(T data);
+		recycler_view.setAdapter(new BindingRecyclerViewAdapter<>(items, binder));
 	}
 }

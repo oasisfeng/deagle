@@ -14,6 +14,6 @@ public class TextViewBindingAdapter {
 
 	@BindingAdapter("text")
 	public static void setText(final TextView view, final @StringRes int text_res) {
-		view.setText(text_res != 0 ? view.getContext().getText(text_res) : null);
+		view.setText(text_res > 0 ? view.getContext().getText(text_res) : null);
 	}
 }
