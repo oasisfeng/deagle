@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.os.Process;
 import android.support.annotation.CheckResult;
 import android.util.Log;
 
@@ -69,6 +70,17 @@ public class Apps {
     }
     private static final int FLAG_PRIVILEGED = 1<<30;
     private static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;        // ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
+
+    public static boolean isPrivileged(final PackageManager pm, final int uid) {
+        if (uid < 0) return false;
+        if (uid < Process.FIRST_APPLICATION_UID) return true;
+        final String[] pkgs = pm.getPackagesForUid(uid);
+        if (pkgs == null) return false;
+        for (final String pkg : pkgs) try {
+            if (isPrivileged(pm.getApplicationInfo(pkg, 0))) return true;
+        } catch (final NameNotFoundException ignored) {}
+        return false;
+    }
 
     private static boolean isSystem(final ApplicationInfo app) {
         return (app.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
