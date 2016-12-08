@@ -1,21 +1,25 @@
-package com.oasisfeng.android.ui;
+package com.oasisfeng.android.ui.support;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.CheckResult;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 
-/** @author Oasis */
+/**
+ * Utilities for {@link AlertDialog} (the support library version)
+ *
+ * Created by Oasis on 2016/12/8.
+ */
 public class Dialogs {
 
 	/** Create an non-cancellable alert dialog builder. */
-	public static @CheckResult Builder buildAlert(final Activity activity, final int title, final int message) {
-		return buildAlert(activity, title != 0 ? activity.getText(title) : null, message != 0 ? activity.getText(message) : null);
+	public static @CheckResult Dialogs.Builder buildAlert(final FragmentActivity context, final int title, final int message) {
+		return buildAlert(context, title != 0 ? context.getText(title) : null, message != 0 ? context.getText(message) : null);
 	}
 
-	public static @CheckResult Builder buildAlert(final Activity activity, final CharSequence title, final CharSequence message) {
-		final Builder builder = new Builder(activity);
+	public static @CheckResult Dialogs.Builder buildAlert(final FragmentActivity context, final CharSequence title, final CharSequence message) {
+		final Dialogs.Builder builder = new Dialogs.Builder(context);
 		builder.setCancelable(true);
 		if (title != null) builder.setTitle(title);
 		if (message != null) builder.setMessage(message);
