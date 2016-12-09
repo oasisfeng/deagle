@@ -5,12 +5,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.CheckResult;
+import android.support.annotation.StringRes;
 
 /** @author Oasis */
 public class Dialogs {
 
 	/** Create an non-cancellable alert dialog builder. */
-	public static @CheckResult Builder buildAlert(final Activity activity, final int title, final int message) {
+	public static @CheckResult Builder buildAlert(final Activity activity, final @StringRes int title, final @StringRes int message) {
 		return buildAlert(activity, title != 0 ? activity.getText(title) : null, message != 0 ? activity.getText(message) : null);
 	}
 

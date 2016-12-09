@@ -3,6 +3,7 @@ package com.oasisfeng.android.ui.support;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.CheckResult;
+import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 
@@ -14,7 +15,7 @@ import android.support.v7.app.AlertDialog;
 public class Dialogs {
 
 	/** Create an non-cancellable alert dialog builder. */
-	public static @CheckResult Dialogs.Builder buildAlert(final FragmentActivity context, final int title, final int message) {
+	public static @CheckResult Dialogs.Builder buildAlert(final FragmentActivity context, final @StringRes int title, final @StringRes int message) {
 		return buildAlert(context, title != 0 ? context.getText(title) : null, message != 0 ? context.getText(message) : null);
 	}
 
