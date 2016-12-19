@@ -159,7 +159,7 @@ public class Hack {
 			try {
 				field = mClass.getDeclaredField(mName);
 				if (Modifier.isStatic(mModifiers) != Modifier.isStatic(field.getModifiers())) {
-					fail(new AssertionException(field + (Modifier.isStatic(mModifiers) ? " is not static" : "is static")).setHackedFieldName(mName));
+					fail(new AssertionException(field + (Modifier.isStatic(mModifiers) ? " is not static" : " is static")).setHackedFieldName(mName));
 					field = null;
 				} else if (mModifiers > 0 && (field.getModifiers() & mModifiers) != mModifiers) {
 					fail(new AssertionException(field + " does not match modifiers: " + mModifiers).setHackedFieldName(mName));
@@ -484,7 +484,7 @@ public class Hack {
 		public R on(final @NonNull C target) throws T1, T2, T3 { return onTarget(target); }
 		public R statically() throws T1, T2, T3 { return onTarget(null); }
 
-		private R onTarget(final C target) throws T1 {
+		private R onTarget(final C target) throws T1 { //noinspection TryWithIdenticalCatches
 			try {
 				@SuppressWarnings("unchecked") final R result = (R) invokable.invoke(target, args);
 				return result;
@@ -813,7 +813,6 @@ public class Hack {
 		@SuppressWarnings({"FieldCanBeLocal", "UnnecessarilyQualifiedStaticUsage"})
 		static class Hacks {
 
-			/** Call this method before any hack is used, usually in your application initialization */
 			static {
 				Hack.setAssertionFailureHandler(new AssertionFailureHandler() { @Override public void onAssertionFailure(final AssertionException failure) {
 					Log.w("Demo", "Partially incompatible: " + failure.getDebugInfo());
@@ -822,7 +821,7 @@ public class Hack {
 				}});
 				Demo_ctor = Hack.into(Demo.class).constructor().withParam(int.class);
 				// Method without fallback (will be null if absent)
-				Demo_methodThrows = Hack.into(Demo.class).method("methodThrows").returning(Void.class)
+				Demo_methodThrows = Hack.into(Demo.class).method("methodThrows").returning(Void.class).fallbackReturning(null)
 						.throwing(InterruptedException.class, IOException.class).withoutParams();
 				// Method with fallback (will never be null)
 				Demo_staticMethod = Hack.into(Demo.class).staticMethod("methodWith2Params").returning(boolean.class)
@@ -832,7 +831,7 @@ public class Hack {
 			}
 
 			static HackedMethod1<Demo, Void, Unchecked, Unchecked, Unchecked, Integer> Demo_ctor;
-			static @Nullable Hack.HackedMethod0<Void, Demo, InterruptedException, IOException, Unchecked> Demo_methodThrows;
+			static Hack.HackedMethod0<Void, Demo, InterruptedException, IOException, Unchecked> Demo_methodThrows;
 			static Hack.HackedMethod2<Boolean, Void, Unchecked, Unchecked, Unchecked, Integer, String> Demo_staticMethod;
 			static @Nullable HackedField<Demo, Boolean> Demo_mField;		// Optional hack may be null if assertion failed
 			static @Nullable HackedTargetField<String> Demo_sField;
