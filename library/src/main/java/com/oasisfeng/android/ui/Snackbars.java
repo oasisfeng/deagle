@@ -6,7 +6,6 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.customtabs.CustomTabsSession;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.SnackbarHack;
 import android.view.View;
 import android.widget.TextView;
 
@@ -77,7 +76,7 @@ public class Snackbars {
 
 	private static Snackbar tweak(final Snackbar snackbar) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) snackbar.getView().setZ(999);
-		final TextView msg_view = SnackbarHack.getMessageView(snackbar);
+		final TextView msg_view = (TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
 		msg_view.setMaxLines(KMaxLines);	// Extend max lines
 		msg_view.setTextColor(0xffffffff);	// Workaround the light theme conflict
 		return snackbar;
