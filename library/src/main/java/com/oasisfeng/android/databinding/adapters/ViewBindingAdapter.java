@@ -12,7 +12,12 @@ import android.view.View;
 public class ViewBindingAdapter {
 
 	@BindingAdapter("visible")
-	public static void setVisibility(final View view, final boolean visible) {
-		view.setVisibility(visible ? View.VISIBLE : View.GONE);
+	public static void setVisible(final View view, final boolean visible) {
+		view.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+	}
+
+	@BindingAdapter("shown")
+	public static void setShown(final View view, final boolean shown) {
+		view.setVisibility(shown ? View.VISIBLE : View.GONE);
 	}
 }
