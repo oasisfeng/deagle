@@ -2,20 +2,20 @@ package com.oasisfeng.android.databinding.adapters;
 
 import android.databinding.BindingAdapter;
 import android.support.annotation.MenuRes;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.widget.ActionMenuView;
-import android.widget.Toolbar;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /**
- * Binding adapter for menu in {@link Toolbar} and {@link ActionMenuView}
+ * Binding adapter for menu in {@link Toolbar} and {@link ActionMenuView} (support-v7 version)
  *
- * Created by Oasis on 2016/11/30.
+ * Created by Oasis on 2016/12/28.
  */
-public class MenuBindingAdapter {
+public class SupportMenuBindingAdapter {
 
 	@BindingAdapter("menu") public static void inflateMenu(final Toolbar toolbar, final @MenuRes int old_menu, final @MenuRes int new_menu) {
 		if (SDK_INT < LOLLIPOP) return;
