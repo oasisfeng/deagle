@@ -27,6 +27,12 @@ public class Snackbars {
 		return tweak(snackbar);
 	}
 
+	@CheckResult public static Additional lastsForever() {
+		return new Additional() { @Override public void invoke(final Snackbar snackbar) {
+			snackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+		}};
+	}
+
 	@CheckResult public static Additional withAction(final int label_res, final View.OnClickListener listener) {
 		return new Additional() { @Override public void invoke(final Snackbar snackbar) {
 			snackbar.setAction(label_res, listener);
