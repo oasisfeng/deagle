@@ -4,8 +4,8 @@ import android.os.AsyncTask;
 import android.support.annotation.MainThread;
 import android.support.annotation.WorkerThread;
 
-import com.google.common.base.Supplier;
 import com.oasisfeng.android.util.Consumer;
+import com.oasisfeng.android.util.Supplier;
 
 import java.util.concurrent.Callable;
 
