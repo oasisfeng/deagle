@@ -8,6 +8,5 @@ import android.databinding.ViewDataBinding;
  * Created by Oasis on 2016/2/14.
  */
 public interface ItemBinder<T> {
-	int getLayoutRes(T model);
 	void onBind(ViewDataBinding container, T model, ViewDataBinding item);
 }

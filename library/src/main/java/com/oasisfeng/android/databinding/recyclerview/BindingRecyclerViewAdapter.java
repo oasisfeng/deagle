@@ -7,19 +7,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.oasisfeng.android.databinding.ObservableSortedList;
-
 /**
  * Adapter of RecycleView for data-binding
  *
  * Created by Oasis on 2016/2/14.
  */
-public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<T>> extends RecyclerView.Adapter<BindingRecyclerViewAdapter.ViewHolder> {
+public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<BindingRecyclerViewAdapter.ViewHolder> {
 
-	public BindingRecyclerViewAdapter(final ObservableList<T> items, final ItemBinder<T> binder) {
-		this.mItems = items;
-		this.mItemBinder = binder;
-		items.addOnListChangedCallback(new OnListChangedCallback<ObservableSortedList<T>>(this));
+	BindingRecyclerViewAdapter(final ObservableList<T> items, final ItemBinder<T> binder, final LayoutSelector<T> layout_selector) {
+		mItems = items;
+		mItemBinder = binder;
+		mLayoutSelector = layout_selector;
+		items.addOnListChangedCallback(new OnListChangedCallback<ObservableList<T>>(this));
 		notifyDataSetChanged();
 	}
 
@@ -44,7 +43,7 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 	}
 
 	@Override public int getItemViewType(final int position) {
-		return mItemBinder.getLayoutRes(mItems.get(position));
+		return mLayoutSelector.getLayoutRes(mItems.get(position));
 	}
 
 	@Override public int getItemCount() {
@@ -54,6 +53,7 @@ public class BindingRecyclerViewAdapter<T extends ObservableSortedList.Sortable<
 	private ViewDataBinding mBinding;
 	private final ObservableList<T> mItems;
 	private final ItemBinder<T> mItemBinder;
+	private final LayoutSelector<T> mLayoutSelector;
 	private transient LayoutInflater mInflater;
 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
