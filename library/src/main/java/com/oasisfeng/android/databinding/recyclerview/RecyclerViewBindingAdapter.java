@@ -13,11 +13,6 @@ import android.support.v7.widget.RecyclerView;
 @SuppressWarnings("unused")
 public class RecyclerViewBindingAdapter {
 
-	@BindingAdapter("layout_manager")
-	public static <T> void setItemsAndBinder(final RecyclerView recycler_view, final RecyclerView.LayoutManager manager) {
-		recycler_view.setLayoutManager(manager);
-	}
-
 	@BindingAdapter({"items", "item_binder", "item_layout_selector"})
 	public static <T> void setItemsAndBinder(final RecyclerView recycler_view, final ObservableList<T> items, final ItemBinder<T> binder, final LayoutSelector<T> layout_selector) {
 		recycler_view.setAdapter(new BindingRecyclerViewAdapter<>(items, binder, layout_selector));
