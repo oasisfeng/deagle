@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -41,6 +42,16 @@ public class IntentFilters {
 
 	public static FluentIntentFilter forActions(final String... actions) {
 		return new FluentIntentFilter().withActions(actions);
+	}
+
+	public static boolean equalIgnoringOrder(final Collection<IntentFilter> ca, final Collection<IntentFilter> cb) {
+		if (ca.size() != cb.size()) return false;
+		NEXT: for (final IntentFilter a : ca) {
+			for (final IntentFilter b : cb)
+				if (equal(a, b)) continue NEXT;
+			return false;
+		}
+		return true;
 	}
 
 	public static boolean equal(final Iterable<IntentFilter> ia, final Iterable<IntentFilter> ib) {
