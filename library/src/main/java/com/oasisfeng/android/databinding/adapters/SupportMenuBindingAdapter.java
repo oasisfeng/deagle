@@ -7,9 +7,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
-
 /**
  * Binding adapter for menu in {@link Toolbar} and {@link ActionMenuView} (support-v7 version)
  *
@@ -18,7 +15,6 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 public class SupportMenuBindingAdapter {
 
 	@BindingAdapter("menu") public static void inflateMenu(final Toolbar toolbar, final @MenuRes int old_menu, final @MenuRes int new_menu) {
-		if (SDK_INT < LOLLIPOP) return;
 		if (new_menu == old_menu) return;
 		final Menu menu = toolbar.getMenu();
 		menu.clear();
@@ -26,7 +22,6 @@ public class SupportMenuBindingAdapter {
 	}
 
 	@BindingAdapter("menu") public static void inflateMenu(final ActionMenuView amv, final @MenuRes int old_menu, final @MenuRes int new_menu) {
-		if (SDK_INT < LOLLIPOP) return;
 		if (new_menu == old_menu) return;
 		final Menu menu = amv.getMenu();
 		menu.clear();
