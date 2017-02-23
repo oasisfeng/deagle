@@ -15,7 +15,7 @@ import java.util.Set;
  *   <li>Guard against ClassCastException in getters of SharedPreferences, return default value if type mismatched.</li>
  *   <li>Prevent anonymous class from being used in {@link #registerOnSharedPreferenceChangeListener(android.content.SharedPreferences.OnSharedPreferenceChangeListener)
  *   registerOnSharedPreferenceChangeListener()}</li>
- *   <li>Prevent the string set return by getStringSet() from modification.</li>
+ *   <li>Prevent the map return by getAll() and string set return by getStringSet() from modification.</li>
  * </ul>
  *
  * @author Oasis
@@ -84,13 +84,16 @@ public class SafeSharedPreferences implements SharedPreferences {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override public Set<String> getStringSet(final String key, final Set<String> defValues) {
 		try {
-			return Collections.unmodifiableSet(mDelegate.getStringSet(key, defValues));		// To enforce the immutability
+			return Collections.unmodifiableSet(mDelegate.getStringSet(key, defValues));		// Enforce the immutability
 		} catch (final ClassCastException e) {
 			return defValues;
 		}
 	}
 
-	@Override public Map<String, ?> getAll() { return mDelegate.getAll(); }
+	@Override public Map<String, ?> getAll() {
+		return Collections.unmodifiableMap(mDelegate.getAll());								// Enforce the immutability
+	}
+
 	@Override public boolean contains(final String key) { return mDelegate.contains(key); }
 	@Override public Editor edit() { return mDelegate.edit(); }
 
