@@ -3,6 +3,7 @@ package com.oasisfeng.android.util;
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.support.annotation.Nullable;
 
 import com.oasisfeng.deagle.BuildConfig;
 
@@ -83,11 +84,13 @@ public class SafeSharedPreferences implements SharedPreferences {
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override public Set<String> getStringSet(final String key, final Set<String> defValues) {
+		final Set<String> values;
 		try {
-			return Collections.unmodifiableSet(mDelegate.getStringSet(key, defValues));		// Enforce the immutability
+			values = mDelegate.getStringSet(key, defValues);
 		} catch (final ClassCastException e) {
 			return defValues;
 		}
+		return values == null ? null : Collections.unmodifiableSet(values);		// Enforce the immutability
 	}
 
 	@Override public Map<String, ?> getAll() {
