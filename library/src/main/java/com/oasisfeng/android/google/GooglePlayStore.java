@@ -25,7 +25,7 @@ public class GooglePlayStore {
         updatePlayUrlIntent(context, intent);
     }
 
-    /** Modify intent to launch Google Play Store directly if possible (without opener-app selector) */
+    /** Modify intent to launch Google Play Store directly if possible (without activity chooser) */
     private static void updatePlayUrlIntent(final Context context, final Intent intent) {
         if (intent == null || intent.getPackage() != null) return;      // Skip intent with explicit target package
         final Uri uri = intent.getData();

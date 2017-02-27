@@ -3,7 +3,6 @@ package com.oasisfeng.android.util;
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.support.annotation.Nullable;
 
 import com.oasisfeng.deagle.BuildConfig;
 
