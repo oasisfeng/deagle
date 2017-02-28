@@ -39,8 +39,10 @@ public class WebContent {
 				Log.d(TAG, "Warming up Chrome custom tabs");
 				if (client.warmup(0)) {
 					final CustomTabsSession session = client.newSession(null);
-					if (session != null) session.mayLaunchUrl(uri, null, null);
-					if (listener != null) listener.onSessionReady(session);
+					if (session != null) {
+						session.mayLaunchUrl(uri, null, null);
+						if (listener != null) listener.onSessionReady(session);
+					}
 				}
 			}
 
@@ -59,7 +61,7 @@ public class WebContent {
 		return view(context, uri, null, null);
 	}
 
-	public static boolean view(final Context context, final Uri uri, final CustomTabsSession session, final Bundle activity_options) {
+	public static boolean view(final Context context, final Uri uri, final @Nullable CustomTabsSession session, final @Nullable Bundle activity_options) {
 		if (! uri.isAbsolute() || ! uri.isHierarchical()) throw new IllegalArgumentException("Invalid URL: " + uri);
 		final Intent intent;
 		final Activity activity = findActivity(context);
@@ -98,7 +100,7 @@ public class WebContent {
 		return false;
 	}
 
-	private static void startActivity(final Context context, final Intent intent, final Bundle activity_options) {
+	private static void startActivity(final Context context, final Intent intent, final @Nullable Bundle activity_options) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
 			context.startActivity(intent, activity_options);
 		else context.startActivity(intent);

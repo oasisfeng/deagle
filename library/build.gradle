@@ -15,6 +15,7 @@ android {
 }
 
 dependencies {
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
     compile 'com.android.support:design:25.1.0'             // class BottomSheetBindingAdapter
     compile 'com.android.support:appcompat-v7:25.1.0'       // class Dialogs
     compile 'com.android.support:customtabs:25.1.0'         // class WebContent

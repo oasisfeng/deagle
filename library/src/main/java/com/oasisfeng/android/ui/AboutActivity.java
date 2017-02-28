@@ -13,6 +13,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.annotation.Nullable;
 
 import com.oasisfeng.android.google.GooglePlayStore;
 import com.oasisfeng.android.i18n.Locales;
@@ -36,8 +37,8 @@ public class AboutActivity extends PreferenceActivity {
 
     private static final String EXTRA_XML_RESOURCE_ID = "xml";
 
-    @SuppressWarnings("static-method") /** Override to provide your own fragment implementation */
-    protected Fragment createAboutFragment() { return new AboutFragment(); }
+    /** Override to provide your own fragment implementation */
+    @SuppressWarnings("MethodMayBeStatic") protected Fragment createAboutFragment() { return new AboutFragment(); }
 
     public static void show(final Context context, final int xml_res) {
         show(context, xml_res, AboutActivity.class);
@@ -48,14 +49,14 @@ public class AboutActivity extends PreferenceActivity {
         context.startActivity(new Intent(context, activity).putExtra(EXTRA_XML_RESOURCE_ID, xml_res));
     }
 
-    @Override protected void onCreate(final Bundle savedInstanceState) {
+    @Override protected void onCreate(final @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, createAboutFragment()).commit();
     }
 
     public static class AboutFragment extends PreferenceFragment {
 
-        @Override public void onCreate(final Bundle savedInstanceState) {
+        @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(getActivity().getIntent().getIntExtra(EXTRA_XML_RESOURCE_ID, 0));
             final Preference version_pref = getPreferenceScreen().findPreference("version");

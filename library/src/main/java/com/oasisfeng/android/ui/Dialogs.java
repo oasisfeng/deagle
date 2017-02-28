@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.CheckResult;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 /** @author Oasis */
@@ -15,7 +16,7 @@ public class Dialogs {
 		return buildAlert(activity, title != 0 ? activity.getText(title) : null, message != 0 ? activity.getText(message) : null);
 	}
 
-	public static @CheckResult Builder buildAlert(final Activity activity, final CharSequence title, final CharSequence message) {
+	public static @CheckResult Builder buildAlert(final Activity activity, final @Nullable CharSequence title, final @Nullable CharSequence message) {
 		final Builder builder = new Builder(activity);
 		builder.setCancelable(true);
 		if (title != null) builder.setTitle(title);
@@ -26,7 +27,7 @@ public class Dialogs {
 	/** Provide shortcuts for simpler building */
 	public static class Builder extends AlertDialog.Builder {
 
-		public @CheckResult Builder withOkButton(final Runnable task) {
+		public @CheckResult Builder withOkButton(final @Nullable Runnable task) {
 			setPositiveButton(android.R.string.ok, task == null ? null : new DialogInterface.OnClickListener() { @Override public void onClick(final DialogInterface dialog, final int which) {
 				task.run();
 			}});
