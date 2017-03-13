@@ -52,6 +52,7 @@ public class Services {
 			}
 
 			@Override public void onServiceDisconnected(final ComponentName name) {}
+			@Override public String toString() { return "ServiceConnection{" + procedure.toString() + "}"; }	// About the source of service invocation
 		});
 	}
 
