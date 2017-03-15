@@ -129,7 +129,7 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
 
 class AppScope extends SharedPrefsBasedScopeImpl {
 
-	AppScope(final Context context) { super(CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameVersionScope)); }
+	AppScope(final Context context) { super(CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameAppScope)); }
 }
 
 class SharedPrefsBasedScopeImpl implements Scope {
