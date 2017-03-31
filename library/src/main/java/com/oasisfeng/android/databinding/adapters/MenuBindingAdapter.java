@@ -15,6 +15,7 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
  *
  * Created by Oasis on 2016/11/30.
  */
+@SuppressWarnings("unused")
 public class MenuBindingAdapter {
 
 	@BindingAdapter("menu") public static void inflateMenu(final Toolbar toolbar, final @MenuRes int old_menu, final @MenuRes int new_menu) {

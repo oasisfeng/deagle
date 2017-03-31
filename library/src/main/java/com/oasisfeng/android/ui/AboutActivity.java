@@ -1,13 +1,11 @@
 package com.oasisfeng.android.ui;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -19,6 +17,8 @@ import com.oasisfeng.android.google.GooglePlayStore;
 import com.oasisfeng.android.i18n.Locales;
 
 import java.util.Locale;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * A helper class to simply build an "About" dialog.
@@ -32,7 +32,7 @@ import java.util.Locale;
 
  * @author Oasis
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)       // TODO: Support 2.x
+@ParametersAreNonnullByDefault
 public class AboutActivity extends PreferenceActivity {
 
     private static final String EXTRA_XML_RESOURCE_ID = "xml";
