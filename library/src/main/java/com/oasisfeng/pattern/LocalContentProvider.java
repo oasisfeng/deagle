@@ -25,7 +25,7 @@ public class LocalContentProvider extends ContentProvider {
 
 	protected static <T extends LocalContentProvider> T getInstance(final Context context, final Class<T> clazz) {
 		final ProviderInfo provider = queryProviderInfo(context, clazz);
-		if (provider == null) return null;
+		if (provider == null) throw new IllegalStateException(clazz + " not declared in AndroidManifest.xml");
 		return getInstance(context, provider.authority);
 	}
 
