@@ -24,9 +24,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class LocalContentProvider extends ContentProvider {
 
 	protected static <T extends LocalContentProvider> T getInstance(final Context context, final Class<T> clazz) {
+		@SuppressWarnings("unchecked") final T singleton = (T) sSingleton;
+		if (singleton != null) return singleton;
 		final ProviderInfo provider = queryProviderInfo(context, clazz);
 		if (provider == null) throw new IllegalStateException(clazz + " not declared in AndroidManifest.xml");
-		return getInstance(context, provider.authority);
+		final T instance = getInstance(context, provider.authority);
+		sSingleton = instance;
+		return instance;
 	}
 
 	protected static <T extends LocalContentProvider> T getInstance(final Context context, final String authority) {
@@ -71,4 +75,6 @@ public class LocalContentProvider extends ContentProvider {
 								final @Nullable String[] strings) { return 0; }
 	@Nullable @Override public Cursor query(final @NonNull Uri uri, final @Nullable String[] projection, final @Nullable String selection,
 											final @Nullable String[] selection_args, final @Nullable String sort) { return null; }
+
+	private static LocalContentProvider sSingleton;		// Short path for intra-classloader access
 }
