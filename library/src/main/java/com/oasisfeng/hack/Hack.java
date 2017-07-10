@@ -428,7 +428,8 @@ public class Hack {
 	public interface NonNullHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedMethod<R, C, T1,T2,T3>, NonNullHackedInvokable<R, C, T1,T2,T3> {
 		/** Optional */
 		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
-
+		/** Whatever exception or none */
+		@CheckResult <TT1 extends Throwable> NonNullHackedMethod<R, C, Exception, T2, T3> throwing();
 		@CheckResult <TT1 extends Throwable> NonNullHackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> NonNullHackedMethod<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
@@ -523,6 +524,12 @@ public class Hack {
 
 		@Override public NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(final R value) {
 			mFallbackReturnValue = value; mHasFallback = true; return this;
+		}
+
+		@Override public NonNullHackedMethod<R, C, Exception, T2, T3> throwing() {
+			mThrowTypes = new Class[] {};
+			@SuppressWarnings("unchecked") final NonNullHackedMethod<R, C, Exception, T2, T3> casted = (NonNullHackedMethod<R, C, Exception, T2, T3>) this;
+			return casted;
 		}
 
 		@Override public <TT extends Throwable> NonNullHackedMethod<R, C, TT, T2, T3> throwing(final Class<TT> type) {
@@ -631,11 +638,11 @@ public class Hack {
 			if (mModifiers > 0 && (modifiers & mModifiers) != mModifiers)
 				fail(new AssertionException(invokable + " does not match modifiers: " + mModifiers).setHackedMethodName(mName));
 
-			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && ex_types.length == 0) {
+			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && mThrowTypes.length > 0 && ex_types.length == 0) {
 				fail(new AssertionException("Checked exception(s) not match: " + invokable));
 				if (ex_types.length > 0) invokable = null;		// No need to fall-back if expected checked exceptions are absent.
-			} else if (mThrowTypes != null) {
-				Arrays.sort(ex_types, CLASS_COMPARATOR);
+			} else if (mThrowTypes != null && mThrowTypes.length > 0) {		// Empty array stands for "whatever exception or none"
+				if (mThrowTypes.length > 1) Arrays.sort(ex_types, CLASS_COMPARATOR);
 				if (! Arrays.equals(ex_types, mThrowTypes)) {	// TODO: Check derived relation of exceptions
 					fail(new AssertionException("Checked exception(s) not match: " + invokable));
 					invokable = null;
