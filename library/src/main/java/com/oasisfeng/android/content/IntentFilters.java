@@ -21,6 +21,9 @@ public class IntentFilters {
 		public FluentIntentFilter withAction(final String action) { addAction(action); return this; }
 		public FluentIntentFilter withActions(final String... actions) { for (final String action : actions) addAction(action); return this; }
 		public FluentIntentFilter withDataScheme(final String scheme) { addDataScheme(scheme); return this; }
+		public FluentIntentFilter withDataSchemes(final String... schemes) { for (final String scheme : schemes) addDataScheme(scheme); return this; }
+		public FluentIntentFilter withCategory(final String category) { addCategory(category); return this; }
+		public FluentIntentFilter withCategories(final String... categories) { for (final String category : categories) addCategory(category); return this; }
 		public FluentIntentFilter inPriority(final int priority) { setPriority(priority); return this; }
 
 		public FluentIntentFilter(final IntentFilter filter) { super(filter); }
