@@ -24,12 +24,14 @@ public class IconResizer {
 	private final Canvas mCanvas = new Canvas();
 
 	public IconResizer() {
+		this((int) Resources.getSystem().getDimension(android.R.dimen.app_icon_size));
+	}
+
+	public IconResizer(final int size) {
 		mCanvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.DITHER_FLAG,
 				Paint.FILTER_BITMAP_FLAG));
 
-		final Resources resources = Resources.getSystem();
-		mIconWidth = mIconHeight = (int) resources.getDimension(
-				android.R.dimen.app_icon_size);
+		mIconWidth = mIconHeight = size;
 	}
 
 	/**
