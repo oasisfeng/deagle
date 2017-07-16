@@ -4,7 +4,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Debug;
 import android.util.Log;
 
-import com.oasisfeng.pattern.LocalContentProvider;
+import com.oasisfeng.pattern.PseudoContentProvider;
 
 /**
  * Special content provider for easy debugger attaching at the starting stage of specific process.
@@ -13,7 +13,7 @@ import com.oasisfeng.pattern.LocalContentProvider;
  *
  * Created by Oasis on 2017/3/20.
  */
-public class DebuggerWaitingProvider extends LocalContentProvider {
+public class DebuggerWaitingProvider extends PseudoContentProvider {
 
 	private static final long WAITING_TIMEOUT = 3_000;
 
