@@ -136,7 +136,7 @@ class LocalAidlServices {
 					try {
 						context.unbindService(record);
 					} catch (final RuntimeException e) {
-						Log.d(TAG, "Ignore failure in service unbinding: " + e);
+						Log.w(TAG, "Ignore failure in service unbinding: " + e);
 					}
 				else {
 					unbindService(record.service, makeIntent(record.service, service_interface));

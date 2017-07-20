@@ -82,7 +82,7 @@ public abstract class AidlService<Stub extends Binder & IInterface> extends Serv
 	@Override public final void onCreate() { super.onCreate(); }
 
 	@Override public final IBinder onBind(final Intent intent) {
-		Log.d(toString(), "onBind");
+		Log.v(toString(), "onBind");
 		mBinder = LocalAidlServices.bind(this, mInterface, intent);
 		return mBinder != null ? mBinder.asBinder() : null;
 	}
@@ -110,7 +110,7 @@ public abstract class AidlService<Stub extends Binder & IInterface> extends Serv
 	@SuppressLint("NewApi")	// AutoCloseable is hidden but accessible
 	private void close(final AutoCloseable closeable) {
 		try {
-			Log.d(toString(), "close");
+			Log.v(toString(), "close");
 			closeable.close();
 		} catch (final Exception e) {
 			Log.w(toString(), "Error closing " + closeable, e);

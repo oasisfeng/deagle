@@ -94,7 +94,7 @@ public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<
                     field.set(null, executor);      // Only accept ThreadPoolExecutor
                     return true;
                 } catch (final Exception exc) {
-                    Log.d(TAG, "Failed to install as default executor of AsyncTask.");
+                    Log.w(TAG, "Failed to install as default executor of AsyncTask.");
                     return false;
                 }
             }

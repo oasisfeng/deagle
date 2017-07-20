@@ -173,7 +173,7 @@ public class Services {
 		}
 
 		final ComponentName component = new ComponentName(best_match.serviceInfo.packageName, best_match.serviceInfo.name);
-		if (matches.size() > 1) Log.d(TAG, "Final match for " + intent + " among " + matches.size() + ": " + component.flattenToShortString());
+		if (matches.size() > 1) Log.w(TAG, "Final match for " + intent + " among " + matches.size() + ": " + component.flattenToShortString());
 
 		return component;
 	}
