@@ -2,6 +2,8 @@ package com.oasisfeng.android.databinding.adapters;
 
 import android.databinding.BindingAdapter;
 import android.support.annotation.MenuRes;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPresenter;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -14,17 +16,61 @@ import android.view.MenuInflater;
  */
 public class SupportMenuBindingAdapter {
 
-	@BindingAdapter("menu") public static void inflateMenu(final Toolbar toolbar, final @MenuRes int old_menu, final @MenuRes int new_menu) {
-		if (new_menu == old_menu) return;
-		final Menu menu = toolbar.getMenu();
-		menu.clear();
-		toolbar.inflateMenu(new_menu);
+	public interface MenuAware {
+		void onBindMenu(final Menu menu);
+		void onShowOverflowMenu(final Menu menu);
 	}
 
-	@BindingAdapter("menu") public static void inflateMenu(final ActionMenuView amv, final @MenuRes int old_menu, final @MenuRes int new_menu) {
-		if (new_menu == old_menu) return;
-		final Menu menu = amv.getMenu();
-		menu.clear();
-		new MenuInflater(amv.getContext()).inflate(new_menu, menu);
+	@BindingAdapter(value = {"menu", "menuAware"}, requireAll = false)
+	public static void inflateMenu(final Toolbar toolbar, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
+												final @MenuRes int menu_res, final MenuAware menu_aware) {
+		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
+			toolbar.setMenuCallbacks(new MenuPresenter.Callback() {
+
+				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
+					if (subMenu == null) menu_aware.onShowOverflowMenu(toolbar.getMenu());
+					return false;
+				}
+
+				@Override public void onCloseMenu(final MenuBuilder menu, final boolean allMenusAreClosing) {}
+			}, null);
+		}
+
+		if (menu_res != last_menu_res && menu_res != 0) {
+			toolbar.getMenu().clear();
+			toolbar.inflateMenu(menu_res);
+		}
+
+		if (menu_aware != last_menu_aware && menu_aware != null) {
+			final Menu menu = toolbar.getMenu();
+			menu_aware.onBindMenu(menu);
+		}
+	}
+
+	@BindingAdapter(value = {"menu", "menuAware"}, requireAll = false)
+	public static void inflateMenu(final ActionMenuView amv, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
+								   final @MenuRes int menu_res, final MenuAware menu_aware) {
+		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
+			amv.setMenuCallbacks(new MenuPresenter.Callback() {
+
+				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
+					if (subMenu == null) menu_aware.onShowOverflowMenu(amv.getMenu());
+					return false;
+				}
+
+				@Override public void onCloseMenu(final MenuBuilder menu, final boolean allMenusAreClosing) {}
+			}, null);
+		}
+
+		if (menu_res != last_menu_res && menu_res != 0) {
+			final Menu menu = amv.getMenu();
+			menu.clear();
+			new MenuInflater(amv.getContext()).inflate(menu_res, menu);
+		}
+
+		if (menu_aware != last_menu_aware && menu_aware != null) {
+			final Menu menu = amv.getMenu();
+			menu_aware.onBindMenu(menu);
+		}
 	}
 }
