@@ -6,6 +6,7 @@ import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPresenter;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 
@@ -25,10 +26,14 @@ public class SupportMenuBindingAdapter {
 	public static void inflateMenu(final Toolbar toolbar, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
 												final @MenuRes int menu_res, final MenuAware menu_aware) {
 		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
+			toolbar.setTag(MenuAware.class.hashCode(), menu_aware);
 			toolbar.setMenuCallbacks(new MenuPresenter.Callback() {
 
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
-					if (subMenu == null) menu_aware.onShowOverflowMenu(toolbar.getMenu());
+					if (subMenu != null) return false;		// Null to indicate overflow menu.
+					final Object tag = toolbar.getTag(MenuAware.class.hashCode());
+					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(toolbar.getMenu());
+					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
 				}
 
@@ -51,10 +56,14 @@ public class SupportMenuBindingAdapter {
 	public static void inflateMenu(final ActionMenuView amv, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
 								   final @MenuRes int menu_res, final MenuAware menu_aware) {
 		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
+			amv.setTag(MenuAware.class.hashCode(), menu_aware);
 			amv.setMenuCallbacks(new MenuPresenter.Callback() {
 
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
-					if (subMenu == null) menu_aware.onShowOverflowMenu(amv.getMenu());
+					if (subMenu != null) return false;		// Null to indicate overflow menu.
+					final Object tag = amv.getTag(MenuAware.class.hashCode());
+					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(amv.getMenu());
+					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
 				}
 
@@ -73,4 +82,6 @@ public class SupportMenuBindingAdapter {
 			menu_aware.onBindMenu(menu);
 		}
 	}
+
+	private static final String TAG = "SupportMenuBinding";
 }
