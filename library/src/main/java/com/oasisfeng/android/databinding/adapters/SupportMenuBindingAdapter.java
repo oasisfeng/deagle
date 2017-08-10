@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import com.oasisfeng.deagle.R;
+
 /**
  * Binding adapter for menu in {@link Toolbar} and {@link ActionMenuView} (support-v7 version)
  *
@@ -26,12 +28,12 @@ public class SupportMenuBindingAdapter {
 	public static void inflateMenu(final Toolbar toolbar, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
 												final @MenuRes int menu_res, final MenuAware menu_aware) {
 		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
-			toolbar.setTag(MenuAware.class.hashCode(), menu_aware);
+			toolbar.setTag(R.id.menuAware, menu_aware);
 			toolbar.setMenuCallbacks(new MenuPresenter.Callback() {
 
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
 					if (subMenu != null) return false;		// Null to indicate overflow menu.
-					final Object tag = toolbar.getTag(MenuAware.class.hashCode());
+					final Object tag = toolbar.getTag(R.id.menuAware);
 					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(toolbar.getMenu());
 					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
@@ -61,7 +63,7 @@ public class SupportMenuBindingAdapter {
 
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
 					if (subMenu != null) return false;		// Null to indicate overflow menu.
-					final Object tag = amv.getTag(MenuAware.class.hashCode());
+					final Object tag = amv.getTag(R.id.menuAware);
 					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(amv.getMenu());
 					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
