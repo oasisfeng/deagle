@@ -30,7 +30,7 @@ public class BottomSheetBindingAdapter {
 	}
 
 	@BindingAdapter("behavior_bottomSheetCallback")
-	public static void bindBottomSheetStateChange(final View view, final BottomSheetCallback callback) {
+	public static void bindBottomSheetCallback(final View view, final BottomSheetCallback callback) {
 		final BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(view);
 		if (behavior == null) throw new IllegalArgumentException(view + " has no BottomSheetBehavior");
 		behavior.setBottomSheetCallback(callback);

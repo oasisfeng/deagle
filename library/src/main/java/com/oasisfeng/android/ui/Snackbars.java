@@ -16,13 +16,13 @@ public class Snackbars {
 	private static final int KMaxLines = 3;
 
 	@CheckResult public static Snackbar make(final View coordinator, final int text_res, final Additional... additional) {
-		@SuppressWarnings("ResourceType") final Snackbar snackbar = Snackbar.make(coordinator, text_res, DEFAULT_DURATION);
+		final Snackbar snackbar = Snackbar.make(coordinator, text_res, DEFAULT_DURATION);
 		for (final Additional add : additional) if (add != null) add.invoke(snackbar);
 		return tweak(snackbar);
 	}
 
 	@CheckResult public static Snackbar make(final View coordinator, final CharSequence text, final Additional... additional) {
-		@SuppressWarnings("ResourceType") final Snackbar snackbar = Snackbar.make(coordinator, text, DEFAULT_DURATION);
+		final Snackbar snackbar = Snackbar.make(coordinator, text, DEFAULT_DURATION);
 		for (final Additional add : additional) if (add != null) add.invoke(snackbar);
 		return tweak(snackbar);
 	}
