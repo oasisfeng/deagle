@@ -23,7 +23,10 @@ public class Scopes {
     public interface Scope {
 
         boolean isMarked(@NonNull String tag);
+        /** @return whether it is NOT YET marked before */
         boolean mark(@NonNull String tag);
+		void markOnly(@NonNull String tag);
+		/** @return whether it is marked before */
         boolean unmark(@NonNull String tag);
     }
 
@@ -88,7 +91,11 @@ class MemoryBasedScopeImpl implements Scope {
         return mSeen.add(tag);
     }
 
-    @Override public boolean unmark(@NonNull final String tag) {
+	@Override public void markOnly(@NonNull final String tag) {
+		mSeen.add(tag);
+	}
+
+	@Override public boolean unmark(@NonNull final String tag) {
         return mSeen.remove(tag);
     }
 
@@ -148,7 +155,11 @@ class SharedPrefsBasedScopeImpl implements Scope {
         return true;
     }
 
-    @Override public boolean unmark(@NonNull final String tag) {
+	@Override public void markOnly(@NonNull final String tag) {
+		mPrefs.edit().putBoolean(KPrefsKeyPrefix + tag, true).apply();
+	}
+
+	@Override public boolean unmark(@NonNull final String tag) {
         final String key = KPrefsKeyPrefix + tag;
         if (! mPrefs.getBoolean(key, false)) return false;
         mPrefs.edit().putBoolean(key, false).apply();
