@@ -2,7 +2,9 @@ package com.oasisfeng.android.base;
 
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,6 +14,9 @@ import com.oasisfeng.android.content.CrossProcessSharedPreferences;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static android.app.PendingIntent.FLAG_NO_CREATE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 /** @author Oasis */
 public class Scopes {
@@ -36,6 +41,7 @@ public class Scopes {
     public static Scope version(final Context context) { return new PackageVersionScope(context); }
 	/** Throughout the current update of this installed app, until being updated by in-place re-installation. */
 	public static Scope update(final Context context) { return new PackageUpdateScope(context); }
+	public static Scope boot(final Context context) { return new DeviceBootScope(context); }
 	/** Throughout the current running process of this installed app, until being terminated. */
     public static Scope process() { return ProcessScope.mSingleton; }
 	/** Throughout the time-limited session within current running process of this installed app, until session time-out. */
@@ -74,6 +80,41 @@ class SessionScope extends MemoryBasedScopeImpl {
 	private long mTimeLastSession = 0;
 
 	static SessionScope mSingleton;
+}
+
+class DeviceBootScope implements Scope {
+
+	@Override public boolean isMarked(@NonNull final String tag) {
+		return PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE) != null;
+	}
+
+	@Override public boolean mark(@NonNull final String tag) {
+		final Intent intent = makeIntent(tag);
+		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, intent, FLAG_NO_CREATE);
+		PendingIntent.getBroadcast(mContext, 0, intent, FLAG_UPDATE_CURRENT);
+		return mark != null;
+	}
+
+	@Override public void markOnly(@NonNull final String tag) {
+		PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_UPDATE_CURRENT);
+	}
+
+	@Override public boolean unmark(@NonNull final String tag) {
+		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE);
+		if (mark == null) return false;
+		mark.cancel();
+		return true;
+	}
+
+	private Intent makeIntent(final String tag) {
+		return new Intent("SCOPE:" + tag).setPackage(mContext.getPackageName());
+	}
+
+	DeviceBootScope(final Context context) {
+		mContext = context;
+	}
+
+	private final Context mContext;
 }
 
 class ProcessScope extends MemoryBasedScopeImpl {
