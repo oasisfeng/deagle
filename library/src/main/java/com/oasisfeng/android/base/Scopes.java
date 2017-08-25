@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 import com.oasisfeng.android.base.Scopes.Scope;
@@ -29,7 +30,7 @@ public class Scopes {
 
         boolean isMarked(@NonNull String tag);
         /** @return whether it is NOT YET marked before */
-        boolean mark(@NonNull String tag);
+        @CheckResult boolean mark(@NonNull String tag);
 		void markOnly(@NonNull String tag);
 		/** @return whether it is marked before */
         boolean unmark(@NonNull String tag);
