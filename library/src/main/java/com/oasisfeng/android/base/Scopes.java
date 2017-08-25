@@ -28,11 +28,11 @@ public class Scopes {
     }
 
 	/** Throughout the whole lifecycle of this installed app, until uninstalled. (can also be extended to re-installation if configured with backup) */
-    public static Scope app(final Context context) { return new AppScope(context); }
+    public static Scope app(final Context context) { return new AppInstallationScope(context); }
 	/** Throughout the current version (code) of this installed app, until the version changes. */
-    public static Scope version(final Context context) { return new VersionScope(context); }
+    public static Scope version(final Context context) { return new PackageVersionScope(context); }
 	/** Throughout the current update of this installed app, until being updated by in-place re-installation. */
-	public static Scope update(final Context context) { return new UpdateScope(context); }
+	public static Scope update(final Context context) { return new PackageUpdateScope(context); }
 	/** Throughout the current running process of this installed app, until being terminated. */
     public static Scope process() { return ProcessScope.mSingleton; }
 	/** Throughout the time-limited session within current running process of this installed app, until session time-out. */
@@ -95,11 +95,11 @@ class MemoryBasedScopeImpl implements Scope {
     final Set<String> mSeen = new HashSet<>();
 }
 
-class UpdateScope extends SharedPrefsBasedScopeImpl {
+class PackageUpdateScope extends SharedPrefsBasedScopeImpl {
 
 	private static final String KPrefsKeyLastUpdateTime = "update-time";
 
-	UpdateScope(final Context context) {
+	PackageUpdateScope(final Context context) {
 		super(resetIfLastUpdateTimeChanged(context, CrossProcessSharedPreferences.get(context, "update.scope")));
 	}
 
@@ -111,11 +111,11 @@ class UpdateScope extends SharedPrefsBasedScopeImpl {
 	}
 }
 
-class VersionScope extends SharedPrefsBasedScopeImpl {
+class PackageVersionScope extends SharedPrefsBasedScopeImpl {
 
 	private static final String KPrefsKeyVersionCode = "version-code";
 
-    VersionScope(final Context context) {
+    PackageVersionScope(final Context context) {
         super(resetIfVersionChanges(context, CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameVersionScope)));
     }
 
@@ -127,9 +127,9 @@ class VersionScope extends SharedPrefsBasedScopeImpl {
     }
 }
 
-class AppScope extends SharedPrefsBasedScopeImpl {
+class AppInstallationScope extends SharedPrefsBasedScopeImpl {
 
-	AppScope(final Context context) { super(CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameAppScope)); }
+	AppInstallationScope(final Context context) { super(CrossProcessSharedPreferences.get(context, Scopes.KPrefsNameAppScope)); }
 }
 
 class SharedPrefsBasedScopeImpl implements Scope {
