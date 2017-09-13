@@ -25,18 +25,24 @@
 package com.oasisfeng.android.util;
 
 /**
- * Represents an operation that accepts a single input argument and returns no
- * result. Unlike most other functional interfaces, {@code Consumer} is expected
- * to operate via side-effects.
+ * Represents a function that accepts one argument and produces a result.
  *
- * @param <T> the type of the input to the operation
+ * <p>This is a <a href="package-summary.html">functional interface</a>
+ * whose functional method is {@link #apply(Object)}.
+ *
+ * @param <T> the type of the input to the function
+ * @param <R> the type of the result of the function
+ *
+ * @since 1.8
  */
-public interface Consumer<T> {
+public interface Function<T, R> {
 
 	/**
-	 * Performs this operation on the given argument.
+	 * Applies this function to the given argument.
 	 *
-	 * @param t the input argument
+	 * @param t the function argument
+	 * @return the function result
 	 */
-	void accept(T t);
+	R apply(T var1);
 }
+

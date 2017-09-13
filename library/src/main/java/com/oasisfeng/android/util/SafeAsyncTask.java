@@ -1,5 +1,6 @@
 package com.oasisfeng.android.util;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -23,6 +24,20 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
 
+	@SuppressLint("StaticFieldLeak")	// AsyncTask here is actually "static", but the two callbacks are probably not.
+	public static <T> void execute(final Activity activity, final Function<Activity, T> background, final Consumer<T> finish) {
+		final WeakReference<Activity> reference = new WeakReference<>(activity);
+		new AsyncTask<Void, Void, T>() {
+			@Override protected T doInBackground(final Void... voids) {
+				final Activity activity = ifActive(reference.get());
+				return activity != null ? background.apply(activity) : null;
+			}
+
+			@Override protected void onPostExecute(final T result) {
+				finish.accept(result);
+			}
+		}.execute();
+	}
 	public static void execute(final Activity activity, final Consumer<Activity> runnable) {
 		final WeakReference<Activity> reference = new WeakReference<>(activity);
 		AsyncTask.execute(new SafeTask<>(new Supplier<Activity>() { @Override public Activity get() {
