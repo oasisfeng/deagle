@@ -42,6 +42,7 @@ public class Scopes {
     public static Scope version(final Context context) { return new PackageVersionScope(context); }
 	/** Throughout the current update of this installed app, until being updated by in-place re-installation. */
 	public static Scope update(final Context context) { return new PackageUpdateScope(context); }
+	/** Throughout this boot-up cycle of the device, until shutdown (or reboot). This scope is synchronized across processes. */
 	public static Scope boot(final Context context) { return new DeviceBootScope(context); }
 	/** Throughout the current running process of this installed app, until being terminated. */
     public static Scope process() { return ProcessScope.mSingleton; }
