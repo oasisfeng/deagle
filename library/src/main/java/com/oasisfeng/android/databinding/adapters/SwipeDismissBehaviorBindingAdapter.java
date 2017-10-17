@@ -13,8 +13,9 @@ import android.view.View;
  */
 public class SwipeDismissBehaviorBindingAdapter {
 
-	@BindingAdapter(value = {"swipeDismissible", "dragDismissDistance"}, requireAll = false)
-	public static void setSwipeDismissBehavior(final View view, final boolean dismissible, final @Nullable Float drag_dismiss_distance) {
+	@BindingAdapter(value = {"swipeDismissible", "dragDismissDistance", "onDismiss"}, requireAll = false)
+	public static void setSwipeDismissBehavior(final View view, final boolean dismissible, final @Nullable Float drag_dismiss_distance,
+											   final Runnable dismiss_callback) {
 		final CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) view.getLayoutParams();
 		final CoordinatorLayout.Behavior behavior = params.getBehavior();
 		if (! dismissible) {
@@ -30,6 +31,7 @@ public class SwipeDismissBehaviorBindingAdapter {
 			@Override public void onDismiss(final View view) {
 				view.setVisibility(View.GONE);
 				view.setAlpha(1);		// Reset the alpha after fade-out for possible later reuse of the card view.
+				if (dismiss_callback != null) dismiss_callback.run();
 			}
 
 			@Override public void onDragStateChanged(final int state) {}
