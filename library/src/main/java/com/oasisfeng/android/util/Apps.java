@@ -1,18 +1,25 @@
 package com.oasisfeng.android.util;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.support.annotation.CheckResult;
 import android.util.Log;
 
+import com.oasisfeng.android.google.GooglePlayStore;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static android.content.Intent.CATEGORY_LAUNCHER;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.M;
@@ -31,6 +38,15 @@ public class Apps {
             return true;
         } catch (final NameNotFoundException e) {
             return false;
+        }
+    }
+
+    public void showInMarket(final String pkg) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + pkg));
+        try {
+            mContext.startActivity(intent);
+        } catch(final ActivityNotFoundException e) {
+            GooglePlayStore.showApp(mContext, pkg);     // This will open browser to open Google Play Store.
         }
     }
 
@@ -68,7 +84,17 @@ public class Apps {
         }
         return SDK_INT >= KITKAT && (app.flags & FLAG_PRIVILEGED) != 0;
     }
-    private static final int FLAG_PRIVILEGED = 1<<30;
+
+    public boolean launch(final String pkg) {
+        try {
+            mContext.startActivity(new Intent(Intent.ACTION_MAIN).addCategory(CATEGORY_LAUNCHER).setPackage(pkg).addFlags(FLAG_ACTIVITY_NEW_TASK));
+            return true;
+        } catch (final ActivityNotFoundException e) {
+            return false;
+        }
+    }
+
+	private static final int FLAG_PRIVILEGED = 1<<30;
     private static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;        // ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
 
     public static boolean isPrivileged(final PackageManager pm, final int uid) {
