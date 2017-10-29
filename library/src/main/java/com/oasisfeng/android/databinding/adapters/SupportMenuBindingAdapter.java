@@ -1,5 +1,6 @@
 package com.oasisfeng.android.databinding.adapters;
 
+import android.content.Context;
 import android.databinding.BindingAdapter;
 import android.support.annotation.MenuRes;
 import android.support.v7.view.menu.MenuBuilder;
@@ -21,7 +22,7 @@ public class SupportMenuBindingAdapter {
 
 	public interface MenuAware {
 		void onBindMenu(final Menu menu);
-		void onShowOverflowMenu(final Menu menu);
+		void onShowOverflowMenu(final Context context, final Menu menu);
 	}
 
 	@BindingAdapter(value = {"menu", "menuAware"}, requireAll = false)
@@ -34,7 +35,7 @@ public class SupportMenuBindingAdapter {
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
 					if (subMenu != null) return false;		// Null to indicate overflow menu.
 					final Object tag = toolbar.getTag(R.id.menuAware);
-					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(toolbar.getMenu());
+					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(toolbar.getContext(), toolbar.getMenu());
 					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
 				}
@@ -64,7 +65,7 @@ public class SupportMenuBindingAdapter {
 				@Override public boolean onOpenSubMenu(final MenuBuilder subMenu) {
 					if (subMenu != null) return false;		// Null to indicate overflow menu.
 					final Object tag = amv.getTag(R.id.menuAware);
-					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(amv.getMenu());
+					if ((tag instanceof MenuAware)) ((MenuAware) tag).onShowOverflowMenu(amv.getContext(), amv.getMenu());
 					else Log.e(TAG, "MenuAware tag is overridden by: " + tag);
 					return false;
 				}
