@@ -5,6 +5,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.oasisfeng.android.util.Supplier;
+import com.oasisfeng.android.util.Suppliers;
+import com.oasisfeng.deagle.BuildConfig;
+
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -33,6 +37,8 @@ import java.util.Comparator;
 public class Hack {
 
 	public static Class<?> ANY_TYPE = $.class; private static class $ {}
+	// TODO: Also lazy-resolve class by name
+	private static final boolean LAZY_RESOLVE = ! BuildConfig.DEBUG;	// Lazy in production if fallback is provided, to reduce initialization cost.
 
 	public static class AssertionException extends Throwable {
 
@@ -238,6 +244,7 @@ public class Hack {
 		}
 
 		private <T> HackedField<C, T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
+			if (LAZY_RESOLVE && fallback) return new LazyHackedField<>(this, type, fallback_value);
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
@@ -272,6 +279,7 @@ public class Hack {
 		}
 
 		private <T> HackedTargetField<T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
+			if (LAZY_RESOLVE && fallback) return new LazyHackedField<>(this, type, fallback_value);
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field).onTarget(null) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
@@ -347,10 +355,36 @@ public class Hack {
 		@Override public Class<T> getType() { return mType; }
 		@Override public boolean isAbsent() { return true; }
 
-		private FallbackField(final Class<T> type, final T value) { mType = type; mValue = value; }
+		FallbackField(final Class<T> type, final T value) { mType = type; mValue = value; }
 
 		private final Class<T> mType;
 		private final T mValue;
+	}
+
+	private static class LazyHackedField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
+
+		@Override public T get(final C instance) { return delegate.get().get(instance); }
+		@Override public void set(final C instance, final T value) { delegate.get().set(instance, value); }
+		@Override public HackedTargetField<T> on(final C target) { return delegate.get().on(target); }
+		@Override public T get() { return delegate.get().get(null); }
+		@Override public void set(final T value) { delegate.get().set(null, value); }
+		@Override public Class<T> getType() { return delegate.get().getType(); }
+		@Override public boolean isAbsent() { return delegate.get().isAbsent(); }
+
+		LazyHackedField(final FieldToHack<C> field, final Class<T> type, final T fallback_value) {
+			mField = field;
+			mType = type;
+			mFallbackValue = fallback_value;
+		}
+
+		private final FieldToHack<C> mField;
+		private final Class<T> mType;
+		private final T mFallbackValue;
+
+		private final Supplier<HackedField<C, T>> delegate = Suppliers.memoize(new Supplier<HackedField<C, T>>() { @Override public HackedField<C, T> get() {
+			final Field field = LazyHackedField.this.mField.findField(mType);
+			return field != null ? new HackedFieldImpl<C, T>(field) : new FallbackField<C, T>(mType, mFallbackValue);
+		}});
 	}
 
 	public static class HackedTargetFieldImpl<T> implements HackedTargetField<T> {
@@ -369,9 +403,7 @@ public class Hack {
 			} catch (final IllegalAccessException ignored) {}			// Should never happen
 		}
 
-		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() {
-			return (Class<T>) mField.getType();
-		}
+		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() { return (Class<T>) mField.getType(); }
 		@Override public boolean isAbsent() { return mField == null; }
 
 		HackedTargetFieldImpl(final Field field, final @Nullable Object instance) {
@@ -438,7 +470,6 @@ public class Hack {
 	public static class CheckedHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
 
 		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
-		@SuppressWarnings("unchecked") public Class<R> getReturnType() { return (Class<R>) mInvokable.getReturnType(); }
 		protected HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
 		/** Whether this hack is absent, thus will be fallen-back when invoked */
 		public boolean isAbsent() { return mInvokable instanceof FallbackInvokable; }
@@ -504,7 +535,6 @@ public class Hack {
 
 	interface Invokable<C> {
 		Object invoke(C target, Object[] args) throws InvocationTargetException, IllegalAccessException, InstantiationException;
-		Class<?> getReturnType();
 	}
 
 	private static class HackedMethodImpl<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> implements NonNullHackedMethod<R, C, T1, T2, T3> {
@@ -563,44 +593,48 @@ public class Hack {
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public HackedMethod0<R, C, T1, T2, T3> withoutParams() {
-			final Invokable<C> invokable = findInvokable();
+			final Invokable<C> invokable = buildInvokable();
 			return invokable == null ? null : new HackedMethod0<R, C, T1, T2, T3>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(final Class<A1> type) {
-			final Invokable invokable = findInvokable(type);
+			final Invokable invokable = buildInvokable(type);
 			return invokable == null ? null : new HackedMethod1<R, C, T1, T2, T3, A1>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2> HackedMethod2<R, C, T1, T2, T3, A1, A2> withParams(final Class<A1> type1, final Class<A2> type2) {
-			final Invokable invokable = findInvokable(type1, type2);
+			final Invokable invokable = buildInvokable(type1, type2);
 			return invokable == null ? null : new HackedMethod2<R, C, T1, T2, T3, A1, A2>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3> HackedMethod3<R, C, T1, T2, T3, A1, A2, A3> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3) {
-			final Invokable invokable = findInvokable(type1, type2, type3);
+			final Invokable invokable = buildInvokable(type1, type2, type3);
 			return invokable == null ? null : new HackedMethod3<R, C, T1, T2, T3, A1, A2, A3>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3, A4> HackedMethod4<R, C, T1, T2, T3, A1, A2, A3, A4> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4) {
-			final Invokable invokable = findInvokable(type1, type2, type3, type4);
+			final Invokable invokable = buildInvokable(type1, type2, type3, type4);
 			return invokable == null ? null : new HackedMethod4<R, C, T1, T2, T3, A1, A2, A3, A4>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3, A4, A5> HackedMethod5<R, C, T1, T2, T3, A1, A2, A3, A4, A5> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4, final Class<A5> type5) {
-			final Invokable invokable = findInvokable(type1, type2, type3, type4, type5);
+			final Invokable invokable = buildInvokable(type1, type2, type3, type4, type5);
 			return invokable == null ? null : new HackedMethod5<R, C, T1, T2, T3, A1, A2, A3, A4, A5>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public HackedMethodN<R, C, T1, T2, T3> withParams(final Class<?>... types) {
-			final Invokable invokable = findInvokable(types);
+			final Invokable invokable = buildInvokable(types);
 			return invokable == null ? null : new HackedMethodN<R, C, T1, T2, T3>(invokable);
+		}
+
+		private @Nullable Invokable<C> buildInvokable(final Class<?>... param_types) {
+			return LAZY_RESOLVE && mHasFallback ? new LazyInvokable<>(this, param_types) : findInvokable(param_types);
 		}
 
 		private @Nullable Invokable<C> findInvokable(final Class<?>... param_types) {
@@ -685,8 +719,6 @@ public class Hack {
 			return method.invoke(target, args);
 		}
 
-		@Override public Class<?> getReturnType() { return method.getReturnType(); }
-
 		@Override public String toString() { return method.toString(); }
 
 		private final Method method;
@@ -699,10 +731,6 @@ public class Hack {
 		public Object invoke(final C target, final Object[] args) throws InstantiationException,
 				IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			return constructor.newInstance(args);
-		}
-
-		@Override public Class<?> getReturnType() {
-			return constructor.getDeclaringClass();
 		}
 
 		@Override public String toString() { return constructor.toString(); }
@@ -718,11 +746,23 @@ public class Hack {
 			return mValue;
 		}
 
-		@Override public Class<?> getReturnType() {
-			return mValue == null ? Object.class : mValue.getClass();
+		private final @Nullable Object mValue;
+	}
+
+	private static class LazyInvokable<C> implements Invokable<C> {
+
+		LazyInvokable(final HackedMethodImpl<?, C, ?, ?, ?> method, final Class<?>[] param_types) {
+			mMethod = method;
+			mParamTypes = param_types;
 		}
 
-		private final @Nullable Object mValue;
+		@Override public Object invoke(final C target, final Object[] args) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+			//noinspection ConstantConditions, since fallback is provided
+			return mMethod.findInvokable(mParamTypes).invoke(target, args);
+		}
+
+		private final HackedMethodImpl<?, C, ?, ?, ?> mMethod;
+		private final Class<?>[] mParamTypes;
 	}
 
 	public static class HackedClass<C> {
@@ -745,8 +785,7 @@ public class Hack {
 
 		public @CheckResult NonNullHackedInvokable<C, Void, Unchecked, Unchecked, Unchecked> constructor() {
 			final HackedMethodImpl<C, Void, Unchecked, Unchecked, Unchecked> constructor = new HackedMethodImpl<>(mClass, null, 0);
-			constructor.fallbackReturning(null);	// Always fallback to null.
-			return constructor;
+			return constructor.fallbackReturning(null);	// Always fallback to null.
 		}
 		
 		HackedClass(final Class<C> clazz) { mClass = clazz; }
