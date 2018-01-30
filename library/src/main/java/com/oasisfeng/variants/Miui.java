@@ -57,12 +57,7 @@ public class Miui {
 		}
 	}
 
-	public static boolean startAppPermissionSettings(final Context context, final String pkg) {
-		try {
-			context.startActivity(new Intent("miui.intent.action.APP_PERM_EDITOR").putExtra("extra_pkgname", pkg));
-			return true;
-		} catch (final ActivityNotFoundException e) {
-			return false;
-		}
+	public static Intent buildAppPermissionSettingsIntent(final String pkg) {
+		return new Intent("miui.intent.action.APP_PERM_EDITOR").putExtra("extra_pkgname", pkg);
 	}
 }
