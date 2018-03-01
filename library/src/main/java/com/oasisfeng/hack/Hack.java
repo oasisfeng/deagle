@@ -19,6 +19,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 /**
  * Java reflection helper optimized for hacking non-public APIs.
  * The core design philosophy behind is compile-time consistency enforcement.
@@ -33,7 +35,7 @@ import java.util.Comparator;
  *
  * @author Oasis
  */
-@SuppressWarnings({"Convert2Lambda", "WeakerAccess", "unused"})
+@ParametersAreNonnullByDefault @SuppressWarnings({"Convert2Lambda", "WeakerAccess", "unused"})
 public class Hack {
 
 	public static Class<?> ANY_TYPE = $.class; private static class $ {}
@@ -46,7 +48,7 @@ public class Hack {
 		private Field mHackedField;
 		private Method mHackedMethod;
 		private String mHackedFieldName;
-		private String mHackedMethodName;
+		private @Nullable String mHackedMethodName;
 		private Class<?>[] mParamTypes;
 
 		AssertionException(final String e) { super(e); }
@@ -237,13 +239,13 @@ public class Hack {
 		}
 
 		/** Fallback to the given value if this field is unavailable at runtime */
-		public @NonNull <T> HackedField<C, T> fallbackTo(final T value) {
+		public @NonNull <T> HackedField<C, T> fallbackTo(final @Nullable T value) {
 			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
 			//noinspection ConstantConditions
 			return ofType(type, true, value);
 		}
 
-		private <T> HackedField<C, T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
+		private <T> HackedField<C, T> ofType(final Class<T> type, final boolean fallback, final @Nullable T fallback_value) {
 			if (LAZY_RESOLVE && fallback) return new LazyHackedField<>(this, type, fallback_value);
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
@@ -272,13 +274,13 @@ public class Hack {
 		}
 
 		/** Fallback to the given value if this field is unavailable at runtime */
-		public @NonNull <T> HackedTargetField<T> fallbackTo(final T value) {
+		public @NonNull <T> HackedTargetField<T> fallbackTo(final @Nullable T value) {
 			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
 			//noinspection ConstantConditions
 			return ofType(type, true, value);
 		}
 
-		private <T> HackedTargetField<T> ofType(final Class<T> type, final boolean fallback, final T fallback_value) {
+		private <T> HackedTargetField<T> ofType(final Class<T> type, final boolean fallback, final @Nullable T fallback_value) {
 			if (LAZY_RESOLVE && fallback) return new LazyHackedField<>(this, type, fallback_value);
 			final Field field = findField(type);
 			return field != null ? new HackedFieldImpl<C, T>(field).onTarget(null) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
@@ -292,7 +294,7 @@ public class Hack {
 
 	public interface HackedField<C, T> {
 		T get(C instance);
-		void set(C instance, T value);
+		void set(C instance, @Nullable T value);
 		HackedTargetField<T> on(C target);
 		Class<T> getType();
 		boolean isAbsent();
@@ -308,7 +310,6 @@ public class Hack {
 	private static class HackedFieldImpl<C, T> implements HackedField<C, T> {
 
 		@Override public HackedTargetFieldImpl<T> on(final C target) {
-			if (target == null) throw new IllegalArgumentException("target is null");
 			return onTarget(target);
 		}
 
@@ -327,7 +328,7 @@ public class Hack {
 		 * 
 		 * <p>No type enforced here since most type mismatch can be easily tested and exposed early.</p>
 		 */
-		@Override public void set(final C instance, final T value) {
+		@Override public void set(final C instance, final @Nullable T value) {
 			try {
 				mField.set(instance, value);
 			} catch (final IllegalAccessException ignored) {}	// Should never happen
@@ -348,14 +349,14 @@ public class Hack {
 	private static class FallbackField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
 
 		@Override public T get(final C instance) { return mValue; }
-		@Override public void set(final C instance, final T value) {}
+		@Override public void set(final C instance, final @Nullable T value) {}
 		@Override public T get() { return mValue; }
 		@Override public void set(final T value) {}
 		@Override public HackedTargetField<T> on(final C target) { return this; }
 		@Override public Class<T> getType() { return mType; }
 		@Override public boolean isAbsent() { return true; }
 
-		FallbackField(final Class<T> type, final T value) { mType = type; mValue = value; }
+		FallbackField(final Class<T> type, final @Nullable T value) { mType = type; mValue = value; }
 
 		private final Class<T> mType;
 		private final T mValue;
@@ -364,14 +365,14 @@ public class Hack {
 	private static class LazyHackedField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
 
 		@Override public T get(final C instance) { return delegate.get().get(instance); }
-		@Override public void set(final C instance, final T value) { delegate.get().set(instance, value); }
+		@Override public void set(final C instance, final @Nullable T value) { delegate.get().set(instance, value); }
 		@Override public HackedTargetField<T> on(final C target) { return delegate.get().on(target); }
 		@Override public T get() { return delegate.get().get(null); }
 		@Override public void set(final T value) { delegate.get().set(null, value); }
 		@Override public Class<T> getType() { return delegate.get().getType(); }
 		@Override public boolean isAbsent() { return delegate.get().isAbsent(); }
 
-		LazyHackedField(final FieldToHack<C> field, final Class<T> type, final T fallback_value) {
+		LazyHackedField(final FieldToHack<C> field, final Class<T> type, final @Nullable T fallback_value) {
 			mField = field;
 			mType = type;
 			mFallbackValue = fallback_value;
@@ -390,7 +391,6 @@ public class Hack {
 	public static class HackedTargetFieldImpl<T> implements HackedTargetField<T> {
 
 		@Override public T get() {
-			if (mField == null) return mFallbackValue;
 			try {
 				@SuppressWarnings("unchecked") final T value = (T) mField.get(mInstance);
 				return value;
@@ -398,13 +398,13 @@ public class Hack {
 		}
 
 		@Override public void set(final T value) {
-			if (mField != null) try {
+			try {
 				mField.set(mInstance, value);
 			} catch (final IllegalAccessException ignored) {}			// Should never happen
 		}
 
 		@Override @SuppressWarnings("unchecked") public @Nullable Class<T> getType() { return (Class<T>) mField.getType(); }
-		@Override public boolean isAbsent() { return mField == null; }
+		@Override public boolean isAbsent() { return false; }
 
 		HackedTargetFieldImpl(final Field field, final @Nullable Object instance) {
 			mField = field;
@@ -413,7 +413,6 @@ public class Hack {
 
 		private final Field mField;
 		private final Object mInstance;		// Instance type is already checked
-		private @Nullable T mFallbackValue;
 	}
 
 	public interface HackedInvokable<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
@@ -448,7 +447,7 @@ public class Hack {
 		/** Optional */
 		@CheckResult <RR> HackedMethod<RR, C, T1, T2, T3> returning(Class<RR> type);
 		/** Fallback to the given value if this field is unavailable at runtime. (Optional) */
-		@CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(R return_value);
+		@CheckResult NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(@Nullable R return_value);
 
 		@CheckResult <TT1 extends Throwable> HackedMethod<R, C, TT1, T2, T3> throwing(Class<TT1> type);
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedMethod<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
@@ -552,7 +551,7 @@ public class Hack {
 			return casted;
 		}
 
-		@Override public NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(final R value) {
+		@Override public NonNullHackedMethod<R, C, T1, T2, T3> fallbackReturning(final @Nullable R value) {
 			mFallbackReturnValue = value; mHasFallback = true; return this;
 		}
 
@@ -665,12 +664,17 @@ public class Hack {
 					ex_types = ctor.getExceptionTypes();
 				}
 			} catch (final NoSuchMethodException e) {
-				fail(new AssertionException(e).setHackedClass(mClass).setHackedMethodName(mName).setParamTypes(param_types));
+				final AssertionException failure = new AssertionException(e).setHackedClass(mClass).setParamTypes(param_types);
+				if (mName != null) failure.setHackedMethodName(mName);
+				fail(failure);
 				return mHasFallback ? new FallbackInvokable<C>(mFallbackReturnValue) : null;
 			}
 
-			if (mModifiers > 0 && (modifiers & mModifiers) != mModifiers)
-				fail(new AssertionException(invokable + " does not match modifiers: " + mModifiers).setHackedMethodName(mName));
+			if (mModifiers > 0 && (modifiers & mModifiers) != mModifiers) {
+				final AssertionException failure = new AssertionException(invokable + " does not match modifiers: " + mModifiers);
+				if (mName != null) failure.setHackedMethodName(mName);
+				fail(failure);
+			}
 
 			if (mThrowTypes == null && ex_types.length > 0 || mThrowTypes != null && mThrowTypes.length > 0 && ex_types.length == 0) {
 				fail(new AssertionException("Checked exception(s) not match: " + invokable));
@@ -742,7 +746,7 @@ public class Hack {
 
 		FallbackInvokable(final @Nullable Object value) { mValue = value; }
 
-		@Override public Object invoke(final C target, final Object[] args) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+		@Override public Object invoke(final C target, final Object[] args) {
 			return mValue;
 		}
 
@@ -860,7 +864,7 @@ public class Hack {
 		static class Hacks {
 
 			static {
-				Hack.setAssertionFailureHandler(new AssertionFailureHandler() { @Override public void onAssertionFailure(final AssertionException failure) {
+				Hack.setAssertionFailureHandler(new AssertionFailureHandler() { @Override public void onAssertionFailure(@NonNull final AssertionException failure) {
 					Log.w("Demo", "Partially incompatible: " + failure.getDebugInfo());
 					// Report the incompatibility silently.
 					//...
@@ -895,7 +899,7 @@ public class Hack {
 
 		Demo(final int flags) {}
 
-		private void methodThrows() throws InterruptedException, IOException {}
+		@SuppressWarnings("RedundantThrows") private void methodThrows() throws InterruptedException, IOException {}
 		static boolean staticMethod(final int a, final String c) { return false; }
 		boolean mField;
 		static String sField;

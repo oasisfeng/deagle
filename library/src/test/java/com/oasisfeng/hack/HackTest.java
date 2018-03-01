@@ -1,5 +1,7 @@
 package com.oasisfeng.hack;
 
+import android.support.annotation.NonNull;
+
 import com.oasisfeng.hack.Hack.Unchecked;
 
 import junit.framework.TestCase;
@@ -137,7 +139,7 @@ public class HackTest extends TestCase {
 
 	@Override protected void setUp() throws Exception {
 		super.setUp();
-		Hack.setAssertionFailureHandler(new Hack.AssertionFailureHandler() { @Override public void onAssertionFailure(final Hack.AssertionException failure) {
+		Hack.setAssertionFailureHandler(new Hack.AssertionFailureHandler() { @Override public void onAssertionFailure(@NonNull final Hack.AssertionException failure) {
 			mFailure = failure;
 		}});
 		mFailure = new Hack.AssertionException(new IOException());
