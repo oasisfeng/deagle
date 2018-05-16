@@ -1,5 +1,7 @@
 package com.oasisfeng.android.databinding.recyclerview;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableList;
 import android.databinding.ViewDataBinding;
@@ -31,14 +33,18 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<BindingR
 	@Override public void onBindViewHolder(final ViewHolder holder, final int position) {
 		final T item = mItems.get(position);
 		mItemBinder.onBind(mBinding, item, holder.binding);
+		holder.binding.setLifecycleOwner(mLifecycleOwner);
 		holder.binding.executePendingBindings();
 	}
 
 	@Override public void onAttachedToRecyclerView(final RecyclerView view) {
 		mBinding = DataBindingUtil.findBinding(view);
+		final Context context = view.getContext();
+		if (context instanceof LifecycleOwner) mLifecycleOwner = (LifecycleOwner) context;
 	}
 
 	@Override public void onDetachedFromRecyclerView(final RecyclerView recyclerView) {
+		mLifecycleOwner = null;
 		mBinding = null;
 	}
 
@@ -55,6 +61,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<BindingR
 	private final ItemBinder<T> mItemBinder;
 	private final LayoutSelector<T> mLayoutSelector;
 	private transient LayoutInflater mInflater;
+	private LifecycleOwner mLifecycleOwner;
 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 
