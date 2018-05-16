@@ -1,8 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -15,11 +14,12 @@ android {
 }
 
 dependencies {
-    compile 'com.google.code.findbugs:jsr305:2.0.1'
-    compile 'com.android.support:design:25.1.0'             // class BottomSheetBindingAdapter
-    compile 'com.android.support:appcompat-v7:25.1.0'       // class Dialogs
-    compile 'com.android.support:customtabs:25.1.0'         // class WebContent
-    compile 'com.android.support:recyclerview-v7:25.1.0'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
+    implementation 'com.google.code.findbugs:jsr305:2.0.1'
+    implementation 'com.android.support:design:26.1.0'             // class BottomSheetBindingAdapter
+    implementation 'com.android.support:appcompat-v7:26.1.0'       // class Dialogs
+    implementation 'com.android.support:customtabs:26.1.0'         // class WebContent
+    implementation 'com.android.support:recyclerview-v7:26.1.0'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
+    implementation 'android.arch.lifecycle:livedata-core:1.1.0'    // package com.oasisfeng.androidx.lifecycle
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
