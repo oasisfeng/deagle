@@ -779,11 +779,11 @@ public class Hack {
 			return new StaticFieldToHack<>(mClass, name, Modifier.STATIC);
 		}
 
-		public @CheckResult NonNullHackedMethod<Void, C, Unchecked, Unchecked, Unchecked> method(final String name) {
+		public @CheckResult HackedMethod<Void, C, Unchecked, Unchecked, Unchecked> method(final String name) {
 			return new HackedMethodImpl<>(mClass, name, 0);
 		}
 
-		public @CheckResult NonNullHackedMethod<Void, Void, Unchecked, Unchecked, Unchecked> staticMethod(final String name) {
+		public @CheckResult HackedMethod<Void, Void, Unchecked, Unchecked, Unchecked> staticMethod(final String name) {
 			return new HackedMethodImpl<>(mClass, name, Modifier.STATIC);
 		}
 

@@ -70,7 +70,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView.Adapter<BindingR
 			this.binding = binding;
 		}
 
-		final ViewDataBinding binding;
+		public final ViewDataBinding binding;
 	}
 
 	private static class OnListChangedCallback<T extends ObservableList> extends ObservableList.OnListChangedCallback<T> {

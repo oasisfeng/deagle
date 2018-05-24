@@ -32,27 +32,32 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 	/** @see SortedList#endBatchedUpdates() */
 	public void endBatchedUpdates() { mList.endBatchedUpdates(); }
 
+	/** @see SortedList#updateItemAt(int, Object) */
 	public void updateItemAt(final int index, final T item) {
 		mList.updateItemAt(index, item);
 	}
 
+	/** @see SortedList#add(Object) */
 	@Override public boolean add(final T item) {
 		mList.add(item);
 		return true;	// Even if item is the same, it is still replaced in the list.
 	}
 
+	/** @see SortedList#addAll(Collection) */
 	@Override public boolean addAll(final @NonNull Collection<? extends T> c) {
 		@SuppressWarnings("unchecked") final Collection<T> casted = (Collection<T>) c;
 		mList.addAll(casted);
 		return true;
 	}
 
+	/** @see SortedList#updateItemAt(int, Object) */
 	@Override public T set(final int location, final T object) {
 		final T old = mList.get(location);
 		mList.updateItemAt(location, cast(object));
 		return old;
 	}
 
+	/** @see SortedList#indexOf(Object) */
 	@Override public int indexOf(final Object object) {
 		try {
 			return mList.indexOf(cast(object));
@@ -61,6 +66,7 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 		}
 	}
 
+	/** @see SortedList#remove(Object) */
 	@Override public boolean remove(final Object object) {
 		try {
 			return mList.remove(cast(object));
@@ -68,7 +74,6 @@ public class ObservableSortedList<T extends ObservableSortedList.Sortable<? supe
 			return false;
 		}
 	}
-
 
 	@SuppressWarnings("unchecked") private T cast(final Object object) { return (T) object; }
 

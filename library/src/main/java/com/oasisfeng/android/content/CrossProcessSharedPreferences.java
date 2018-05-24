@@ -158,7 +158,7 @@ public class CrossProcessSharedPreferences {
 		@Override public boolean contains(final String key) { return mDelegate.contains(key); }
 		@Override public Editor edit() { return mDelegate.edit(); }
 
-		@SuppressLint("CommitPrefEdits") @Override public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
+		@SuppressLint("ApplySharedPref") @Override public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
 			Log.d(TAG, key + " changed in shared preferences " + mName + ", broadcast this change to other processes.");
 			sharedPreferences.edit().commit();		// Force commit to avoid reloading ahead of flushing.
 			final Intent intent = new Intent(KActionSharedPrefsUpdated).putExtra(KExtraName, mName).putExtra(KExtraKey, key).putExtra(KExtraPid, Process.myPid());
