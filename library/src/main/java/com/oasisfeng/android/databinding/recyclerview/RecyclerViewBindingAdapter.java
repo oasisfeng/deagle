@@ -4,6 +4,7 @@ import android.databinding.BindingAdapter;
 import android.databinding.ObservableList;
 import android.support.annotation.LayoutRes;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 
 /**
  * Binding adapters for RecyclerView.
@@ -23,5 +24,15 @@ public class RecyclerViewBindingAdapter {
 		recycler_view.setAdapter(new BindingRecyclerViewAdapter<>(items, binder, new LayoutSelector<T>() {
 			@Override public int getLayoutRes(final T model) { return item_layout; }
 		}));
+	}
+
+	@BindingAdapter({"item_touch"})
+	public static void setItemTouchHelper(final RecyclerView view, final ItemTouchHelper helper) {
+		for (int i = 0;; i ++) try {
+			final RecyclerView.ItemDecoration decoration = view.getItemDecorationAt(i);
+			if (decoration == null) break;								// Null is returned on RecyclerView library 27+
+			if (decoration == helper) return;
+		} catch (final IndexOutOfBoundsException ignored) { break; }	// IndexOutOfBoundsException is thrown on RecyclerView library prior to 27.
+		helper.attachToRecyclerView(view);
 	}
 }
