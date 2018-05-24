@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.support.annotation.CheckResult;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.oasisfeng.android.google.GooglePlayStore;
@@ -42,7 +43,14 @@ public class Apps {
     }
 
     public void showInMarket(final String pkg) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + pkg));
+        showInMarket(pkg, null, null);
+    }
+
+    public void showInMarket(final String pkg, final @Nullable String utm_source, final @Nullable String utm_campaign) {
+        final StringBuilder uri = new StringBuilder("market://details?id=").append(pkg);
+        if (utm_source != null) uri.append("&utm_source=").append(utm_source);
+        if (utm_campaign != null) uri.append("&utm_campaign=").append(utm_campaign);
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()));
         try {
             mContext.startActivity(intent);
         } catch(final ActivityNotFoundException e) {
