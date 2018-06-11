@@ -20,7 +20,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 		@InverseBindingMethod(type = BottomNavigationView.class, attribute = "selectedItemId", event = "android:selectedItemIdAttrChanged"))
 public class BottomNavigationViewBindingAdapter {
 
-	@BindingAdapter(value = {"android:onNavigationItemSelected", "android:selectedItemIdAttrChanged" }, requireAll = false)
+	@BindingAdapter(value = {"onNavigationItemSelected", "selectedItemIdAttrChanged" }, requireAll = false)
 	public static void setOnItemSelectedListener(final BottomNavigationView view, final @Nullable OnNavigationItemSelectedListener listener,
 												 final @Nullable InverseBindingListener notifier) {
 		if (listener == null && notifier == null) view.setOnNavigationItemSelectedListener(null);

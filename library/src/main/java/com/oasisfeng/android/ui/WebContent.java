@@ -8,7 +8,6 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
@@ -101,9 +100,7 @@ public class WebContent {
 	}
 
 	private static void startActivity(final Context context, final Intent intent, final @Nullable Bundle activity_options) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-			context.startActivity(intent, activity_options);
-		else context.startActivity(intent);
+		context.startActivity(intent, activity_options);
 	}
 
 	private static Activity findActivity(Context context) {

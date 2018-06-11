@@ -7,7 +7,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Process;
 import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
@@ -62,8 +61,6 @@ public class Apps {
     public @CheckResult boolean isInstalledInCurrentUser(final String pkg) {
         try { @SuppressWarnings("deprecation")
             final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
-            //noinspection SimplifiableIfStatement
-            if (SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) return true;
             return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
         } catch (final NameNotFoundException e) {
             return false;
