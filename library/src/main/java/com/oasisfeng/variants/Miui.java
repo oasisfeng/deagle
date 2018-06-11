@@ -10,6 +10,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static android.content.Intent.CATEGORY_DEFAULT;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 /**
  * MIUI related functions
  *
@@ -41,7 +44,7 @@ public class Miui {
 
 	public static boolean startRootSettings(final Context context) {
 		try {
-			context.startActivity(new Intent("miui.intent.action.ROOT_MANAGER").addCategory(Intent.CATEGORY_DEFAULT));
+			context.startActivity(new Intent("miui.intent.action.ROOT_MANAGER").addCategory(CATEGORY_DEFAULT).addFlags(FLAG_ACTIVITY_NEW_TASK));
 			return true;
 		} catch (final ActivityNotFoundException e) {
 			return false;
@@ -50,7 +53,7 @@ public class Miui {
 
 	public static boolean startAutoStartSettings(final Context context) {
 		try {
-			context.startActivity(new Intent("miui.intent.action.OP_AUTO_START").addCategory(Intent.CATEGORY_DEFAULT));
+			context.startActivity(new Intent("miui.intent.action.OP_AUTO_START").addCategory(CATEGORY_DEFAULT).addFlags(FLAG_ACTIVITY_NEW_TASK));
 			return true;
 		} catch (final ActivityNotFoundException e) {
 			return false;

@@ -50,7 +50,7 @@ public class Apps {
         final StringBuilder uri = new StringBuilder("market://details?id=").append(pkg);
         if (utm_source != null) uri.append("&utm_source=").append(utm_source);
         if (utm_campaign != null) uri.append("&utm_campaign=").append(utm_campaign);
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())).addFlags(FLAG_ACTIVITY_NEW_TASK);
         try {
             mContext.startActivity(intent);
         } catch(final ActivityNotFoundException e) {

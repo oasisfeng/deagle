@@ -14,9 +14,10 @@ public class GooglePlayStore {
     private static final String APP_URL_PREFIX = "https://play.google.com/store/apps/details?id=";
 
     public static void showApp(final Context context, final String pkg) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_URL_PREFIX + pkg));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_URL_PREFIX + pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         updatePlayUrlIntent(context, intent);
-        try { context.startActivity(intent);
+        try {
+            context.startActivity(intent);
         } catch(final ActivityNotFoundException e) { /* In case of Google Play malfunction */ }
     }
 
