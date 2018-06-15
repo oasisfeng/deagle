@@ -1,7 +1,6 @@
 package com.oasisfeng.android.databinding.adapters;
 
 import android.databinding.BindingAdapter;
-import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,10 +30,8 @@ public class ViewBindingAdapter {
 		final ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) layout_params;
 		//noinspection ResourceType
 		params.setMargins(v(left, params.leftMargin), v(top, params.topMargin), v(right, params.rightMargin), v(bottom, params.bottomMargin));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			if (start != null) params.setMarginStart(start.intValue());
-			if (end != null) params.setMarginEnd(end.intValue());
-		}
+		if (start != null) params.setMarginStart(start.intValue());
+		if (end != null) params.setMarginEnd(end.intValue());
 		view.setLayoutParams(params);
 	}
 
