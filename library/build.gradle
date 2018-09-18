@@ -28,8 +28,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'       // class Dialogs
     implementation 'com.android.support:customtabs:27.1.1'         // class WebContent
     implementation 'com.android.support:recyclerview-v7:27.1.1'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
-    implementation 'android.arch.lifecycle:livedata-core:1.1.1'    // package com.oasisfeng.androidx.lifecycle
-    implementation 'android.arch.lifecycle:viewmodel:1.1.1'        // class LifecycleFragment
+    implementation 'android.arch.lifecycle:livedata-core:1.1.0'    // package com.oasisfeng.androidx.lifecycle (keep from 1.1.1 to avoid dependency conflict with data-binding)
+    implementation 'android.arch.lifecycle:viewmodel:1.1.0'        // class LifecycleFragment
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
