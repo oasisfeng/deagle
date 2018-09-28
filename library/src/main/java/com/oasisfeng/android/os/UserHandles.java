@@ -6,6 +6,7 @@ import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 
+import com.oasisfeng.android.annotation.AppIdInt;
 import com.oasisfeng.android.annotation.UserIdInt;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -65,11 +66,18 @@ public class UserHandles {
 	/**
 	 * Returns the user id for a given uid.
 	 */
-	private static @UserIdInt int getUserId(final int uid) {
+	public static @UserIdInt int getUserId(final int uid) {
 		if (MU_ENABLED) {
 			return uid / PER_USER_RANGE;
 		} else {
 			return USER_SYSTEM;
 		}
+	}
+
+	/**
+	 * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
+	 */
+	public static @AppIdInt int getAppId(final int uid) {
+		return uid % PER_USER_RANGE;
 	}
 }
