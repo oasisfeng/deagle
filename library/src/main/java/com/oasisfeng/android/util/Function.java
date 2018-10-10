@@ -43,6 +43,6 @@ public interface Function<T, R> {
 	 * @param t the function argument
 	 * @return the function result
 	 */
-	R apply(T var1);
+	R apply(T t);
 }
 
