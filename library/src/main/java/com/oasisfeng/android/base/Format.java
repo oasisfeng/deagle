@@ -1,24 +1,21 @@
 package com.oasisfeng.android.base;
 
-import android.annotation.SuppressLint;
 import android.text.format.DateUtils;
+
+import java.util.Locale;
 
 /** @author Oasis */
 public class Format {
 
-    @SuppressLint("DefaultLocale")    // TODO: Use locale format
-    public static String elapsedTime(final StringBuilder recycle, final long elapsedSeconds) {
-        if (elapsedSeconds < 100 * 60 * 60) return DateUtils.formatElapsedTime(recycle, elapsedSeconds);
+	public static String elapsedTime(final long elapsedSeconds) {
+		if (elapsedSeconds < 100 * 60 * 60) return DateUtils.formatElapsedTime(null, elapsedSeconds);
 
-        long seconds = elapsedSeconds, hours = 0, minutes = 0;
-        if (seconds >= 3600) {
-            hours = seconds / 3600;
-            seconds = hours % 3600;
-        }
-        if (seconds >= 60) {
-            minutes = seconds / 60;
-            seconds = minutes % 60;
-        }
-        return String.format("%1$d:%2$02d:%3$02d", hours, minutes, seconds);
-    }
+		final long hours = elapsedSeconds / 3600, minutes;
+		long seconds = hours % 3600;
+		if (seconds >= 60) {
+			minutes = seconds / 60;
+			seconds = minutes % 60;
+		} else minutes = 0;
+		return String.format((Locale) null, "%1$d:%2$02d:%3$02d", hours, minutes, seconds);
+	}
 }
