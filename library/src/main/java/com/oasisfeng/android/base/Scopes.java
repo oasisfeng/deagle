@@ -34,7 +34,19 @@ public class Scopes {
 		void markOnly(@NonNull String tag);
 		/** @return whether it is marked before */
         boolean unmark(@NonNull String tag);
+
+		default ScopedTag tag(@NonNull final String tag) { return new ScopedTag(this, tag); }
     }
+
+    public static class ScopedTag {
+    	public boolean isMarked() { return mScope.isMarked(mTag); }
+		public void markOnly() { mScope.markOnly(mTag); }
+		public boolean unmark() { return mScope.unmark(mTag); }
+
+		ScopedTag(final Scope scope, final String tag) { mScope = scope; mTag = tag; }
+		private final Scope mScope;
+		private final String mTag;
+	}
 
 	/** Throughout the whole lifecycle of this installed app, until uninstalled. (can also be extended to re-installation if configured with backup) */
     public static Scope app(final Context context) { return new AppInstallationScope(context); }
