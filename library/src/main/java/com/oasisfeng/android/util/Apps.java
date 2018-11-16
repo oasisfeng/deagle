@@ -1,11 +1,13 @@
 package com.oasisfeng.android.util;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Process;
 import android.support.annotation.CheckResult;
@@ -23,6 +25,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.O_MR1;
 
 /** @author Oasis */
 public class Apps {
@@ -148,11 +151,15 @@ public class Apps {
     }
 
     public @CheckResult CharSequence getAppName(final String pkg) {
-        try { //noinspection WrongConstant,deprecation
-        	final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+        try {
+        	@SuppressLint("WrongConstant") final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg,
+                    PackageManager.GET_UNINSTALLED_PACKAGES | (SDK_INT <= O_MR1 ? MATCH_ANY_USER : 0));
             return getAppName(info);
-        } catch (final NameNotFoundException e) {
-        	return "<?>";
+        } catch (final NameNotFoundException e) {   // May be thrown on Android P+, if caller is not within the same managed profile
+            @SuppressLint("WrongConstant") final ResolveInfo resolve = mContext.getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN)
+                    .addCategory(CATEGORY_LAUNCHER).setPackage(pkg), MATCH_ANY_USER | PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (resolve != null) return getAppName(resolve.activityInfo.applicationInfo);
+        	return pkg;
         }
     }
 
@@ -190,5 +197,7 @@ public class Apps {
     }
 
     private final Context mContext;
+
+    private static final int MATCH_ANY_USER = 0x00400000;   // PackageManager.MATCH_ANY_USER
     private static final String TAG = "Apps";
 }
