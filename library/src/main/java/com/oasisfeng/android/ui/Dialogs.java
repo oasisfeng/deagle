@@ -3,13 +3,15 @@ package com.oasisfeng.android.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.StringRes;
 
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
+
 /** @author Oasis */
-public class Dialogs {
+@RequiresApi(LOLLIPOP) public class Dialogs {
 
 	/** Create an non-cancellable alert dialog builder. */
 	public static @CheckResult Builder buildAlert(final Activity activity, final @StringRes int title, final @StringRes int message) {
@@ -28,9 +30,7 @@ public class Dialogs {
 	public static class Builder extends AlertDialog.Builder {
 
 		public @CheckResult Builder withOkButton(final @Nullable Runnable task) {
-			setPositiveButton(android.R.string.ok, task == null ? null : new DialogInterface.OnClickListener() { @Override public void onClick(final DialogInterface dialog, final int which) {
-				task.run();
-			}});
+			setPositiveButton(android.R.string.ok, task == null ? null : (d, w) -> task.run());
 			return this;
 		}
 
@@ -39,6 +39,6 @@ public class Dialogs {
 			return this;
 		}
 
-		public Builder(final Context context) { super(context); }
+		public Builder(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
 	}
 }
