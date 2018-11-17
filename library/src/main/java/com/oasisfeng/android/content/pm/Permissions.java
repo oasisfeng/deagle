@@ -26,6 +26,8 @@ import static android.os.Build.VERSION_CODES.M;
 @ParametersAreNonnullByDefault
 public class Permissions {
 
+	public static final String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
+
 	public static boolean has(final Context context, final String permission) {
 		return context.checkPermission(permission, Process.myPid(), Process.myUid()) == PackageManager.PERMISSION_GRANTED;
 	}

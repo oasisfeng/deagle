@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -14,18 +15,23 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.oasisfeng.android.content.pm.Permissions;
 import com.oasisfeng.android.google.GooglePlayStore;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O_MR1;
+import static com.oasisfeng.android.content.pm.Permissions.INTERACT_ACROSS_USERS;
 
 /** @author Oasis */
 public class Apps {
@@ -37,7 +43,7 @@ public class Apps {
     /** Check whether specified app is installed on the device, even if not installed in current user (Android 4.2+). */
     public @CheckResult boolean isInstalledOnDevice(final String pkg) {
         try { //noinspection WrongConstant,deprecation
-            mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+            mContext.getPackageManager().getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
             return true;
         } catch (final NameNotFoundException e) {
             return false;
@@ -63,7 +69,7 @@ public class Apps {
     /** Check whether specified app is installed in current user, even if hidden by system (Android 5+). */
     public @CheckResult boolean isInstalledInCurrentUser(final String pkg) {
         try { @SuppressWarnings("deprecation")
-            final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
+            final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
             return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
         } catch (final NameNotFoundException e) {
             return false;
@@ -102,7 +108,7 @@ public class Apps {
         }
     }
 
-	private static final int FLAG_PRIVILEGED = 1<<30;
+    private static final int FLAG_PRIVILEGED = 1<<30;
     private static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;        // ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
 
     public static boolean isPrivileged(final PackageManager pm, final int uid) {
@@ -150,17 +156,34 @@ public class Apps {
         }
     }
 
-    public @CheckResult CharSequence getAppName(final String pkg) {
-        try {
-        	@SuppressLint("WrongConstant") final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg,
-                    PackageManager.GET_UNINSTALLED_PACKAGES | (SDK_INT <= O_MR1 ? MATCH_ANY_USER : 0));
-            return getAppName(info);
-        } catch (final NameNotFoundException e) {   // May be thrown on Android P+, if caller is not within the same managed profile
-            @SuppressLint("WrongConstant") final ResolveInfo resolve = mContext.getPackageManager().resolveActivity(new Intent(Intent.ACTION_MAIN)
-                    .addCategory(CATEGORY_LAUNCHER).setPackage(pkg), MATCH_ANY_USER | PackageManager.GET_UNINSTALLED_PACKAGES);
-            if (resolve != null) return getAppName(resolve.activityInfo.applicationInfo);
-        	return pkg;
+    public @Nullable ApplicationInfo getAppInfo(final String pkg) {
+        try { @SuppressLint("WrongConstant")
+        final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, getFlagsMatchKnownPackages(mContext));
+            return info;
+        } catch (final NameNotFoundException e) { @SuppressLint("WrongConstant")	// May be thrown on Android P+, if caller is not in the same user.
+            final List<ResolveInfo> resolves = mContext.getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN)
+                    .addCategory(CATEGORY_LAUNCHER).setPackage(pkg), MATCH_ANY_USER | GET_UNINSTALLED_PACKAGES | GET_DISABLED_COMPONENTS);
+            if (resolves != null && ! resolves.isEmpty()) return resolves.get(0).activityInfo.applicationInfo;
+            return null;    // TODO: Try AndroidX internal provider?
         }
+    }
+
+	public @Nullable PackageInfo getPackageInfo(final String pkg, final int flags) {
+		try { @SuppressLint("WrongConstant")
+			final PackageInfo info = mContext.getPackageManager().getPackageInfo(pkg, flags | getFlagsMatchKnownPackages(mContext));
+			return info;
+		} catch (final NameNotFoundException e) {   // May be thrown on Android P+, if caller is not within the same managed profile
+			return null;
+		}
+	}
+
+	public static int getFlagsMatchKnownPackages(final Context context) {
+		return GET_UNINSTALLED_PACKAGES | (SDK_INT <= O_MR1 || Permissions.has(context, INTERACT_ACROSS_USERS) ? MATCH_ANY_USER : 0);
+	}
+
+	public @CheckResult CharSequence getAppName(final String pkg) {
+        final ApplicationInfo info = getAppInfo(pkg);
+        return info != null ? getAppName(info) : pkg;
     }
 
     public @CheckResult CharSequence getAppName(final ApplicationInfo app_info) {
@@ -173,22 +196,8 @@ public class Apps {
 
     public @CheckResult String getAppNames(final Collection<String> pkgs, final String separator) {
         final StringBuilder app_names = new StringBuilder();
-        final PackageManager pm = mContext.getPackageManager();
-        for (final String pkg : pkgs) {
-        	app_names.append(separator);
-            final ApplicationInfo info;
-            try { //noinspection WrongConstant,deprecation
-                info = pm.getApplicationInfo(pkg, PackageManager.GET_UNINSTALLED_PACKAGES);
-            } catch (final NameNotFoundException e) {
-            	app_names.append("<?>");
-            	continue;
-            }
-            try {
-            	app_names.append(info.loadLabel(pm));
-            } catch (final RuntimeException e) {	// Including Resources.NotFoundException
-            	app_names.append(info.packageName);
-            }
-        }
+        for (final String pkg : pkgs)
+            app_names.append(separator).append(getAppName(pkg));
         return app_names.substring(separator.length());
     }
 
