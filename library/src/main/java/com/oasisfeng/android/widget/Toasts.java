@@ -28,6 +28,10 @@ public class Toasts {
 	}
 
 	public static void show(final Context context, final @StringRes int text, final @Duration int length) {
+		show(context, context.getText(text), length);
+	}
+
+	public static void show(final Context context, final CharSequence text, final @Duration int length) {
 		final Looper my_looper = Looper.myLooper();
 		if (my_looper == MAIN_LOOPER) Toast.makeText(context, text, length).show();
 		else new Handler(MAIN_LOOPER).post(() -> Toast.makeText(context, text, length).show());
