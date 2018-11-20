@@ -2,6 +2,7 @@ package com.oasisfeng.android.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
@@ -33,12 +34,21 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 			setPositiveButton(android.R.string.ok, task == null ? null : (d, w) -> task.run());
 			return this;
 		}
+		public @CheckResult Builder withCancelButton() { setNegativeButton(android.R.string.cancel, null); return this; }
+		Builder(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
+	}
 
-		public @CheckResult Builder withCancelButton() {
-			setNegativeButton(android.R.string.cancel, null);
-			return this;
-		}
+	public static @CheckResult FluentProgressDialog buildProgress(final Activity activity, final CharSequence message) {
+		final FluentProgressDialog dialog = new FluentProgressDialog(activity);
+		dialog.setMessage(message);
+		return dialog;
+	}
 
-		public Builder(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
+	public static class FluentProgressDialog extends ProgressDialog {
+
+		FluentProgressDialog(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
+		public FluentProgressDialog indeterminate() { setIndeterminate(true); return this; }
+		public FluentProgressDialog nonCancelable() { setCancelable(false); return this; }
+		public FluentProgressDialog start() { super.show(); return this; }
 	}
 }
