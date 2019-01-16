@@ -6,7 +6,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;

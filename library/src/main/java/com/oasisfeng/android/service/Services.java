@@ -13,14 +13,15 @@ import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
-import android.support.annotation.CheckResult;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
 
 /**
  * Simplify the AIDL service usage

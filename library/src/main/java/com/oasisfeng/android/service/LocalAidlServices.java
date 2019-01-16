@@ -15,8 +15,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.oasisfeng.android.util.MultiCatchROECompat;
@@ -33,6 +31,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Optimized implementation for local-only service.

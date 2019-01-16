@@ -1,10 +1,10 @@
 package com.oasisfeng.android.databinding.recyclerview;
 
-import android.databinding.BindingAdapter;
-import android.databinding.ObservableList;
-import android.support.annotation.LayoutRes;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.databinding.BindingAdapter;
+import androidx.databinding.ObservableList;
+import androidx.annotation.LayoutRes;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 /**
  * Binding adapters for RecyclerView.

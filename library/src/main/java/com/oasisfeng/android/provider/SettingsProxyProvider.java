@@ -11,8 +11,8 @@ import android.os.Handler;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;

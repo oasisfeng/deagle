@@ -1,10 +1,12 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
-import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.SwipeDismissBehavior;
 import android.view.View;
+
+import com.google.android.material.behavior.SwipeDismissBehavior;
+
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.databinding.BindingAdapter;
 
 /**
  * Binding adapter to attach {@link SwipeDismissBehavior} to any view inside {@link CoordinatorLayout}.

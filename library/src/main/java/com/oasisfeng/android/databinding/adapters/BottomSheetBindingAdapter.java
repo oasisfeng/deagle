@@ -1,10 +1,12 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
 import android.os.Handler;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.view.View;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback;
+
+import androidx.databinding.BindingAdapter;
 
 /**
  * Binding adapter for {@link BottomSheetBehavior}

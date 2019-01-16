@@ -19,16 +19,17 @@ package com.oasisfeng.androidx.lifecycle;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Fragment;
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelStore;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.oasisfeng.android.app.LifecycleActivity;
 import com.oasisfeng.android.app.LifecycleFragment;
+
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStore;
 
 /**
  * Utilities methods for {@link ViewModelStore} class.

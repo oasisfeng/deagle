@@ -1,13 +1,14 @@
 package com.oasisfeng.android.os;
 
 import android.os.AsyncTask;
-import android.support.annotation.MainThread;
-import android.support.annotation.WorkerThread;
 
 import com.oasisfeng.android.util.Consumer;
 import com.oasisfeng.android.util.Supplier;
 
 import java.util.concurrent.Callable;
+
+import androidx.annotation.MainThread;
+import androidx.annotation.WorkerThread;
 
 /**
  * Simplify the basic usage of {@link AsyncTask}.

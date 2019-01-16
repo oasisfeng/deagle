@@ -1,17 +1,18 @@
 package com.oasisfeng.android.databinding.adapters;
 
 import android.content.Context;
-import android.databinding.BindingAdapter;
-import android.support.annotation.MenuRes;
-import android.support.v7.view.menu.MenuBuilder;
-import android.support.v7.view.menu.MenuPresenter;
-import android.support.v7.widget.ActionMenuView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.oasisfeng.deagle.R;
+
+import androidx.annotation.MenuRes;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPresenter;
+import androidx.appcompat.widget.ActionMenuView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.BindingAdapter;
 
 /**
  * Binding adapter for menu in {@link Toolbar} and {@link ActionMenuView} (support-v7 version)

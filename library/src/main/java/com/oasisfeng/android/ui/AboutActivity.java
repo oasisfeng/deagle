@@ -11,7 +11,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.support.annotation.Nullable;
 
 import com.oasisfeng.android.google.GooglePlayStore;
 import com.oasisfeng.android.i18n.Locales;
@@ -19,6 +18,8 @@ import com.oasisfeng.android.i18n.Locales;
 import java.util.Locale;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import androidx.annotation.Nullable;
 
 /**
  * A helper class to simply build an "About" dialog.

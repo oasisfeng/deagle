@@ -1,13 +1,14 @@
 package com.oasisfeng.android.databinding.recyclerview;
 
-import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.databinding.ObservableList;
-import android.databinding.ViewDataBinding;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ObservableList;
+import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Adapter of RecycleView for data-binding

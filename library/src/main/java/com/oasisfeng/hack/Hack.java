@@ -1,8 +1,5 @@
 package com.oasisfeng.hack;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.oasisfeng.android.util.Supplier;
@@ -20,6 +17,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Java reflection helper optimized for hacking non-public APIs.

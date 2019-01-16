@@ -1,13 +1,13 @@
 package com.oasisfeng.hack;
 
-import android.support.annotation.NonNull;
-
 import com.oasisfeng.hack.Hack.Unchecked;
 
 import junit.framework.TestCase;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import androidx.annotation.NonNull;
 
 import static com.oasisfeng.hack.Hack.ANY_TYPE;
 import static com.oasisfeng.hack.Hack.onlyIf;

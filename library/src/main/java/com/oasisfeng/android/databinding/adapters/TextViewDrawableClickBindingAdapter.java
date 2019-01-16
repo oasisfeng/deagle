@@ -1,12 +1,13 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+
+import androidx.databinding.BindingAdapter;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 

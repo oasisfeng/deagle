@@ -7,14 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
 
 import com.oasisfeng.android.base.Scopes.Scope;
 import com.oasisfeng.android.content.CrossProcessSharedPreferences;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
 
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;

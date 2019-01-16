@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.oasisfeng.deagle.BuildConfig;
@@ -15,6 +14,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+
+import androidx.annotation.Nullable;
 
 /**
  * A base class for AIDL service to simplify the boilerplate code, supporting both local and remote clients simultaneously.

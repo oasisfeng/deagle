@@ -14,10 +14,11 @@
 package com.oasisfeng.android.util;
 
 import android.os.SystemClock;
-import android.support.annotation.VisibleForTesting;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Useful suppliers.

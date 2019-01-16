@@ -3,12 +3,13 @@ package com.oasisfeng.android.widget;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.IntDef;
-import android.support.annotation.StringRes;
 import android.widget.Toast;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.StringRes;
 
 /**
  * Created by Oasis on 2018-9-11.

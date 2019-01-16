@@ -1,9 +1,9 @@
 package com.oasisfeng.androidx.lifecycle;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.support.annotation.NonNull;
-
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 /**
  * Created by Oasis on 2018/5/14.
