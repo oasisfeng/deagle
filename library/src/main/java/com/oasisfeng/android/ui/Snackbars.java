@@ -1,5 +1,6 @@
 package com.oasisfeng.android.ui;
 
+import android.app.Activity;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.oasisfeng.deagle.R;
 
 import androidx.annotation.CheckResult;
 
@@ -15,6 +17,13 @@ public class Snackbars {
 
 	private static final int DEFAULT_DURATION = 10_000;
 	private static final int KMaxLines = 3;
+
+	/** Try to find {@link androidx.coordinatorlayout.widget.CoordinatorLayout CoordinatorLayout} with ID {@link R.id#coordinator coordinator} */
+	@CheckResult public static Snackbar make(final Activity activity, final int text_res, final Additional... additional) {
+		View coordinator = activity.findViewById(R.id.coordinator);
+		if (coordinator == null) coordinator = activity.findViewById(android.R.id.content);
+		return make(coordinator, text_res, additional);
+	}
 
 	@CheckResult public static Snackbar make(final View coordinator, final int text_res, final Additional... additional) {
 		final Snackbar snackbar = Snackbar.make(coordinator, text_res, DEFAULT_DURATION);
