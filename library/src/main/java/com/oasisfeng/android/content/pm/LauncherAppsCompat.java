@@ -32,5 +32,18 @@ import static android.os.Build.VERSION_CODES.O;
 		return info;
 	}
 
+	@RequiresApi(N) @SuppressLint("NewApi")
+	public ApplicationInfo getApplicationInfoNoThrows(final String pkg, final int flags, final UserHandle user) {
+		try {
+			return mLauncherApps.getApplicationInfo(pkg, flags, user);
+		} catch (final PackageManager.NameNotFoundException e) {
+			return null;
+		}
+	}
+
+	public final LauncherApps get() {
+		return mLauncherApps;
+	}
+
 	private final LauncherApps mLauncherApps;
 }
