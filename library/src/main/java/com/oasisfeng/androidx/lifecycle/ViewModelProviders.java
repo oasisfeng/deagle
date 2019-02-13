@@ -23,6 +23,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelStore;
+import android.arch.lifecycle.ViewModelStoreOwner;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -121,6 +122,13 @@ public class ViewModelProviders {
 			factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application);
 		}
 		return new ViewModelProvider(activity.getViewModelStore(), factory);
+	}
+
+	@NonNull
+	@MainThread
+	public static ViewModelProvider of(final Application app, final ViewModelStoreOwner owner) {
+		final ViewModelProvider.AndroidViewModelFactory factory = ViewModelProvider.AndroidViewModelFactory.getInstance(app);
+		return new ViewModelProvider(owner.getViewModelStore(), factory);
 	}
 
 	/**
