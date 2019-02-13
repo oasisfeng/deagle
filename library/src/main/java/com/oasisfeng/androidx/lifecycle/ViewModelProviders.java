@@ -30,6 +30,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 /**
  * Utilities methods for {@link ViewModelStore} class.
@@ -122,6 +123,13 @@ public class ViewModelProviders {
 			factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application);
 		}
 		return new ViewModelProvider(activity.getViewModelStore(), factory);
+	}
+
+	@NonNull
+	@MainThread
+	public static ViewModelProvider of(final Application app, final ViewModelStoreOwner owner) {
+		final ViewModelProvider.AndroidViewModelFactory factory = ViewModelProvider.AndroidViewModelFactory.getInstance(app);
+		return new ViewModelProvider(owner.getViewModelStore(), factory);
 	}
 
 	/**
