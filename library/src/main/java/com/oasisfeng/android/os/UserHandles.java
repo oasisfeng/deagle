@@ -17,8 +17,10 @@ import static android.os.Build.VERSION_CODES.N;
  */
 public class UserHandles {
 
-	private static final UserHandle MY_USER_HANDLE = Process.myUserHandle();
-	@VisibleForTesting static Pair<Integer, UserHandle> sCache = null;	// Must before SYSTEM
+	public static final UserHandle MY_USER_HANDLE = Process.myUserHandle();
+	public static final int MY_USER_ID = getIdentifier(Process.myUserHandle());
+
+	@VisibleForTesting static Pair<Integer, UserHandle> sCache = null;	// Must before SYSTEM. TODO: Support multiple profiles.
 
 	/**
 	 * Enable multi-user related side effects. Set this to false if
@@ -79,5 +81,23 @@ public class UserHandles {
 	 */
 	public static @AppIdInt int getAppId(final int uid) {
 		return uid % PER_USER_RANGE;
+	}
+
+	/**
+	 * Returns the uid that is composed from the userId and the appId.
+	 */
+	public static int getUid(final @UserIdInt int userId, final @AppIdInt int appId) {
+		if (MU_ENABLED) {
+			return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
+		} else {
+			return appId;
+		}
+	}
+
+	/**
+	 * Returns the userId stored in this UserHandle. (same as UserHandle.getIdentifier())
+	 */
+	public static int getIdentifier(final UserHandle handle) {
+		return handle.hashCode();		// So far so good
 	}
 }
