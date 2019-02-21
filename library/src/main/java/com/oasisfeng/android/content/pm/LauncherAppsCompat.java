@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import androidx.annotation.RequiresApi;
 
+import java.util.Objects;
+
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.N;
@@ -21,7 +23,7 @@ import static android.os.Build.VERSION_CODES.O;
 @RequiresApi(LOLLIPOP) public class LauncherAppsCompat {
 
 	public LauncherAppsCompat(final Context context) {
-		mLauncherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+		mLauncherApps = Objects.requireNonNull((LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE));
 	}
 
 	@RequiresApi(N) @SuppressLint("NewApi")

@@ -2,7 +2,8 @@ package com.oasisfeng.hack;
 
 import com.oasisfeng.hack.Hack.Unchecked;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,19 +11,22 @@ import java.io.IOException;
 import androidx.annotation.NonNull;
 
 import static com.oasisfeng.hack.Hack.ANY_TYPE;
-import static com.oasisfeng.hack.Hack.onlyIf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link Hack}
  *
  * Created by Oasis on 2015/8/24.
  */
-public class HackTest extends TestCase {
+public class HackTest {
 
-	public void testBasicMethodAndConstructor() throws IOException {
+	@Test public void testBasicMethodAndConstructor() throws IOException {
 		final Hack.HackedMethod1<Simple, Void, IOException, Unchecked, Unchecked, Integer> constructor
 				= Hack.into(Simple.class).constructor().throwing(IOException.class).withParam(int.class);
-		assertNotNull(constructor);;
+		assertNotNull(constructor);
 		final Simple simple = constructor.invoke(0).statically();
 		assertNotNull(simple);
 
@@ -54,14 +58,14 @@ public class HackTest extends TestCase {
 		assertFail(null, Hack.into(Simple.class).method("foo").returning(Void.class).withoutParams());
 	}
 
-	public void testMethodReturningAnyType() throws IOException {
+	@Test public void testMethodReturningAnyType() throws IOException {
 		final Hack.HackedMethod0<?, Simple, Unchecked, Unchecked, Unchecked> foo
 				= Hack.into(Simple.class).method("foo").returning(ANY_TYPE).withoutParams();
 		assertNotNull(foo);
 		assertEquals(7, foo.invoke().on(new Simple(0)));
 	}
 
-	public void testMethodFallback() throws IOException {
+	@Test public void testMethodFallback() throws IOException {
 		final Hack.HackedMethod1<Integer, Simple, IOException, Unchecked, Unchecked, Void> foo_wrong
 				= Hack.into(Simple.class).method("foo").throwing(IOException.class).returning(int.class).fallbackReturning(-1).withParam(Void.class);
 		assertTrue(foo_wrong.isAbsent());		// Checked exceptions mismatch
@@ -73,7 +77,7 @@ public class HackTest extends TestCase {
 		assertEquals(-1, (int) foo_absent.invoke().on(new Simple(0)));
 	}
 
-	public void testConstructorFallback() throws IOException {
+	@Test public void testConstructorFallback() {
 		final Hack.HackedMethod1<Simple, Void, Unchecked, Unchecked, Unchecked, Integer> constructor
 				= Hack.into(Simple.class).constructor().withParam(int.class);
 		assertTrue(constructor.isAbsent());
@@ -83,7 +87,7 @@ public class HackTest extends TestCase {
 		assertTrue(absent_constructor.isAbsent());
 	}
 
-	public void testBasicField() throws IOException {
+	@Test public void testBasicField() throws IOException {
 		final Simple simple = new Simple(0);
 		final Hack.HackedField<Simple, Integer> field = Hack.into(Simple.class).field("mIntField").ofType(int.class);
 		assertNotNull(field);
@@ -93,22 +97,22 @@ public class HackTest extends TestCase {
 		assertFail(null, Hack.into(Simple.class).staticField("mIntField").ofType(ANY_TYPE));
 	}
 
-	public void testFieldFallback() {
+	@Test public void testFieldFallback() {
 		final Hack.HackedTargetField<Integer> field = Hack.into(Simple.class).staticField("mIntField").fallbackTo(-1);
 		assertEquals(-1, (int) field.get());
 		field.set(0);
 		assertEquals(-1, (int) field.get());
 	}
 
-	public void testClassNotFound() {
+	@Test public void testClassNotFound() {
 		assertFail(ClassNotFoundException.class, Hack.into("NoSuchClass").method("nonSense").withoutParams());
 		assertFail(ClassNotFoundException.class, Hack.into(Simple.class).field("mIntField").ofType("NoSuchType"));
 		assertFail(ClassNotFoundException.class, Hack.into(Simple.class).staticField("mStaticField").ofType("NoSuchType"));
 	}
 
-	public void testOnlyIf() throws IOException {
+	@Test public void testOnlyIf() throws IOException {
 		final Hack.HackedMethod1<Simple, Void, IOException, Unchecked, Unchecked, Integer> constructor
-				= onlyIf(true).into(Simple.class).constructor().throwing(IOException.class).withParam(int.class);
+				= Hack.onlyIf(true).into(Simple.class).constructor().throwing(IOException.class).withParam(int.class);
 		assertNotNull(constructor);
 		final Simple simple = constructor.invoke(0).statically();
 		assertNotNull(simple);
@@ -137,17 +141,14 @@ public class HackTest extends TestCase {
 		assertEquals(-1, (int) fallback_field.get(simple));
 	}
 
-	@Override protected void setUp() throws Exception {
-		super.setUp();
-		Hack.setAssertionFailureHandler(new Hack.AssertionFailureHandler() { @Override public void onAssertionFailure(@NonNull final Hack.AssertionException failure) {
-			mFailure = failure;
-		}});
+	@Before public void setUp() {
+		Hack.setAssertionFailureHandler(failure -> mFailure = failure);
 		mFailure = new Hack.AssertionException(new IOException());
 		assertFail(IOException.class, null);
 		mFailure = null;
 	}
 
-	private void assertFail(Class<? extends Throwable> failure, final Object hack) {
+	private void assertFail(final Class<? extends Throwable> failure, final Object hack) {
 		assertNull(hack);
 		assertNotNull(mFailure);
 		if (failure != null) {
@@ -161,9 +162,9 @@ public class HackTest extends TestCase {
 
 	@SuppressWarnings("unused") private static class Simple {
 
-		Simple(final int x) throws IOException {}
-		int foo() { return 7; }
-		private static void bar(int type, String name, Simple simple) throws IOException {}
+		@SuppressWarnings("RedundantThrows") Simple(final int x) throws IOException {}
+		@SuppressWarnings("MethodMayBeStatic") int foo() { return 7; }
+		@SuppressWarnings("RedundantThrows") private static void bar(final int type, final String name, final Simple simple) throws IOException {}
 		int mIntField;
 	}
 }
