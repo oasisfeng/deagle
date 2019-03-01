@@ -55,7 +55,7 @@ public class Hack {
 		AssertionException(final String e) { super(e); }
 		AssertionException(final Exception e) { super(e); }
 
-		@Override public String toString() {
+		@Override public @NonNull String toString() {
 			return getCause() != null ? getClass().getName() + ": " + getCause() : super.toString();
 		}
 
@@ -483,23 +483,23 @@ public class Hack {
 	}
 	public static class HackedMethod1<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod1(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg) { return super.invoke(arg); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg) { return super.invoke(arg); }
 	}
 	public static class HackedMethod2<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod2(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2) { return super.invoke(arg1, arg2); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2) { return super.invoke(arg1, arg2); }
 	}
 	public static class HackedMethod3<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod3(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3) { return super.invoke(arg1, arg2, arg3); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3) { return super.invoke(arg1, arg2, arg3); }
 	}
 	public static class HackedMethod4<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod4(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3, final A4 arg4) { return super.invoke(arg1, arg2, arg3, arg4); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3, final @Nullable A4 arg4) { return super.invoke(arg1, arg2, arg3, arg4); }
 	}
 	public static class HackedMethod5<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4, A5> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethod5(final Invokable invokable) { super(invokable); }
-		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final A1 arg1, final A2 arg2, final A3 arg3, final A4 arg4, final A5 arg5) { return super.invoke(arg1, arg2, arg3, arg4, arg5); }
+		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3, final @Nullable A4 arg4, final @Nullable A5 arg5) { return super.invoke(arg1, arg2, arg3, arg4, arg5); }
 	}
 	public static class HackedMethodN<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends CheckedHackedMethod<R, C, T1,T2,T3> {
 		HackedMethodN(final Invokable invokable) { super(invokable); }
@@ -709,7 +709,7 @@ public class Hack {
 				return lhs.toString().compareTo(rhs.toString());
 			}
 
-			@Override public boolean equals(final Object object) {
+			@Override public boolean equals(final @Nullable Object object) {
 				return this == object;
 			}
 		};
@@ -724,7 +724,7 @@ public class Hack {
 			return method.invoke(target, args);
 		}
 
-		@Override public String toString() { return method.toString(); }
+		@Override public @NonNull String toString() { return method.toString(); }
 
 		private final Method method;
 	}
@@ -738,7 +738,7 @@ public class Hack {
 			return constructor.newInstance(args);
 		}
 
-		@Override public String toString() { return constructor.toString(); }
+		@Override public @NonNull String toString() { return constructor.toString(); }
 
 		private final Constructor<C> constructor;
 	}
@@ -792,7 +792,7 @@ public class Hack {
 			final HackedMethodImpl<C, Void, Unchecked, Unchecked, Unchecked> constructor = new HackedMethodImpl<>(mClass, null, 0);
 			return constructor.fallbackReturning(null);	// Always fallback to null.
 		}
-		
+
 		HackedClass(final Class<C> clazz) { mClass = clazz; }
 
 		private final Class<C> mClass;
@@ -847,7 +847,7 @@ public class Hack {
 	}
 
 	/** Specify a handler to deal with assertion failure, and decide whether the failure should be thrown. */
-	public static AssertionFailureHandler setAssertionFailureHandler(final AssertionFailureHandler handler) {
+	public static AssertionFailureHandler setAssertionFailureHandler(final @Nullable AssertionFailureHandler handler) {
 		final AssertionFailureHandler old = sFailureHandler;
 		sFailureHandler = handler;
 		return old;
