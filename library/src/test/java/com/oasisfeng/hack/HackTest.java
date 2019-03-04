@@ -7,14 +7,14 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import androidx.annotation.NonNull;
+import java.lang.reflect.Field;
 
 import static com.oasisfeng.hack.Hack.ANY_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test cases for {@link Hack}
@@ -139,6 +139,20 @@ public class HackTest {
 		assertNotNull(fallback_field);
 		fallback_field.set(simple, 3);
 		assertEquals(-1, (int) fallback_field.get(simple));
+	}
+
+	@Test public void testLazy() throws NoSuchFieldException, IllegalAccessException {
+		//noinspection JavaReflectionMemberAccess
+		final Field Hack_LAZY_RESOLVE = Hack.class.getDeclaredField("LAZY_RESOLVE");
+		Hack_LAZY_RESOLVE.setAccessible(true);
+		Hack_LAZY_RESOLVE.set(null, true);
+
+		Hack.setAssertionFailureHandler(e -> fail(e.toString()));
+		final Hack.HackedMethod0<Void, Object, Unchecked, Unchecked, Unchecked> method = Hack.into("nonexistent.Class").method("foo").fallbackReturning(null).withoutParams();
+		Hack.setAssertionFailureHandler(null);
+		assertNotNull(method);
+		assertTrue(method.isAbsent());
+		assertNull(method.invoke().statically());
 	}
 
 	@Before public void setUp() {

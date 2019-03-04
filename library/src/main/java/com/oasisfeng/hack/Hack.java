@@ -40,12 +40,11 @@ import androidx.annotation.Nullable;
 public class Hack {
 
 	public static Class<?> ANY_TYPE = $.class; private static class $ {}
-	// TODO: Also lazy-resolve class by name
-	private static final boolean LAZY_RESOLVE = ! BuildConfig.DEBUG;	// Lazy in production if fallback is provided, to reduce initialization cost.
+	private static boolean LAZY_RESOLVE = ! BuildConfig.DEBUG;	// Lazy in production if fallback is provided, to reduce initialization cost.
 
 	public static class AssertionException extends Throwable {
 
-		private Class<?> mClass;
+		private HackedClass<?> mClass;
 		private Field mHackedField;
 		private Method mHackedMethod;
 		private String mHackedFieldName;
@@ -66,25 +65,26 @@ public class Hack {
 				info.append(" Potential candidates:");
 				final int initial_length = info.length();
 				final String name = getHackedMethodName();
+				final Class<?> clazz = getHackedClass().getRawClass();
 				if (name != null) {
-					for (final Method method : getHackedClass().getDeclaredMethods())
+					for (final Method method : clazz.getDeclaredMethods())
 						if (method.getName().equals(name))			// Exact name match
 							info.append(' ').append(method);
 					if (info.length() == initial_length)
-						for (final Method method : getHackedClass().getDeclaredMethods())
+						for (final Method method : clazz.getDeclaredMethods())
 							if (method.getName().startsWith(name))	// Name prefix match
 								info.append(' ').append(method);
 					if (info.length() == initial_length)
-						for (final Method method : getHackedClass().getDeclaredMethods())
+						for (final Method method : clazz.getDeclaredMethods())
 							if (! method.getName().startsWith("-"))	// Dump all but generated methods
 								info.append(' ').append(method);
-				} else for (final Constructor<?> constructor : getHackedClass().getDeclaredConstructors())
+				} else for (final Constructor<?> constructor : clazz.getDeclaredConstructors())
 					info.append(' ').append(constructor);
 			} else if (cause instanceof NoSuchFieldException) {
 				info.append(" Potential candidates:");
 				final int initial_length = info.length();
 				final String name = getHackedFieldName();
-				final Field[] fields = getHackedClass().getDeclaredFields();
+				final Field[] fields = getHackedClass().getRawClass().getDeclaredFields();
 				for (final Field field : fields)
 					if (field.getName().equals(name))				// Exact name match
 						info.append(' ').append(field);
@@ -98,11 +98,11 @@ public class Hack {
 			return info.toString();
 		}
 
-		public Class<?> getHackedClass() {
+		public HackedClass<?> getHackedClass() {
 			return mClass;
 		}
 
-		AssertionException setHackedClass(final Class<?> hacked_class) {
+		AssertionException setHackedClass(final HackedClass<?> hacked_class) {
 			mClass = hacked_class; return this;
 		}
 
@@ -163,10 +163,10 @@ public class Hack {
 	public static class FieldToHack<C> {
 
 		protected @Nullable <T> Field findField(final @Nullable Class<T> type) {
-			if (mClass == ANY_TYPE) return null;		// AnyType as a internal indicator for class not found.
+			if (mClass.getRawClass() == ANY_TYPE) return null;		// AnyType as a internal indicator for class not found.
 			Field field = null;
 			try {
-				field = mClass.getDeclaredField(mName);
+				field = mClass.getRawClass().getDeclaredField(mName);
 				if (Modifier.isStatic(mModifiers) != Modifier.isStatic(field.getModifiers())) {
 					fail(new AssertionException(field + (Modifier.isStatic(mModifiers) ? " is not static" : " is static")).setHackedFieldName(mName));
 					field = null;
@@ -187,13 +187,13 @@ public class Hack {
 		}
 
 		/** @param modifiers the modifiers this field must have */
-		protected FieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+		protected FieldToHack(final HackedClass<C> clazz, final String name, final int modifiers) {
 			mClass = clazz;
 			mName = name;
 			mModifiers = modifiers;
 		}
 
-		protected final Class<C> mClass;
+		protected final HackedClass<C> mClass;
 		protected final String mName;
 		protected final int mModifiers;
 	}
@@ -207,7 +207,7 @@ public class Hack {
 
 		public @Nullable <T> HackedField<C, T> ofType(final String type_name) {
 			try { //noinspection unchecked
-				return ofType((Class<T>) Class.forName(type_name, false, mClass.getClassLoader()));
+				return ofType((Class<T>) Class.forName(type_name, false, mClass.getRawClass().getClassLoader()));
 			} catch (final ClassNotFoundException e) {
 				fail(new AssertionException(e));
 				return null;
@@ -253,7 +253,7 @@ public class Hack {
 		}
 
 		/** @param modifiers the modifiers this field must have */
-		private MemberFieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+		private MemberFieldToHack(final HackedClass<C> clazz, final String name, final int modifiers) {
 			super(clazz, name, modifiers);
 		}
 	}
@@ -267,7 +267,7 @@ public class Hack {
 
 		public @Nullable <T> HackedTargetField<T> ofType(final String type_name) {
 			try { //noinspection unchecked
-				return ofType((Class<T>) Class.forName(type_name, false, mClass.getClassLoader()));
+				return ofType((Class<T>) Class.forName(type_name, false, mClass.getRawClass().getClassLoader()));
 			} catch (final ClassNotFoundException e) {
 				fail(new AssertionException(e));
 				return null;
@@ -288,7 +288,7 @@ public class Hack {
 		}
 
 		/** @param modifiers the modifiers this field must have */
-		private StaticFieldToHack(final Class<C> clazz, final String name, final int modifiers) {
+		private StaticFieldToHack(final HackedClass<C> clazz, final String name, final int modifiers) {
 			super(clazz, name, modifiers);
 		}
 	}
@@ -472,7 +472,7 @@ public class Hack {
 		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
 		protected HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
 		/** Whether this hack is absent, thus will be fallen-back when invoked */
-		public boolean isAbsent() { return mInvokable instanceof FallbackInvokable; }
+		public boolean isAbsent() { return mInvokable.isAbsent(); }
 
 		private final Invokable mInvokable;
 	}
@@ -535,13 +535,14 @@ public class Hack {
 
 	interface Invokable<C> {
 		Object invoke(@Nullable C target, Object[] args) throws InvocationTargetException, IllegalAccessException, InstantiationException;
+		boolean isAbsent();
 	}
 
 	private static class HackedMethodImpl<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> implements NonNullHackedMethod<R, C, T1, T2, T3> {
 
-		HackedMethodImpl(final Class<?> clazz, @Nullable final String name, final int modifiers) {
+		HackedMethodImpl(final HackedClass<?> clazz, @Nullable final String name, final int modifiers) {
 			//noinspection unchecked, to be compatible with HackedClass.staticMethod()
-			mClass = (Class<C>) clazz;
+			mClass = (HackedClass<C>) clazz;
 			mName = name;
 			mModifiers = modifiers;
 		}
@@ -638,13 +639,13 @@ public class Hack {
 		}
 
 		private @Nullable Invokable<C> findInvokable(final Class<?>... param_types) {
-			if (mClass == ANY_TYPE)		// AnyType as a internal indicator for class not found.
+			if (mClass.getRawClass() == ANY_TYPE)		// AnyType as a internal indicator for class not found.
 				return mHasFallback ? new FallbackInvokable<>(mFallbackReturnValue) : null;
 
 			final int modifiers; Invokable<C> invokable; final AccessibleObject accessible; final Class<?>[] ex_types;
 			try {
 				if (mName != null) {
-					final Method candidate = mClass.getDeclaredMethod(mName, param_types); Method method = candidate;
+					final Method candidate = mClass.getRawClass().getDeclaredMethod(mName, param_types); Method method = candidate;
 					ex_types = candidate.getExceptionTypes();
 					modifiers = method.getModifiers();
 					if (Modifier.isStatic(mModifiers) != Modifier.isStatic(candidate.getModifiers())) {
@@ -660,7 +661,7 @@ public class Hack {
 						accessible = method;
 					} else { invokable = null; accessible = null; }
 				} else {
-					final Constructor<C> ctor = mClass.getDeclaredConstructor(param_types);
+					final Constructor<C> ctor = mClass.getRawClass().getDeclaredConstructor(param_types);
 					modifiers = ctor.getModifiers(); invokable = new InvokableConstructor<>(ctor); accessible = ctor;
 					ex_types = ctor.getExceptionTypes();
 				}
@@ -697,7 +698,7 @@ public class Hack {
 			return invokable;
 		}
 
-		private final Class<C> mClass;
+		private final HackedClass<C> mClass;
 		private final @Nullable String mName;		// Null for constructor
 		private final int mModifiers;
 		private Class<?> mReturnType;
@@ -724,6 +725,7 @@ public class Hack {
 			return method.invoke(target, args);
 		}
 
+		@Override public boolean isAbsent() { return false; }
 		@Override public @NonNull String toString() { return method.toString(); }
 
 		private final Method method;
@@ -738,6 +740,7 @@ public class Hack {
 			return constructor.newInstance(args);
 		}
 
+		@Override public boolean isAbsent() { return false; }
 		@Override public @NonNull String toString() { return constructor.toString(); }
 
 		private final Constructor<C> constructor;
@@ -747,9 +750,8 @@ public class Hack {
 
 		FallbackInvokable(final @Nullable Object value) { mValue = value; }
 
-		@Override public Object invoke(final @Nullable C target, final Object[] args) {
-			return mValue;
-		}
+		@Override public Object invoke(final @Nullable C target, final Object[] args) { return mValue; }
+		@Override public boolean isAbsent() { return true; }
 
 		private final @Nullable Object mValue;
 	}
@@ -762,54 +764,68 @@ public class Hack {
 		}
 
 		@Override public Object invoke(final @Nullable C target, final Object[] args) throws InvocationTargetException, IllegalAccessException, InstantiationException {
-			//noinspection ConstantConditions, since fallback is provided
-			return mMethod.findInvokable(mParamTypes).invoke(target, args);
+			return resolveIfNotYet().invoke(target, args);
+		}
+
+		@Override public boolean isAbsent() {
+			return resolveIfNotYet().isAbsent();
+		}
+
+		private Invokable<C> resolveIfNotYet() {
+			if (mResolved == null) mResolved = mMethod.findInvokable(mParamTypes);
+			return mResolved;
 		}
 
 		private final HackedMethodImpl<?, C, ?, ?, ?> mMethod;
 		private final Class<?>[] mParamTypes;
+		private Invokable<C> mResolved;
 	}
 
 	public static class HackedClass<C> {
 
 		public @CheckResult <T> MemberFieldToHack<C> field(final @NonNull String name) {
-			return new MemberFieldToHack<>(mClass, name, 0);
+			return new MemberFieldToHack<>(this, name, 0);
 		}
 
 		public @CheckResult <T> StaticFieldToHack<C> staticField(final @NonNull String name) {
-			return new StaticFieldToHack<>(mClass, name, Modifier.STATIC);
+			return new StaticFieldToHack<>(this, name, Modifier.STATIC);
 		}
 
 		public @CheckResult HackedMethod<Void, C, Unchecked, Unchecked, Unchecked> method(final String name) {
-			return new HackedMethodImpl<>(mClass, name, 0);
+			return new HackedMethodImpl<>(this, name, 0);
 		}
 
 		public @CheckResult HackedMethod<Void, Void, Unchecked, Unchecked, Unchecked> staticMethod(final String name) {
-			return new HackedMethodImpl<>(mClass, name, Modifier.STATIC);
+			return new HackedMethodImpl<>(this, name, Modifier.STATIC);
 		}
 
 		public @CheckResult NonNullHackedInvokable<C, Void, Unchecked, Unchecked, Unchecked> constructor() {
-			final HackedMethodImpl<C, Void, Unchecked, Unchecked, Unchecked> constructor = new HackedMethodImpl<>(mClass, null, 0);
+			final HackedMethodImpl<C, Void, Unchecked, Unchecked, Unchecked> constructor = new HackedMethodImpl<>(this, null, 0);
 			return constructor.fallbackReturning(null);	// Always fallback to null.
 		}
 
-		HackedClass(final Class<C> clazz) { mClass = clazz; }
+		@SuppressWarnings("unchecked") private Class<C> getRawClass() {
+			try { //noinspection ConstantConditions
+				return mClass != null ? mClass : (mClass = (Class<C>) Class.forName(mClassName));
+			} catch (final ClassNotFoundException e) {
+				fail(new AssertionException(e));
+				return (Class) ANY_TYPE;		// Use AnyType as a lazy trick to make fallback working and avoid null.
+			}
+		}
 
-		private final Class<C> mClass;
+		HackedClass(final Class<C> clazz) { mClass = clazz; mClassName = null; }
+		HackedClass(final String classname) { mClassName = classname; }
+
+		private @Nullable Class<C> mClass;
+		private final String mClassName;
 	}
 
 	public static <T> HackedClass<T> into(final @NonNull Class<T> clazz) {
 		return new HackedClass<>(clazz);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <T> HackedClass<T> into(final String class_name) {
-		try {
-			return new HackedClass(Class.forName(class_name));
-		} catch (final ClassNotFoundException e) {
-			fail(new AssertionException(e));
-			return new HackedClass(ANY_TYPE);		// Use AnyType as a lazy trick to make fallback working and avoid null.
-		}
+		return new HackedClass<>(class_name);
 	}
 
 	@SuppressWarnings("unchecked") public static <C> Hack.HackedClass<C> onlyIf(final boolean condition, final Hacking<Hack.HackedClass<C>> hacking) {
