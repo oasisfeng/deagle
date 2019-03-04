@@ -261,11 +261,11 @@ public class Hack {
 	public static class StaticFieldToHack<C> extends FieldToHack<C> {
 
 		/** Assert the field type. */
-		public @Nullable <T> HackedTargetField<T> ofType(final Class<T> type) {
+		public @Nullable <T> HackedStaticField<T> ofType(final Class<T> type) {
 			return ofType(type, false, null);
 		}
 
-		public @Nullable <T> HackedTargetField<T> ofType(final String type_name) {
+		public @Nullable <T> HackedStaticField<T> ofType(final String type_name) {
 			try { //noinspection unchecked
 				return ofType((Class<T>) Class.forName(type_name, false, mClass.getRawClass().getClassLoader()));
 			} catch (final ClassNotFoundException e) {
@@ -275,16 +275,16 @@ public class Hack {
 		}
 
 		/** Fallback to the given value if this field is unavailable at runtime */
-		public @NonNull <T> HackedTargetField<T> fallbackTo(final @Nullable T value) {
+		public @NonNull <T> HackedStaticField<T> fallbackTo(final @Nullable T value) {
 			@SuppressWarnings("unchecked") final Class<T> type = value == null ? null : (Class<T>) value.getClass();
 			//noinspection ConstantConditions
 			return ofType(type, true, value);
 		}
 
-		private <T> HackedTargetField<T> ofType(final Class<T> type, final boolean fallback, final @Nullable T fallback_value) {
+		private <T> HackedStaticField<T> ofType(final Class<T> type, final boolean fallback, final @Nullable T fallback_value) {
 			if (LAZY_RESOLVE && fallback) return new LazyHackedField<>(this, type, fallback_value);
 			final Field field = findField(type);
-			return field != null ? new HackedFieldImpl<C, T>(field).onTarget(null) : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
+			return field != null ? new HackedFieldImpl<C, T>(field).statically() : fallback ? new FallbackField<C, T>(type, fallback_value) : null;
 		}
 
 		/** @param modifiers the modifiers this field must have */
@@ -308,13 +308,17 @@ public class Hack {
 		boolean isAbsent();
 	}
 
+	public interface HackedStaticField<T> extends HackedTargetField<T> {}
+
 	private static class HackedFieldImpl<C, T> implements HackedField<C, T> {
 
 		@Override public HackedTargetFieldImpl<T> on(final C target) {
 			return onTarget(target);
 		}
 
-		private HackedTargetFieldImpl<T> onTarget(final @Nullable C target) { return new HackedTargetFieldImpl<>(mField, target); }
+		private HackedTargetFieldImpl<T> onTarget(final C target) { return new HackedTargetFieldImpl<>(mField, target); }
+
+		private HackedStaticFieldImpl<T> statically() { return new HackedStaticFieldImpl<>(mField); }
 
 		/** Get current value of this field */
 		@Override public T get(final C instance) {
@@ -347,7 +351,7 @@ public class Hack {
 		private final @NonNull Field mField;
 	}
 
-	private static class FallbackField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
+	private static class FallbackField<C, T> implements HackedField<C, T>, HackedStaticField<T> {
 
 		@Override public T get(final C instance) { return mValue; }
 		@Override public void set(final C instance, final @Nullable T value) {}
@@ -363,7 +367,7 @@ public class Hack {
 		private final T mValue;
 	}
 
-	private static class LazyHackedField<C, T> implements HackedField<C, T>, HackedTargetField<T> {
+	private static class LazyHackedField<C, T> implements HackedField<C, T>, HackedStaticField<T> {
 
 		@Override public T get(final C instance) { return delegate.get().get(instance); }
 		@Override public void set(final C instance, final @Nullable T value) { delegate.get().set(instance, value); }
@@ -414,6 +418,10 @@ public class Hack {
 
 		private final Field mField;
 		private final Object mInstance;		// Instance type is already checked
+	}
+
+	public static class HackedStaticFieldImpl<T> extends HackedTargetFieldImpl<T> implements HackedStaticField<T> {
+		HackedStaticFieldImpl(final Field field) { super(field, null); }
 	}
 
 	public interface HackedInvokable<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
@@ -470,7 +478,7 @@ public class Hack {
 	public static class CheckedHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
 
 		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
-		protected HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
+		private HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
 		/** Whether this hack is absent, thus will be fallen-back when invoked */
 		public boolean isAbsent() { return mInvokable.isAbsent(); }
 
