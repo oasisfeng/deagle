@@ -98,7 +98,7 @@ public class UserHandles {
 	/**
 	 * Returns the userId stored in this UserHandle. (same as UserHandle.getIdentifier())
 	 */
-	public static int getIdentifier(final UserHandle handle) {
+	public static @UserIdInt int getIdentifier(final UserHandle handle) {
 		return handle.hashCode();		// So far so good
 	}
 }
