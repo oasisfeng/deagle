@@ -108,7 +108,7 @@ public class Services {
 		final IBinder binder = peekService(context, buildServiceIntent(context, service_interface));
 		if (binder == null) return null;
 		try {	//noinspection unchecked
-			return (I) service_interface.getMethod("asInterface", IBinder.class).invoke(binder);
+			return (I) service_interface.getMethod("asInterface", IBinder.class).invoke(null, binder);
 		} catch (final Exception e) {
 			Log.e(TAG, "Error calling " + service_interface.getCanonicalName() + ".asInterface() on " + binder, e);
 			return null;
