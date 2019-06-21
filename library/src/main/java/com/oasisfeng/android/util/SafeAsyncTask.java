@@ -12,31 +12,40 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.annotation.Nullable;
+
 import androidx.fragment.app.FragmentActivity;
+import java9.util.function.BiConsumer;
 
 /**
  * Protect against NPE when calling {@link Fragment#getActivity()} in {@link AsyncTask}.
  *
- * Note: Avoiding memory leak is not the purpose of this class. Please consider using lambda (with RetroLambda)
+ * Note: Avoiding memory leak is not the purpose of this class. Consider using non-instance-capturing lambda instead of anonymous inner class.
  *
  * @author Oasis
  */
 public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
 
 	@SuppressLint("StaticFieldLeak")	// AsyncTask here is actually "static", but the two callbacks are probably not.
-	public static <T> void execute(final Activity activity, final Function<Activity, T> background, final Consumer<T> finish) {
+	public static <T> void execute(final Activity activity, final Function<Activity, T> task, final BiConsumer<Activity, T> finish) {
 		final WeakReference<Activity> reference = new WeakReference<>(activity);
 		new AsyncTask<Void, Void, T>() {
 			@Override protected T doInBackground(final Void... voids) {
 				final Activity activity = ifActive(reference.get());
-				return activity != null ? background.apply(activity) : null;
+				return activity != null ? task.apply(activity) : null;
 			}
 
 			@Override protected void onPostExecute(final T result) {
-				finish.accept(result);
+				final Activity activity = ifActive(reference.get());
+				if (activity != null) finish.accept(activity, result);
 			}
 		}.execute();
 	}
+
+	public static void execute(final Activity activity, final Consumer<Activity> task, final Consumer<Activity> finish) {
+		execute(activity, a -> { task.accept(a); return a; }, (a, r) -> finish.accept(a));
+	}
+
 	public static void execute(final Activity activity, final Consumer<Activity> runnable) {
 		final WeakReference<Activity> reference = new WeakReference<>(activity);
 		AsyncTask.execute(new SafeTask<>(() -> ifActive(reference.get()), runnable));
@@ -135,7 +144,7 @@ public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<
     }
 
     /** Check activity status to avoid crash due to referencing activity which is no longer available. */
-    private static Activity ifActive(final Activity activity) {
+    private static @Nullable Activity ifActive(final Activity activity) {
 	    return activity == null || activity.isFinishing() || activity.isDestroyed() ? null : activity;
     }
 
