@@ -18,6 +18,8 @@ public class NonNullMutableLiveData<T> extends MutableLiveData<T> {
 		super.setValue(Objects.requireNonNull(value));
 	}
 
+	public void notifyChange() { super.postValue(super.getValue()); }
+
 	@SuppressWarnings("ConstantConditions") @NonNull @Override public T getValue() {
 		return super.getValue();
 	}
