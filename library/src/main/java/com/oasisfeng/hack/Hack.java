@@ -226,7 +226,7 @@ public class Hack {
 						return source_result;
 					} else {
 						final Class<?> mirror_return_type = mirror_method.getReturnType();
-						if (mirror_return_type.isAssignableFrom(source_result.getClass())) return source_result;
+						if (mirror_return_type.isPrimitive() || mirror_return_type.isAssignableFrom(source_result.getClass())) return source_result;
 						//noinspection unchecked
 						return into(source_result).with((Class) mirror_return_type);
 					}
