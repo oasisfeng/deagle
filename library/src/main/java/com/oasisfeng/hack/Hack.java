@@ -2,6 +2,7 @@ package com.oasisfeng.hack;
 
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.oasisfeng.android.util.Supplier;
 import com.oasisfeng.android.util.Suppliers;
@@ -32,6 +33,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.O;
+import static java.lang.Character.toLowerCase;
+
 /**
  * Java reflection helper optimized for hacking non-public APIs.
  * The core design philosophy behind is compile-time consistency enforcement.
@@ -60,6 +65,7 @@ public class Hack {
 	 * <pre>
 	 * interface HiddenClass extends Mirror&lt;com.foo.HiddenClass&gt; {
 	 *     void foo(int x);
+	 *     int getValue();		// Mirror getter for member field "value" (setter can be defined too)
 	 *     static int bar(String name) {
 	 *         return Hack.mirrorStaticMethod("bar", -1, name);
 	 *     }
@@ -196,7 +202,8 @@ public class Hack {
 			for (final Method mirror_method : inner_class.getMethods()) try {
 				findSourceMethodForMirror(mirror_method, source_class);
 			} catch (final NoSuchMethodException e) {
-				fail(new AssertionException(e));
+				if (extractFieldGetterOrSetterFromMethod(mirror_method, source_class) != null) continue;
+				fail(new AssertionException(e).setHackedClass(into(inner_class)));
 			}
 			verifyAllMirrorsIn(inner_class);    // Only Mirror class may contain inner Mirror classes
 		}
@@ -214,7 +221,19 @@ public class Hack {
 						final Method source_method = findSourceMethodForMirror(mirror_method, source_class);	// TODO: Cache
 						source_method.setAccessible(true);
 						source_result = source_method.invoke(mSource, args);
-					} catch (final IllegalAccessException/* should not happen */| NoSuchMethodException e) {
+					} catch (final NoSuchMethodException e) {
+						final String mirror_method_name = mirror_method.getName(); final boolean is_getter; final char first_char;
+						final Pair<Boolean, Field> accessor = extractFieldGetterOrSetterFromMethod(mirror_method, source_class);	// TODO: Cache
+						if (accessor != null) {
+							final Field field = accessor.second;
+							field.setAccessible(true);
+							if (! accessor.first) {		// Setter
+								field.set(mSource, args[0]);
+								return null;
+							} else return field.get(mSource);
+						}
+						return fallback(mirror_method);
+					} catch (final IllegalAccessException e) {
 						return fallback(mirror_method);
 					} catch (final InvocationTargetException e) {
 						throw e.getTargetException();
@@ -261,6 +280,25 @@ public class Hack {
 	// TODO: Support params in type Object (as placeholder) with @ClassName annotation
 	private static Method findSourceMethodForMirror(final Method mirror_method, final Class<?> source_class) throws NoSuchMethodException {
 		return source_class.getDeclaredMethod(mirror_method.getName(), mirror_method.getParameterTypes());
+	}
+
+	private static @Nullable Pair<Boolean, Field> extractFieldGetterOrSetterFromMethod(final Method mirror_method, final Class<?> source_class) {
+		final String mirror_method_name = mirror_method.getName(); final char first_char;
+		if (mirror_method_name.length() > 3 && Character.isUpperCase(first_char = mirror_method_name.charAt(3))) {
+			final boolean is_getter = mirror_method_name.startsWith("get");
+			if (is_getter) {
+				if (getParameterCount(mirror_method) != 0) return null;		// Getter should have no parameter
+			} else if (! mirror_method_name.startsWith("set") || getParameterCount(mirror_method) != 1) return null;
+			try {
+				final Field field = source_class.getDeclaredField(toLowerCase(first_char) + mirror_method_name.substring(4));
+				return new Pair<>(is_getter, field);
+			} catch (final NoSuchFieldException ignored) {}
+		}
+		return null;
+	}
+
+	private static int getParameterCount(final Method mirror_method) {
+		return SDK_INT >= O ? mirror_method.getParameterCount() : mirror_method.getParameterTypes().length;
 	}
 
 	public static class AssertionException extends Throwable {
