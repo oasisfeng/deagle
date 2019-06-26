@@ -8,6 +8,8 @@ import com.oasisfeng.android.util.Suppliers;
 import com.oasisfeng.deagle.BuildConfig;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -68,6 +70,7 @@ public class Hack {
 	 * @see #mirrorStaticMethod(String, Object, Object...)
 	 */
 	public interface Mirror<T> {}
+	@Retention(RetentionPolicy.RUNTIME) public @interface SourceClass { String value(); }
 
 	public interface HackedObject {
 		<T, M extends Mirror<T>> M with(final Class<M> mirror_class);
@@ -165,6 +168,13 @@ public class Hack {
 			//noinspection unchecked
 			return (Class<T>) source_type;
 		} else {
+			final SourceClass target_class = mirror_class.getAnnotation(SourceClass.class);
+			if (target_class != null) try { //noinspection unchecked
+				return (Class<T>) Class.forName(target_class.value());
+			} catch (final ClassNotFoundException e) {
+				return null;
+			}
+
 			final Class<?> enclosing_class = mirror_class.getEnclosingClass();
 			@SuppressWarnings("unchecked") final Class source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class) enclosing_class) : null;
 			if (source_enclosing_class == null)
@@ -201,7 +211,7 @@ public class Hack {
 				@Override public Object invoke(final Object proxy, final Method mirror_method, final Object[] args) throws Throwable {
 					final Object source_result;
 					try {
-						final Method source_method = findSourceMethodForMirror(mirror_method, source_class);
+						final Method source_method = findSourceMethodForMirror(mirror_method, source_class);	// TODO: Cache
 						source_method.setAccessible(true);
 						source_result = source_method.invoke(mSource, args);
 					} catch (final IllegalAccessException/* should not happen */| NoSuchMethodException e) {
