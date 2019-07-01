@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
@@ -30,6 +31,5 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <em>not</em> the same as a UID.
  */
 @Retention(SOURCE)
-@Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE})
-public @interface UserIdInt {
-}
+@Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE, TYPE_USE})
+public @interface UserIdInt {}
