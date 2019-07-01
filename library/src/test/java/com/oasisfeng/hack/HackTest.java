@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 import static com.oasisfeng.hack.Hack.ANY_TYPE;
 import static org.junit.Assert.assertEquals;
@@ -141,12 +140,8 @@ public class HackTest {
 		assertEquals(-1, (int) fallback_field.get(simple));
 	}
 
-	@Test public void testLazy() throws NoSuchFieldException, IllegalAccessException {
-		//noinspection JavaReflectionMemberAccess
-		final Field Hack_LAZY_RESOLVE = Hack.class.getDeclaredField("LAZY_RESOLVE");
-		Hack_LAZY_RESOLVE.setAccessible(true);
-		Hack_LAZY_RESOLVE.set(null, true);
-
+	@Test public void testLazy() {
+		Hack.LAZY_RESOLVE = true;
 		Hack.setAssertionFailureHandler(e -> fail(e.toString()));
 		final Hack.HackedMethod0<Void, Object, Unchecked, Unchecked, Unchecked> method = Hack.into("nonexistent.Class").method("foo").fallbackReturning(null).withoutParams();
 		Hack.setAssertionFailureHandler(null);

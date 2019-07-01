@@ -20,6 +20,10 @@ public class Toasts {
 
 	private final static Looper MAIN_LOOPER = Looper.getMainLooper();
 
+	public static void showLong(final Context context, final CharSequence text) {
+		show(context, text, Toast.LENGTH_LONG);
+	}
+
 	public static void showLong(final Context context, final @StringRes int text) {
 		show(context, text, Toast.LENGTH_LONG);
 	}

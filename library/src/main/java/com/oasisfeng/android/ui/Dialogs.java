@@ -38,6 +38,10 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 		Builder(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
 	}
 
+	public static @CheckResult FluentProgressDialog buildProgress(final Activity activity, final @StringRes int message) {
+		return buildProgress(activity, activity.getText(message));
+	}
+
 	public static @CheckResult FluentProgressDialog buildProgress(final Activity activity, final CharSequence message) {
 		final FluentProgressDialog dialog = new FluentProgressDialog(activity);
 		dialog.setMessage(message);
