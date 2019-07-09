@@ -10,27 +10,14 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ViewModelStore;
-import androidx.lifecycle.ViewModelStoreOwner;
-
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.M;
 
 /**
- * Extends the native {@link Fragment} with compatibility for lifecycle and view-model in Android Jet Pack.
+ * Extends the native {@link Fragment} with compatibility for lifecycle in Android Jet Pack.
  *
  * Created by Oasis on 2018/5/17.
  */
 @ParametersAreNonnullByDefault
-public class LifecycleFragment extends Fragment implements LifecycleOwner, ViewModelStoreOwner {
-
-	@Override public @NonNull ViewModelStore getViewModelStore() {
-		if ((SDK_INT >= M ? getContext() : getActivity()) == null) throw new IllegalStateException("Can't access ViewModels from detached fragment");
-		if (mViewModelStore == null) mViewModelStore = new ViewModelStore();
-		return mViewModelStore;
-	}
-
-	private ViewModelStore mViewModelStore;		// TODO: Retain across configuration changes
+public class LifecycleFragment extends Fragment implements LifecycleOwner {
 
 	@Override public void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);

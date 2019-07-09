@@ -8,28 +8,13 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ViewModelStore;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 /**
- * Extends the native {@link Activity} with compatibility for lifecycle and view-model in Android Jet Pack.
+ * Extends the native {@link Activity} with compatibility for lifecycle in Android Jet Pack.
  *
  * Created by Oasis on 2018/5/17.
  */
-public class LifecycleActivity extends Activity implements LifecycleOwner, ViewModelStoreOwner {
-
-	@Override public @NonNull ViewModelStore getViewModelStore() {
-		if (getApplication() == null) {
-			throw new IllegalStateException("Your activity is not yet attached to the "
-					+ "Application instance. You can't request ViewModel before onCreate call.");
-		}
-		if (mViewModelStore == null) {
-			mViewModelStore = new ViewModelStore();
-		}
-		return mViewModelStore;
-	}
-
-	private ViewModelStore mViewModelStore;
+public class LifecycleActivity extends Activity implements LifecycleOwner {
 
 	/* Lifecycle */
 

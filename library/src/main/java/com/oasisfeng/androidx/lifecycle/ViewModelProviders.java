@@ -20,8 +20,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Fragment;
 
-import com.oasisfeng.android.app.LifecycleActivity;
-import com.oasisfeng.android.app.LifecycleFragment;
+import com.oasisfeng.android.app.LifecycleViewModelActivity;
+import com.oasisfeng.android.app.LifecycleViewModelFragment;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -65,7 +65,7 @@ public class ViewModelProviders {
 	 */
 	@NonNull
 	@MainThread
-	public static ViewModelProvider of(@NonNull LifecycleFragment fragment) {
+	public static ViewModelProvider of(@NonNull LifecycleViewModelFragment fragment) {
 		return of(fragment, null);
 	}
 
@@ -80,7 +80,7 @@ public class ViewModelProviders {
 	 */
 	@NonNull
 	@MainThread
-	public static ViewModelProvider of(@NonNull LifecycleActivity activity) {
+	public static ViewModelProvider of(@NonNull LifecycleViewModelActivity activity) {
 		return of(activity, null);
 	}
 
@@ -96,7 +96,7 @@ public class ViewModelProviders {
 	 */
 	@NonNull
 	@MainThread
-	public static ViewModelProvider of(@NonNull LifecycleFragment fragment, @Nullable ViewModelProvider.Factory factory) {
+	public static ViewModelProvider of(@NonNull LifecycleViewModelFragment fragment, @Nullable ViewModelProvider.Factory factory) {
 		Application application = checkApplication(checkActivity(fragment));
 		if (factory == null) {
 			factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application);
@@ -116,7 +116,7 @@ public class ViewModelProviders {
 	 */
 	@NonNull
 	@MainThread
-	public static ViewModelProvider of(@NonNull LifecycleActivity activity,
+	public static ViewModelProvider of(@NonNull LifecycleViewModelActivity activity,
 									   @Nullable ViewModelProvider.Factory factory) {
 		Application application = checkApplication(activity);
 		if (factory == null) {
