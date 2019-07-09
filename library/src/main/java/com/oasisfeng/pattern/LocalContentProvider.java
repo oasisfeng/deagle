@@ -6,9 +6,10 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.support.annotation.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import androidx.annotation.Nullable;
 
 /**
  * Local Content Provider Pattern:

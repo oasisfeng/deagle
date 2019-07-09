@@ -11,8 +11,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Process;
-import android.support.annotation.CheckResult;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.oasisfeng.android.content.pm.Permissions;
@@ -22,6 +20,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
 
 import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -164,7 +165,7 @@ public class Apps {
             final List<ResolveInfo> resolves = mContext.getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN)
                     .addCategory(CATEGORY_LAUNCHER).setPackage(pkg), MATCH_ANY_USER | GET_UNINSTALLED_PACKAGES | GET_DISABLED_COMPONENTS);
             if (resolves != null && ! resolves.isEmpty()) return resolves.get(0).activityInfo.applicationInfo;
-            return null;    // TODO: Try AndroidX internal provider?
+            return null;    // TODO: Try AndroidX internal provider: android.arch.lifecycle.ProcessLifecycleOwnerInitializer?
         }
     }
 

@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 27
 
-        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -21,16 +21,15 @@ android {
 }
 
 dependencies {
-    api 'net.sourceforge.streamsupport:android-retrostreams:1.6.3'
-    api 'net.sourceforge.streamsupport:android-retrofuture:1.6.3'
-    implementation 'com.google.code.findbugs:jsr305:3.0.1'
-    implementation 'com.android.support:design:27.1.1'             // class BottomSheetBindingAdapter
-    implementation 'com.android.support:appcompat-v7:27.1.1'       // class Dialogs
-    implementation 'com.android.support:customtabs:27.1.1'         // class WebContent
-    implementation 'com.android.support:recyclerview-v7:27.1.1'    // class RecyclerViewBindings & BindingRecyclerViewAdapter
-    implementation 'android.arch.lifecycle:livedata-core:1.1.0'    // package com.oasisfeng.androidx.lifecycle (keep from 1.1.1 to avoid dependency conflict with data-binding)
-    implementation 'android.arch.lifecycle:viewmodel:1.1.0'        // class LifecycleFragment
+    implementation 'net.sourceforge.streamsupport:android-retrostreams:1.7.0'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'          // Reference to class ParametersAreNonnullByDefault
+    implementation 'androidx.browser:browser:1.0.0'                 // class WebContent (not yet fully decoupled for "runtimeOnly"
+    runtimeOnly 'androidx.lifecycle:lifecycle-viewmodel:2.0.0'      // class LifecycleViewModelActivity, LifecycleViewModelFragment
+    runtimeOnly 'androidx.lifecycle:lifecycle-livedata-core:2.0.0'  // class NonNullMutableLiveData
+    runtimeOnly 'androidx.appcompat:appcompat:1.0.2'                // class Dialogs
+    runtimeOnly 'androidx.recyclerview:recyclerview:1.0.0'          // class RecyclerViewBindings & BindingRecyclerViewAdapter
+    runtimeOnly 'com.google.android.material:material:1.0.0'        // class BottomSheetBindingAdapter
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
 }

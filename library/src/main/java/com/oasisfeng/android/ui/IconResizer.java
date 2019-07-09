@@ -10,7 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.support.annotation.UiThread;
+import androidx.annotation.UiThread;
 
 /**
  * Utility class to resize icons to match default icon size.

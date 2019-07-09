@@ -6,9 +6,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
-import android.support.annotation.RequiresApi;
 
 import java.util.Objects;
+
+import androidx.annotation.RequiresApi;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -34,15 +35,19 @@ import static android.os.Build.VERSION_CODES.O;
 		return info;
 	}
 
-	@RequiresApi(N) @SuppressLint("NewApi")
+	@RequiresApi(N)
 	public ApplicationInfo getApplicationInfoNoThrows(final String pkg, final int flags, final UserHandle user) {
+		return getApplicationInfoNoThrows(mLauncherApps, pkg, flags, user);
+	}
+
+	@RequiresApi(N) @SuppressLint("NewApi")
+	public static ApplicationInfo getApplicationInfoNoThrows(final LauncherApps la, final String pkg, final int flags, final UserHandle user) {
 		try {
-			return mLauncherApps.getApplicationInfo(pkg, flags, user);
+			return la.getApplicationInfo(pkg, flags, user);
 		} catch (final PackageManager.NameNotFoundException e) {
 			return null;
 		}
 	}
-
 	public final LauncherApps get() {
 		return mLauncherApps;
 	}

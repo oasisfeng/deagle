@@ -1,34 +1,20 @@
 package com.oasisfeng.android.app;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LifecycleRegistry;
-import android.arch.lifecycle.ViewModelStore;
-import android.arch.lifecycle.ViewModelStoreOwner;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 /**
- * Extends the native {@link Activity} with compatibility for lifecycle and view-model in Android Jet Pack.
+ * Extends the native {@link Activity} with compatibility for lifecycle in Android Jet Pack.
  *
  * Created by Oasis on 2018/5/17.
  */
-public class LifecycleActivity extends Activity implements LifecycleOwner, ViewModelStoreOwner {
-
-	@Override public @NonNull ViewModelStore getViewModelStore() {
-		if (getApplication() == null) {
-			throw new IllegalStateException("Your activity is not yet attached to the "
-					+ "Application instance. You can't request ViewModel before onCreate call.");
-		}
-		if (mViewModelStore == null) {
-			mViewModelStore = new ViewModelStore();
-		}
-		return mViewModelStore;
-	}
-
-	private ViewModelStore mViewModelStore;
+public class LifecycleActivity extends Activity implements LifecycleOwner {
 
 	/* Lifecycle */
 

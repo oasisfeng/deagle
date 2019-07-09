@@ -1,8 +1,9 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.databinding.BindingAdapter;
 
 /**
  * Complementary binding adapter for {@link View}

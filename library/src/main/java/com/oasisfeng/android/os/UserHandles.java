@@ -3,11 +3,12 @@ package com.oasisfeng.android.os;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UserHandle;
-import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 
 import com.oasisfeng.android.annotation.AppIdInt;
 import com.oasisfeng.android.annotation.UserIdInt;
+
+import androidx.annotation.VisibleForTesting;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.N;
@@ -97,7 +98,7 @@ public class UserHandles {
 	/**
 	 * Returns the userId stored in this UserHandle. (same as UserHandle.getIdentifier())
 	 */
-	public static int getIdentifier(final UserHandle handle) {
+	public static @UserIdInt int getIdentifier(final UserHandle handle) {
 		return handle.hashCode();		// So far so good
 	}
 }

@@ -13,14 +13,15 @@ import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
-import android.support.annotation.CheckResult;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
 
 /**
  * Simplify the AIDL service usage
@@ -107,7 +108,7 @@ public class Services {
 		final IBinder binder = peekService(context, buildServiceIntent(context, service_interface));
 		if (binder == null) return null;
 		try {	//noinspection unchecked
-			return (I) service_interface.getMethod("asInterface", IBinder.class).invoke(binder);
+			return (I) service_interface.getMethod("asInterface", IBinder.class).invoke(null, binder);
 		} catch (final Exception e) {
 			Log.e(TAG, "Error calling " + service_interface.getCanonicalName() + ".asInterface() on " + binder, e);
 			return null;

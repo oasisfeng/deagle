@@ -1,8 +1,8 @@
 package com.oasisfeng.android.databinding;
 
-import android.databinding.BindingMethod;
-import android.databinding.BindingMethods;
-import android.support.v7.widget.Toolbar;
+import androidx.databinding.BindingMethod;
+import androidx.databinding.BindingMethods;
+import androidx.appcompat.widget.Toolbar;
 
 /**
  * Binding adapter for {@link Toolbar} (support-library version)

@@ -1,12 +1,14 @@
 package com.oasisfeng.android.databinding.adapters;
 
 import android.content.res.ColorStateList;
-import android.databinding.BindingAdapter;
-import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.BindingAdapter;
 
 /**
  * Binding adapter for {@link FloatingActionButton}

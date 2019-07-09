@@ -1,9 +1,9 @@
 package com.oasisfeng.androidx.lifecycle;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.support.annotation.NonNull;
-
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 /**
  * Created by Oasis on 2018/5/14.
@@ -17,6 +17,8 @@ public class NonNullMutableLiveData<T> extends MutableLiveData<T> {
 	@Override public void setValue(final @NonNull T value) {
 		super.setValue(Objects.requireNonNull(value));
 	}
+
+	public void notifyChange() { super.postValue(super.getValue()); }
 
 	@SuppressWarnings("ConstantConditions") @NonNull @Override public T getValue() {
 		return super.getValue();

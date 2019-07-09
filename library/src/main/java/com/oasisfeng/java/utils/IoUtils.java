@@ -1,9 +1,9 @@
 package com.oasisfeng.java.utils;
 
-import android.support.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.InputStream;
+
+import androidx.annotation.Nullable;
 
 /** Simple static methods to perform common IO operations. */
 public final class IoUtils {

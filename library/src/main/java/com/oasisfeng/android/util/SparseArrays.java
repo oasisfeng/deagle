@@ -1,11 +1,12 @@
 package com.oasisfeng.android.util;
 
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 
 import java.util.Iterator;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * Utilities for {@link android.util.SparseIntArray}

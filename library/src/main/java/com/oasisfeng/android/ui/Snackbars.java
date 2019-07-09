@@ -1,18 +1,29 @@
 package com.oasisfeng.android.ui;
 
+import android.app.Activity;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.CheckResult;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.oasisfeng.deagle.R;
+
+import androidx.annotation.CheckResult;
 
 /** @author Oasis */
 public class Snackbars {
 
 	private static final int DEFAULT_DURATION = 10_000;
 	private static final int KMaxLines = 3;
+
+	/** Try to find {@link androidx.coordinatorlayout.widget.CoordinatorLayout CoordinatorLayout} with ID {@link R.id#coordinator coordinator} */
+	@CheckResult public static Snackbar make(final Activity activity, final int text_res, final Additional... additional) {
+		View coordinator = activity.findViewById(R.id.coordinator);
+		if (coordinator == null) coordinator = activity.findViewById(android.R.id.content);
+		return make(coordinator, text_res, additional);
+	}
 
 	@CheckResult public static Snackbar make(final View coordinator, final int text_res, final Additional... additional) {
 		final Snackbar snackbar = Snackbar.make(coordinator, text_res, DEFAULT_DURATION);
@@ -68,7 +79,7 @@ public class Snackbars {
 
 	private static Snackbar tweak(final Snackbar snackbar) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) snackbar.getView().setZ(999);
-		final TextView msg_view = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+		final TextView msg_view = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
 		msg_view.setMaxLines(KMaxLines);	// Extend max lines
 		msg_view.setTextColor(0xffffffff);	// Workaround the light theme conflict
 		return snackbar;

@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import androidx.annotation.Nullable;
 
 /**
  * Make changes of SharedPreferences in one process propagate to all other processes with the same SharedPreferences (only after commit/apply).

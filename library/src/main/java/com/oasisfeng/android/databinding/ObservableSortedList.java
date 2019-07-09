@@ -1,13 +1,13 @@
 package com.oasisfeng.android.databinding;
 
-import android.databinding.ListChangeRegistry;
-import android.databinding.ObservableList;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.util.SortedList;
-
 import java.util.AbstractList;
 import java.util.Collection;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.ListChangeRegistry;
+import androidx.databinding.ObservableList;
+import androidx.recyclerview.widget.SortedList;
 
 /**
  * Observable wrapper of {@link SortedList}, which implements {@link ObservableList}.
@@ -17,9 +17,9 @@ import java.util.Collection;
 public class ObservableSortedList<T extends ObservableSortedList.Sortable<? super T>> extends AbstractList<T> implements ObservableList<T> {
 
 	public interface Sortable<T> extends Comparable<T> {
-		/** @see android.support.v7.util.SortedList.Callback#areItemsTheSame(Object, Object) */
+		/** @see androidx.recyclerview.widget.SortedList.Callback#areItemsTheSame(Object, Object) */
 		boolean isSameAs(T another);
-		/** @see android.support.v7.util.SortedList.Callback#areContentsTheSame(Object, Object) */
+		/** @see androidx.recyclerview.widget.SortedList.Callback#areContentsTheSame(Object, Object) */
 		boolean isContentSameAs(T another);
 	}
 

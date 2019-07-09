@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.support.annotation.CheckResult;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.annotation.StringRes;
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.StringRes;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
@@ -36,6 +36,10 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 		}
 		public @CheckResult Builder withCancelButton() { setNegativeButton(android.R.string.cancel, null); return this; }
 		Builder(final Context context) { super(context, android.R.style.Theme_Material_Light_Dialog_Alert); }
+	}
+
+	public static @CheckResult FluentProgressDialog buildProgress(final Activity activity, final @StringRes int message) {
+		return buildProgress(activity, activity.getText(message));
 	}
 
 	public static @CheckResult FluentProgressDialog buildProgress(final Activity activity, final CharSequence message) {

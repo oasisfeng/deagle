@@ -1,8 +1,9 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
-import android.support.annotation.StringRes;
 import android.widget.TextView;
+
+import androidx.annotation.StringRes;
+import androidx.databinding.BindingAdapter;
 
 /**
  * Extra bindings for {@link android.widget.TextView}

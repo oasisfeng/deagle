@@ -5,8 +5,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import javax.annotation.Nonnull;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Serves as a globally unique container across the application.
@@ -16,7 +19,7 @@ import android.support.annotation.Nullable;
 public class PseudoContentProvider extends ContentProvider {
 
 	/** Helper method to eliminate the nullness check. Be ware, never call it in the constructor! */
-	protected Context context() { return getContext(); }
+	@SuppressWarnings("ConstantConditions") protected @Nonnull Context context() { return getContext(); }
 
 	/* PseudoContentProvider does not provide resolver actions */
 

@@ -1,11 +1,12 @@
 package com.oasisfeng.android.databinding.adapters;
 
-import android.databinding.BindingAdapter;
-import android.support.annotation.MenuRes;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ActionMenuView;
 import android.widget.Toolbar;
+
+import androidx.annotation.MenuRes;
+import androidx.databinding.BindingAdapter;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;

@@ -1,7 +1,5 @@
 package com.oasisfeng.network;
 
-import android.support.annotation.RequiresApi;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +9,8 @@ import java.net.URL;
 import java.security.Permission;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.RequiresApi;
 
 import static android.os.Build.VERSION_CODES.N;
 
