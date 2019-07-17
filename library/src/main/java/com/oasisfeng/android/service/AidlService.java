@@ -59,7 +59,6 @@ import androidx.annotation.Nullable;
 public abstract class AidlService<Stub extends Binder & IInterface> extends Service {
 
 	public AidlService() {
-		super.onCreate();
 		final Type[] types = getActualTypeArguments(getClass());
 		final Type type = types[0];
 		if (! (type instanceof Class) || ! Binder.class.isAssignableFrom((Class) type))
