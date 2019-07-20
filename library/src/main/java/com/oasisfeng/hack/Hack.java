@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -244,15 +245,13 @@ public class Hack {
 						final Type list_type = mirror_return_type.getActualTypeArguments()[0];
 						final Class<?> list_raw_type = list_type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) list_type).getRawType()
 								: list_type instanceof Class ? (Class<?>) list_type : null;
-						if (list_raw_type != null && Mirror.class.isAssignableFrom(list_raw_type)) {		// T (in List<T>) is a Mirror class
-							final List source_result_list = ((List) source_result);
-							for (int i = 0; i < source_result_list.size(); i ++) {
-								final Object source_result_item = source_result_list.get(i);
-								if (source_result_item != null) //noinspection unchecked
-									source_result_list.set(i, into(source_result_item).with((Class) list_raw_type));	// TODO: Individual item may be derived class of the generic list type
-							}
-						}
-						return source_result;
+						if (list_raw_type == null || ! Mirror.class.isAssignableFrom(list_raw_type)) return source_result;
+						// T (in List<T>) is a Mirror class, let's transform the list items.
+						final List source_result_list = ((List) source_result), mirrored_result_list = new ArrayList(source_result_list.size());
+						for (final Object source_result_item : source_result_list)
+							if (source_result_item != null)	//noinspection unchecked
+								mirrored_result_list.add(into(source_result_item).with((Class) list_raw_type));	// TODO: Individual item may be derived class of the generic list type
+						return mirrored_result_list;
 					} else {
 						final Class<?> mirror_return_type = mirror_method.getReturnType();
 						if (mirror_return_type.isPrimitive() || mirror_return_type.isAssignableFrom(source_result.getClass())) return source_result;
