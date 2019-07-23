@@ -28,7 +28,7 @@ dependencies {
     runtimeOnly 'androidx.lifecycle:lifecycle-livedata-core:2.0.0'  // class NonNullMutableLiveData
     runtimeOnly 'androidx.appcompat:appcompat:1.0.2'                // class Dialogs
     runtimeOnly 'androidx.recyclerview:recyclerview:1.0.0'          // class RecyclerViewBindings & BindingRecyclerViewAdapter
-    runtimeOnly 'com.google.android.material:material:1.0.0'        // class BottomSheetBindingAdapter
+    implementation 'com.google.android.material:material:1.0.0'     // class BottomSheetBindingAdapter
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
