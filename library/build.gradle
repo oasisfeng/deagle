@@ -6,6 +6,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 27
+        consumerProguardFiles 'proguard-rules.pro'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

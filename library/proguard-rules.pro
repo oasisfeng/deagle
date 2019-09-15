@@ -1,0 +1,1 @@
+-keepnames interface * implements com.oasisfeng.hack.Hack$Mirror { *; }
