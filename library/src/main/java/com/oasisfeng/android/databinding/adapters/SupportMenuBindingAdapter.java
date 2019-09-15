@@ -28,7 +28,7 @@ public class SupportMenuBindingAdapter {
 
 	@BindingAdapter(value = {"menu", "menuAware"}, requireAll = false)
 	public static void inflateMenu(final Toolbar toolbar, final @MenuRes int last_menu_res, final MenuAware last_menu_aware,
-												final @MenuRes int menu_res, final MenuAware menu_aware) {
+								   final @MenuRes int menu_res, final MenuAware menu_aware) {
 		if (menu_aware != last_menu_aware && menu_aware != null) {		// setMenuCallbacks() must be called before getMenu() to take effect.
 			toolbar.setTag(R.id.menuAware, menu_aware);
 			toolbar.setMenuCallbacks(new MenuPresenter.Callback() {

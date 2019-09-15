@@ -93,11 +93,11 @@ public class Hack {
 	 *
 	 * @see Mirror
 	 */
-	public static <T, M extends Mirror<T>, R, E extends Exception> R mirrorStaticMethod(final Class<M> clazz, final String method, final R fallback, final Object... args) throws E {
-		final String tag = clazz.getName() + "#" + method;
+	public static <T, M extends Mirror<T>, R, E extends Exception> R mirrorStaticMethod(final Class<M> mirror, final String method, final R fallback, final Object... args) throws E {
+		final String tag = mirror.getName() + "#" + method;
 		Method source_method = sStaticMethodCache.get(tag);
 		if (source_method == null) {
-			source_method = findSourceStaticMethod(clazz, method, args.length);
+			source_method = findSourceStaticMethod(mirror, method, args.length);
 			if (source_method != null) source_method.setAccessible(true);
 			else source_method = NULL_METHOD;
 			sStaticMethodCache.put(tag, source_method);
