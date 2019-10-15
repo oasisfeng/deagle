@@ -1,6 +1,5 @@
 package com.oasisfeng.hack;
 
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -9,8 +8,10 @@ import com.oasisfeng.android.util.Suppliers;
 import com.oasisfeng.deagle.BuildConfig;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +67,8 @@ public class Hack {
 	 * <p>Example:</p>
 	 * <pre>
 	 * interface HiddenClass extends Mirror&lt;com.foo.HiddenClass&gt; {
-	 *     void foo(int x);
+	 *    {@literal @}Fallback(-1) int foo(int x);
+	 *    {@literal @}Fallback(Fallback.TRUE) boolean bar();
 	 *     int getValue();		// Mirror getter for member field "value" (setter can be defined too)
 	 *     static int bar(String name) {
 	 *         return Hack.mirrorStaticMethod(com.foo.HiddenClass.class, "bar", -1, name);
@@ -77,7 +80,8 @@ public class Hack {
 	 * @see #mirrorStaticMethod(Class, String, Object, Object...)
 	 */
 	public interface Mirror<T> {}
-	@Retention(RetentionPolicy.RUNTIME) public @interface SourceClass { String value(); }
+	@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE) public @interface SourceClass { String value(); }
+	@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD) public @interface Fallback { int value(); int TRUE = 1; int FALSE = 0; }
 
 	public interface HackedObject {
 		<T, M extends Mirror<T>> M with(final Class<M> mirror_class);
@@ -246,9 +250,24 @@ public class Hack {
 
 				Object fallback(final Method method) {
 					final Class<?> type = method.getReturnType();
-					if (type == Boolean.class) return false;
-					if (Number.class.isAssignableFrom(type)) return 0;
+					if (! type.isPrimitive()) return null;
+					final Fallback fallback_annotation = method.getAnnotation(Fallback.class);
+					if (type == boolean.class) return fallback_annotation != null && fallback_annotation.value() > 0;
+					else if (type == int.class || type == long.class || type == byte.class || type == char.class
+							|| type == float.class || type == double.class || type == short.class)
+						return fallback_annotation != null ? cast(fallback_annotation.value(), type) : cast(0, type);
 					return null;
+				}
+
+				private Object cast(final int value, final Class<?> type) {
+					if (type == int.class) return value;
+					if (type == long.class) return (long) value;
+					if (type == byte.class) return (byte) value;
+					if (type == char.class) return (char) value;
+					if (type == float.class) return (float) value;
+					if (type == double.class) return (double) value;
+					if (type == short.class) return (short) value;
+					throw new UnsupportedOperationException();
 				}
 
 				private Map<Method/* mirror */, Method/* source */> mMethodCache;
@@ -1171,8 +1190,8 @@ public class Hack {
 		static String sField;
 	}
 
-	private static final Map<Class<?>/* mirror class */, Class<?>/* source class or Object.class for null */> sMirrorCache = new ArrayMap<>();
-	private static final Map<String, Method> sStaticMethodCache = new ArrayMap<>();
+	private static final Map<Class<?>/* mirror class */, Class<?>/* source class or Object.class for null */> sMirrorCache = new HashMap<>();
+	private static final Map<String, Method> sStaticMethodCache = new HashMap<>();
 	private static final Method NULL_METHOD;
 	static { try { NULL_METHOD = Object.class.getMethod("toString"); } catch (final NoSuchMethodException e) { throw new LinkageError(); }}
 
