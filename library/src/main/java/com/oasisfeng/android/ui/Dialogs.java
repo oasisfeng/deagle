@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import androidx.annotation.CheckResult;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -12,18 +16,37 @@ import androidx.annotation.StringRes;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /** @author Oasis */
+@ParametersAreNonnullByDefault
 @RequiresApi(LOLLIPOP) public class Dialogs {
 
 	/** Create an non-cancellable alert dialog builder. */
 	public static @CheckResult Builder buildAlert(final Activity activity, final @StringRes int title, final @StringRes int message) {
 		return buildAlert(activity, title != 0 ? activity.getText(title) : null, message != 0 ? activity.getText(message) : null);
 	}
-
 	public static @CheckResult Builder buildAlert(final Activity activity, final @Nullable CharSequence title, final @Nullable CharSequence message) {
 		final Builder builder = new Builder(activity);
-		builder.setCancelable(true);
 		if (title != null) builder.setTitle(title);
 		if (message != null) builder.setMessage(message);
+		return builder;
+	}
+
+	public static @CheckResult Builder buildList(final Activity activity, final @StringRes int title, final CharSequence[] items,
+												 final DialogInterface.OnClickListener listener) {
+		return buildList(activity, title != 0 ? activity.getText(title) : null, items, listener);
+	}
+	public static @CheckResult Builder buildList(final Activity activity, final @Nullable CharSequence title, final CharSequence[] items,
+												 final DialogInterface.OnClickListener listener) {
+		final Builder builder = new Builder(activity);
+		if (title != null) builder.setTitle(title);
+		builder.setItems(items, listener);
+		return builder;
+	}
+
+	public static @CheckResult Builder buildCheckList(final Activity activity, final @Nullable CharSequence title, final CharSequence[] items,
+													  final @Nullable boolean[] checkedItems, final DialogInterface.OnMultiChoiceClickListener listener) {
+		final Builder builder = new Builder(activity);
+		if (title != null) builder.setTitle(title);
+		builder.setMultiChoiceItems(items, checkedItems, listener);
 		return builder;
 	}
 
