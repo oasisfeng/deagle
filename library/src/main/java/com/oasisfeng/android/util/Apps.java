@@ -43,7 +43,7 @@ public class Apps {
 
     /** Check whether specified app is installed on the device, even if not installed in current user (Android 4.2+). */
     public @CheckResult boolean isInstalledOnDevice(final String pkg) {
-        try { //noinspection WrongConstant,deprecation
+        try {
             mContext.getPackageManager().getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
             return true;
         } catch (final NameNotFoundException e) {
@@ -69,12 +69,16 @@ public class Apps {
 
     /** Check whether specified app is installed in current user, even if hidden by system (Android 5+). */
     public @CheckResult boolean isInstalledInCurrentUser(final String pkg) {
-        try { @SuppressWarnings("deprecation")
+        try {
             final ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(pkg, GET_UNINSTALLED_PACKAGES);
-            return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+            return isInstalledInCurrentUser(info);
         } catch (final NameNotFoundException e) {
             return false;
         }
+    }
+
+    public static @CheckResult boolean isInstalledInCurrentUser(final ApplicationInfo info) {
+        return (info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
     }
 
     /** Use {@link #isInstalledInCurrentUser(String)} or {@link #isInstalledOnDevice(String)} instead */
@@ -86,7 +90,7 @@ public class Apps {
         if (SDK_INT >= M) {
             if (ApplicationInfo_privateFlags == NO_SUCH_FIELD) return isSystem(app);    // Fallback
             try {
-                if (ApplicationInfo_privateFlags == null) {
+                if (ApplicationInfo_privateFlags == null) { //noinspection JavaReflectionMemberAccess
                     ApplicationInfo_privateFlags = ApplicationInfo.class.getField("privateFlags");
                     if (ApplicationInfo_privateFlags.getType() != int.class) throw new NoSuchFieldException();
                 }
@@ -123,7 +127,7 @@ public class Apps {
         return false;
     }
 
-    private static boolean isSystem(final ApplicationInfo app) {
+    public static boolean isSystem(final ApplicationInfo app) {
         return (app.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
