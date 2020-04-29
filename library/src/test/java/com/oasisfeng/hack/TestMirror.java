@@ -1,10 +1,10 @@
 package com.oasisfeng.hack;
 
+import androidx.annotation.Nullable;
+
 import com.oasisfeng.hack.Hack.Fallback;
 
 import java.util.List;
-
-import androidx.annotation.Nullable;
 
 /**
  * Created by Oasis on 2019-10-14.
@@ -34,9 +34,4 @@ interface TestMirror extends Hack.Mirror<TestClass> {
 
 	List<InnerClass> complexMethod(int a, String b, @Nullable int[] c);
 	void setMode(int code, int uid, String packageName, int mode);
-
-	/** Retrieve the default mode for the operation. */
-	static int opToDefaultMode(final int op) {
-		return Hack.mirrorStaticMethod(TestMirror.class, "opToDefaultMode", -1, op);
-	}
 }

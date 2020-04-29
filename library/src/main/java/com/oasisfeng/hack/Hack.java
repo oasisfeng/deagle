@@ -3,6 +3,11 @@ package com.oasisfeng.hack;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.oasisfeng.android.util.Supplier;
 import com.oasisfeng.android.util.Suppliers;
 import com.oasisfeng.deagle.BuildConfig;
@@ -30,11 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
-import androidx.annotation.CheckResult;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.O;
@@ -97,6 +97,7 @@ public class Hack {
 	 *
 	 * @see Mirror
 	 */
+	@Deprecated
 	public static <T, M extends Mirror<T>, R, E extends Exception> R mirrorStaticMethod(final Class<M> mirror, final String method, final R fallback, final Object... args) throws E {
 		final String tag = mirror.getName() + "#" + method;
 		Method source_method = sStaticMethodCache.get(tag);
@@ -192,6 +193,7 @@ public class Hack {
 				findSourceMethodForMirror(mirror_method, source_class);
 			} catch (final NoSuchMethodException e) {
 				if (extractFieldGetterOrSetterFromMethod(mirror_method, source_class) != null) continue;
+				if (mirror_method.getAnnotation(Hack.Fallback.class) != null) continue;
 				fail(new AssertionException(e).setHackedClass(into(inner_class)));
 			}
 			verifyAllMirrorsIn(inner_class);    // Only Mirror class may contain inner Mirror classes
@@ -414,7 +416,7 @@ public class Hack {
 	}
 
 	/** Placeholder for unchecked exception */
-	public class Unchecked extends RuntimeException {}
+	public static class Unchecked extends RuntimeException {}
 
 	/** Use {@link Hack#setAssertionFailureHandler(AssertionFailureHandler) } to set the global handler */
 	public interface AssertionFailureHandler {
@@ -690,13 +692,13 @@ public class Hack {
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable> HackedInvokable<R, C, TT1, TT2, T3> throwing(Class<TT1> type1, Class<TT2> type2);
 		@CheckResult <TT1 extends Throwable, TT2 extends Throwable, TT3 extends Throwable> HackedInvokable<R, C, TT1, TT2, TT3> throwing(Class<TT1> type1, Class<TT2> type2, Class<TT3> type3);
 
-		@Nullable HackedMethod0<R, C, T1, T2, T3> withoutParams();
-		@Nullable <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(Class<A1> type);
-		@Nullable <A1, A2> HackedMethod2<R, C, T1, T2, T3, A1, A2> withParams(Class<A1> type1, Class<A2> type2);
-		@Nullable <A1, A2, A3> HackedMethod3<R, C, T1, T2, T3, A1, A2, A3> withParams(Class<A1> type1, Class<A2> type2, Class<A3> type3);
-		@Nullable <A1, A2, A3, A4> HackedMethod4<R, C, T1, T2, T3, A1, A2, A3, A4> withParams(Class<A1> type1, Class<A2> type2, Class<A3> type3, Class<A4> type4);
-		@Nullable <A1, A2, A3, A4, A5> HackedMethod5<R, C, T1, T2, T3, A1, A2, A3, A4, A5> withParams(Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4, final Class<A5> type5);
-		@Nullable HackedMethodN<R, C, T1, T2, T3> withParams(Class<?>... types);
+		@CheckResult @Nullable HackedMethod0<R, C, T1, T2, T3> withoutParams();
+		@CheckResult @Nullable <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(Class<A1> type);
+		@CheckResult @Nullable <A1, A2> HackedMethod2<R, C, T1, T2, T3, A1, A2> withParams(Class<A1> type1, Class<A2> type2);
+		@CheckResult @Nullable <A1, A2, A3> HackedMethod3<R, C, T1, T2, T3, A1, A2, A3> withParams(Class<A1> type1, Class<A2> type2, Class<A3> type3);
+		@CheckResult @Nullable <A1, A2, A3, A4> HackedMethod4<R, C, T1, T2, T3, A1, A2, A3, A4> withParams(Class<A1> type1, Class<A2> type2, Class<A3> type3, Class<A4> type4);
+		@CheckResult @Nullable <A1, A2, A3, A4, A5> HackedMethod5<R, C, T1, T2, T3, A1, A2, A3, A4, A5> withParams(Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4, final Class<A5> type5);
+		@CheckResult @Nullable HackedMethodN<R, C, T1, T2, T3> withParams(Class<?>... types);
 	}
 
 	public interface NonNullHackedInvokable<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends HackedInvokable<R, C, T1,T2,T3> {
