@@ -83,6 +83,7 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 		FluentProgressDialog(final Context context) { super(context, getDayNightThemeForAlertDialog(context)); }
 		public FluentProgressDialog indeterminate() { setIndeterminate(true); return this; }
 		public FluentProgressDialog nonCancelable() { setCancelable(false); return this; }
+		public FluentProgressDialog onCancel(final OnCancelListener listener) { setOnCancelListener(listener); return this; }
 		public FluentProgressDialog start() { super.show(); return this; }
 	}
 }
