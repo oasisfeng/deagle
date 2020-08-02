@@ -5,11 +5,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import androidx.annotation.IntDef;
 import androidx.annotation.StringRes;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by Oasis on 2018-9-11.
@@ -26,6 +26,10 @@ public class Toasts {
 
 	public static void showLong(final Context context, final @StringRes int text) {
 		show(context, text, Toast.LENGTH_LONG);
+	}
+
+	public static void showShort(final Context context, final CharSequence text) {
+		show(context, text, Toast.LENGTH_SHORT);
 	}
 
 	public static void showShort(final Context context, final @StringRes int text) {
