@@ -160,28 +160,29 @@ public class Hack {
 		if (generic_interface instanceof ParameterizedType) {
 			final ParameterizedType mirror_type = (ParameterizedType) generic_interface;
 			final Type source_type = mirror_type.getActualTypeArguments()[0];
-			if (! (source_type instanceof Class)) throw new IllegalStateException("Generic type must be class");
-			//noinspection unchecked
-			return (Class<T>) source_type;
-		} else {
-			final SourceClass target_class = mirror_class.getAnnotation(SourceClass.class);
-			if (target_class != null) try { //noinspection unchecked
-				return (Class<T>) Class.forName(target_class.value());
-			} catch (final ClassNotFoundException e) {
-				return null;
+			if (source_type != Object.class) {      // "<Object>" is just for suppressing compiler warning.
+				if (! (source_type instanceof Class)) throw new IllegalStateException("Generic type must be class");
+				//noinspection unchecked
+				return (Class<T>) source_type;
 			}
-
-			final Class<?> enclosing_class = mirror_class.getEnclosingClass();
-			@SuppressWarnings("unchecked") final Class source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class) enclosing_class) : null;
-			if (source_enclosing_class == null)
-				throw new IllegalArgumentException("Mirror without parameter can only be extended by inner class of Mirror class");
-			final Class[] inner_classes = source_enclosing_class.getClasses();
-			final String mirror_class_simple_name = mirror_class.getSimpleName();
-			for (final Class inner_class : inner_classes)
-				if (mirror_class_simple_name.equals(inner_class.getSimpleName())) //noinspection unchecked
-					return (Class<T>) inner_class;
+		}
+		final SourceClass target_class = mirror_class.getAnnotation(SourceClass.class);
+		if (target_class != null) try { //noinspection unchecked
+			return (Class<T>) Class.forName(target_class.value());
+		} catch (final ClassNotFoundException e) {
 			return null;
 		}
+
+		final Class<?> enclosing_class = mirror_class.getEnclosingClass();
+		@SuppressWarnings("unchecked") final Class source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class) enclosing_class) : null;
+		if (source_enclosing_class == null)
+			throw new IllegalArgumentException("Mirror without parameter can only be extended by inner class of Mirror class");
+		final Class[] inner_classes = source_enclosing_class.getClasses();
+		final String mirror_class_simple_name = mirror_class.getSimpleName();
+		for (final Class inner_class : inner_classes)
+			if (mirror_class_simple_name.equals(inner_class.getSimpleName())) //noinspection unchecked
+				return (Class<T>) inner_class;
+		return null;
 	}
 
 	// TODO: Use IdleHandler or low-priority thread
