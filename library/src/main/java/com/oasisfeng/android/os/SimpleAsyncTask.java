@@ -2,10 +2,9 @@ package com.oasisfeng.android.os;
 
 import android.os.AsyncTask;
 
-import com.oasisfeng.android.util.Consumer;
-import com.oasisfeng.android.util.Supplier;
-
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.WorkerThread;

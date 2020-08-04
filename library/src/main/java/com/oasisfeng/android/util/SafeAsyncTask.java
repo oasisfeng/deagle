@@ -11,11 +11,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 import androidx.fragment.app.FragmentActivity;
-import java9.util.function.BiConsumer;
 
 /**
  * Protect against NPE when calling {@link Fragment#getActivity()} in {@link AsyncTask}.
@@ -65,10 +68,6 @@ public abstract class SafeAsyncTask<Params, Progress, Result> extends AsyncTask<
 			final androidx.fragment.app.Fragment f = fragment_reference.get();
 			return f == null ? null : f.getActivity();
 		}, runnable));
-	}
-
-	private interface Supplier<T> {
-		T get();
 	}
 
 	static class SafeTask<T> implements java.lang.Runnable {

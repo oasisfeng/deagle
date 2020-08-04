@@ -9,13 +9,13 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
 
-import com.oasisfeng.android.util.Consumer;
-
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import java.util.function.Consumer;
 
 import static android.os.Build.VERSION_CODES.M;
 

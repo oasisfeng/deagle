@@ -1,7 +1,7 @@
 package com.oasisfeng.android.util;
 
 /**
- * {@link Consumer} with {@link Throwable}
+ * {@link java.util.function.Consumer} with {@link Throwable}
  *
  * Created by Oasis on 2016/11/24.
  */

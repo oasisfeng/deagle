@@ -3,7 +3,7 @@ package com.oasisfeng.android.os;
 import android.os.Bundle;
 import android.os.Parcelable;
 
-import com.oasisfeng.android.util.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Bundle-related helpers
