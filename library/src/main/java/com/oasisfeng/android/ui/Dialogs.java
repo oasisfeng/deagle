@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.widget.ListAdapter;
 
 import androidx.annotation.CheckResult;
 import androidx.annotation.Nullable;
@@ -32,20 +34,31 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 		return builder;
 	}
 
-	public static @CheckResult Builder buildList(final Activity activity, final @StringRes int title, final CharSequence[] items,
-												 final DialogInterface.OnClickListener listener) {
+	public static @CheckResult Builder buildList(final Activity activity, final @StringRes int title,
+			final CharSequence[] items, final DialogInterface.OnClickListener listener) {
 		return buildList(activity, title != 0 ? activity.getText(title) : null, items, listener);
 	}
-	public static @CheckResult Builder buildList(final Activity activity, final @Nullable CharSequence title, final CharSequence[] items,
-												 final DialogInterface.OnClickListener listener) {
+	public static @CheckResult Builder buildList(final Activity activity, final @Nullable CharSequence title,
+			final CharSequence[] items, final DialogInterface.OnClickListener listener) {
 		final Builder builder = new Builder(activity);
 		if (title != null) builder.setTitle(title);
 		builder.setItems(items, listener);
 		return builder;
 	}
+	public static @CheckResult Builder buildList(final Activity activity, final @StringRes int title,
+			final ListAdapter adapter, final int checkedItem, final DialogInterface.OnClickListener listener) {
+		return buildList(activity, title != 0 ? activity.getText(title) : null, adapter, checkedItem, listener);
+	}
+	public static @CheckResult Builder buildList(final Activity activity, final @Nullable CharSequence title,
+			final ListAdapter adapter, final int checkedItem, final DialogInterface.OnClickListener listener) {
+		final Builder builder = new Builder(activity);
+		if (title != null) builder.setTitle(title);
+		builder.setSingleChoiceItems(adapter, checkedItem, listener);
+		return builder;
+	}
 
-	public static @CheckResult Builder buildCheckList(final Activity activity, final @Nullable CharSequence title, final CharSequence[] items,
-													  final @Nullable boolean[] checkedItems, final DialogInterface.OnMultiChoiceClickListener listener) {
+	public static @CheckResult Builder buildCheckList(final Activity activity, final @Nullable CharSequence title,
+			final CharSequence[] items, final @Nullable boolean[] checkedItems, final OnMultiChoiceClickListener listener) {
 		final Builder builder = new Builder(activity);
 		if (title != null) builder.setTitle(title);
 		builder.setMultiChoiceItems(items, checkedItems, listener);
