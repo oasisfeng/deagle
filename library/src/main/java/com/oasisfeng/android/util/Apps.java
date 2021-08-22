@@ -1,5 +1,13 @@
 package com.oasisfeng.android.util;
 
+import static android.content.Intent.CATEGORY_LAUNCHER;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.O_MR1;
+import static com.oasisfeng.android.content.pm.Permissions.INTERACT_ACROSS_USERS;
+
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -13,6 +21,9 @@ import android.net.Uri;
 import android.os.Process;
 import android.util.Log;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.Nullable;
+
 import com.oasisfeng.android.content.pm.Permissions;
 import com.oasisfeng.android.google.GooglePlayStore;
 
@@ -20,19 +31,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import androidx.annotation.CheckResult;
-import androidx.annotation.Nullable;
-
-import static android.content.Intent.CATEGORY_LAUNCHER;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.KITKAT;
-import static android.os.Build.VERSION_CODES.M;
-import static android.os.Build.VERSION_CODES.O_MR1;
-import static com.oasisfeng.android.content.pm.Permissions.INTERACT_ACROSS_USERS;
 
 /** @author Oasis */
 public class Apps {
@@ -87,21 +85,24 @@ public class Apps {
     }
 
     public static boolean isPrivileged(final ApplicationInfo app) {
-        if (SDK_INT >= M) {
-            if (ApplicationInfo_privateFlags == NO_SUCH_FIELD) return isSystem(app);    // Fallback
-            try {
-                if (ApplicationInfo_privateFlags == null) { //noinspection JavaReflectionMemberAccess
-                    ApplicationInfo_privateFlags = ApplicationInfo.class.getField("privateFlags");
-                    if (ApplicationInfo_privateFlags.getType() != int.class) throw new NoSuchFieldException();
-                }
-                return ((int) ApplicationInfo_privateFlags.get(app) & PRIVATE_FLAG_PRIVILEGED) != 0;
-            } catch (final NoSuchFieldException | IllegalAccessException | MultiCatchROECompat e) {
-                ApplicationInfo_privateFlags = NO_SUCH_FIELD;
-                Log.e(TAG, "Incompatible ROM: No public integer field - ApplicationInfo.privateFlags");
-                return isSystem(app);
+        final Integer flags = getPrivateFlags(app);
+        if (flags == null) return isSystem(app);    // Fallback
+        return (flags & PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    public static Integer getPrivateFlags(final ApplicationInfo app) {
+        if (ApplicationInfo_privateFlags == NO_SUCH_FIELD) return null;
+        try {
+            if (ApplicationInfo_privateFlags == null) { //noinspection JavaReflectionMemberAccess
+                ApplicationInfo_privateFlags = ApplicationInfo.class.getField("privateFlags");
+                if (ApplicationInfo_privateFlags.getType() != int.class) throw new NoSuchFieldException();
             }
+            return (Integer) ApplicationInfo_privateFlags.get(app);
+        } catch (final NoSuchFieldException | IllegalAccessException | MultiCatchROECompat e) {
+            ApplicationInfo_privateFlags = NO_SUCH_FIELD;
+            Log.e(TAG, "Incompatible ROM: No public integer field - ApplicationInfo.privateFlags");
+            return null;
         }
-        return SDK_INT >= KITKAT && (app.flags & FLAG_PRIVILEGED) != 0;
     }
 
     public boolean launch(final String pkg) {
@@ -113,7 +114,6 @@ public class Apps {
         }
     }
 
-    private static final int FLAG_PRIVILEGED = 1<<30;
     private static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;        // ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
 
     public static boolean isPrivileged(final PackageManager pm, final int uid) {
