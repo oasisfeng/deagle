@@ -1,15 +1,15 @@
 package com.oasisfeng.android.content.pm;
 
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.N;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.oasisfeng.android.os.UserHandles;
-
-import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.N;
 
 /**
  * Created by Oasis on 2019-2-12.
@@ -25,7 +25,7 @@ public class PackageManagerCompat {
 		return mPackageManager.getPackageUid(pkg, user);
 	}
 
-	@SuppressLint("NewApi") public int getPackageUid(final String pkg) throws PackageManager.NameNotFoundException {
+	public int getPackageUid(final String pkg) throws PackageManager.NameNotFoundException {
 		return getPackageUid(pkg, UserHandles.MY_USER_ID);
 	}
 

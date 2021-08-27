@@ -1,5 +1,10 @@
 package com.oasisfeng.android.content.pm;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static android.os.Build.VERSION_CODES.N;
+import static android.os.Build.VERSION_CODES.O;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -7,14 +12,10 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 
-import java.util.Objects;
-
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.os.Build.VERSION_CODES.N;
-import static android.os.Build.VERSION_CODES.O;
+import java.util.Objects;
 
 /**
  * Backward-compatibility helper for {@link LauncherApps}.
@@ -35,19 +36,19 @@ import static android.os.Build.VERSION_CODES.O;
 		return info;
 	}
 
-	@RequiresApi(N)
-	public ApplicationInfo getApplicationInfoNoThrows(final String pkg, final int flags, final UserHandle user) {
+	@RequiresApi(N) public @Nullable ApplicationInfo getApplicationInfoNoThrows(final String pkg, final int flags, final UserHandle user) {
 		return getApplicationInfoNoThrows(mLauncherApps, pkg, flags, user);
 	}
 
-	@RequiresApi(N) @SuppressLint("NewApi")
-	public static ApplicationInfo getApplicationInfoNoThrows(final LauncherApps la, final String pkg, final int flags, final UserHandle user) {
+	@RequiresApi(N) @SuppressLint("NewApi") public static @Nullable ApplicationInfo getApplicationInfoNoThrows(
+			final LauncherApps la, final String pkg, final int flags, final UserHandle user) {
 		try {
 			return la.getApplicationInfo(pkg, flags, user);
 		} catch (final PackageManager.NameNotFoundException e) {
 			return null;
 		}
 	}
+
 	public final LauncherApps get() {
 		return mLauncherApps;
 	}
