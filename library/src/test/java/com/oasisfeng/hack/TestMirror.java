@@ -11,13 +11,13 @@ import java.util.List;
  */
 interface TestMirror extends Hack.Mirror<TestClass> {
 
-	interface InnerClass extends Hack.Mirror {
+	interface InnerClass extends Hack.Mirror<Object> {
 		String getPackageName();
 		int getUid();
 		List<OpEntry> getOps();
 	}
 
-	interface OpEntry extends Hack.Mirror {
+	interface OpEntry extends Hack.Mirror<Object> {
 		int getOp();
 		long getMode();
 	}

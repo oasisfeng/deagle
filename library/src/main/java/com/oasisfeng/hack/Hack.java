@@ -1,5 +1,9 @@
 package com.oasisfeng.hack;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.O;
+import static java.lang.Character.toLowerCase;
+
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,10 +39,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.O;
-import static java.lang.Character.toLowerCase;
 
 /**
  * Java reflection helper optimized for hacking non-public APIs.
@@ -174,12 +174,12 @@ public class Hack {
 		}
 
 		final Class<?> enclosing_class = mirror_class.getEnclosingClass();
-		@SuppressWarnings("unchecked") final Class source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class) enclosing_class) : null;
+		@SuppressWarnings("unchecked") final Class<T> source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class<M>) enclosing_class) : null;
 		if (source_enclosing_class == null)
-			throw new IllegalArgumentException("Mirror without parameter can only be extended by inner class of Mirror class");
-		final Class[] inner_classes = source_enclosing_class.getClasses();
+			throw new IllegalArgumentException("Mirror without parameter can only be extended by inner class of Mirror class: " + mirror_class);
+		final Class<?>[] inner_classes = source_enclosing_class.getClasses();
 		final String mirror_class_simple_name = mirror_class.getSimpleName();
-		for (final Class inner_class : inner_classes)
+		for (final Class<?> inner_class : inner_classes)
 			if (mirror_class_simple_name.equals(inner_class.getSimpleName())) //noinspection unchecked
 				return (Class<T>) inner_class;
 		return null;
@@ -189,7 +189,7 @@ public class Hack {
 	public static void verifyAllMirrorsIn(final Class<?> enclosing) {
 		for (final Class<?> inner_class : enclosing.getClasses()) {
 			if (! Mirror.class.isAssignableFrom(inner_class)) continue;
-			@SuppressWarnings("unchecked") final Class source_class = ensureSourceClassFromMirror((Class) inner_class);
+			@SuppressWarnings({"unchecked", "rawtypes"}) final Class source_class = ensureSourceClassFromMirror((Class) inner_class);
 			for (final Method mirror_method : inner_class.getMethods()) try {
 				findSourceMethodForMirror(mirror_method, source_class);
 			} catch (final NoSuchMethodException e) {
@@ -238,15 +238,16 @@ public class Hack {
 								: list_type instanceof Class ? (Class<?>) list_type : null;
 						if (list_raw_type == null || ! Mirror.class.isAssignableFrom(list_raw_type)) return source_result;
 						// T (in List<T>) is a Mirror class, let's transform the list items.
-						final List source_result_list = ((List) source_result), mirrored_result_list = new ArrayList(source_result_list.size());
+						@SuppressWarnings("unchecked") final List<Object> source_result_list = ((List<Object>) source_result);
+						final List<Object> mirrored_result_list = new ArrayList<>(source_result_list.size());
 						for (final Object source_result_item : source_result_list)
-							if (source_result_item != null)	//noinspection unchecked
+							if (source_result_item != null) //noinspection unchecked,rawtypes
 								mirrored_result_list.add(into(source_result_item).with((Class) list_raw_type));	// TODO: Individual item may be derived class of the generic list type
 						return mirrored_result_list;
 					} else {
 						final Class<?> mirror_return_type = mirror_method.getReturnType();
 						if (mirror_return_type.isPrimitive() || mirror_return_type.isAssignableFrom(source_result.getClass())) return source_result;
-						//noinspection unchecked
+						//noinspection unchecked,rawtypes
 						return into(source_result).with((Class) mirror_return_type);
 					}
 				}
@@ -741,46 +742,46 @@ public class Hack {
 
 	public static class CheckedHackedMethod<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
 
-		CheckedHackedMethod(final Invokable invokable) { mInvokable = invokable; }
+		CheckedHackedMethod(final Invokable<C> invokable) { mInvokable = invokable; }
 		@VisibleForTesting HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return new HackInvocation<>(mInvokable, args); }
 		/** Whether this hack is absent, thus will be fallen-back when invoked */
 		public boolean isAbsent() { return mInvokable.isAbsent(); }
 
-		private final Invokable mInvokable;
+		private final Invokable<C> mInvokable;
 	}
 
 	public static class HackedMethod0<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod0(final Invokable invokable) { super(invokable); }
+		HackedMethod0(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke() { return super.invoke(); }
 	}
 	public static class HackedMethod1<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod1(final Invokable invokable) { super(invokable); }
+		HackedMethod1(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg) { return super.invoke(arg); }
 	}
 	public static class HackedMethod2<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod2(final Invokable invokable) { super(invokable); }
+		HackedMethod2(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2) { return super.invoke(arg1, arg2); }
 	}
 	public static class HackedMethod3<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod3(final Invokable invokable) { super(invokable); }
+		HackedMethod3(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3) { return super.invoke(arg1, arg2, arg3); }
 	}
 	public static class HackedMethod4<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod4(final Invokable invokable) { super(invokable); }
+		HackedMethod4(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3, final @Nullable A4 arg4) { return super.invoke(arg1, arg2, arg3, arg4); }
 	}
 	public static class HackedMethod5<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable, A1, A2, A3, A4, A5> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethod5(final Invokable invokable) { super(invokable); }
+		HackedMethod5(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final @Nullable A1 arg1, final @Nullable A2 arg2, final @Nullable A3 arg3, final @Nullable A4 arg4, final @Nullable A5 arg5) { return super.invoke(arg1, arg2, arg3, arg4, arg5); }
 	}
 	public static class HackedMethodN<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> extends CheckedHackedMethod<R, C, T1,T2,T3> {
-		HackedMethodN(final Invokable invokable) { super(invokable); }
+		HackedMethodN(final Invokable<C> invokable) { super(invokable); }
 		public @CheckResult HackInvocation<R, C, T1, T2, T3> invoke(final Object... args) { return super.invoke(args); }
 	}
 
 	public static class HackInvocation<R, C, T1 extends Throwable, T2 extends Throwable, T3 extends Throwable> {
 
-		HackInvocation(final Invokable invokable, final Object... args) {
+		HackInvocation(final Invokable<C> invokable, final Object... args) {
 			this.invokable = invokable;
 			this.args = args;
 		}
@@ -800,7 +801,7 @@ public class Hack {
 			}
 		}
 
-		private final Invokable invokable;
+		private final Invokable<C> invokable;
 		private final Object[] args;
 	}
 
@@ -871,37 +872,37 @@ public class Hack {
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1> HackedMethod1<R, C, T1, T2, T3, A1> withParam(final Class<A1> type) {
-			final Invokable invokable = buildInvokable(type);
+			final Invokable<C> invokable = buildInvokable(type);
 			return invokable == null ? null : new HackedMethod1<>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2> HackedMethod2<R, C, T1, T2, T3, A1, A2> withParams(final Class<A1> type1, final Class<A2> type2) {
-			final Invokable invokable = buildInvokable(type1, type2);
+			final Invokable<C> invokable = buildInvokable(type1, type2);
 			return invokable == null ? null : new HackedMethod2<>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3> HackedMethod3<R, C, T1, T2, T3, A1, A2, A3> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3) {
-			final Invokable invokable = buildInvokable(type1, type2, type3);
+			final Invokable<C> invokable = buildInvokable(type1, type2, type3);
 			return invokable == null ? null : new HackedMethod3<>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3, A4> HackedMethod4<R, C, T1, T2, T3, A1, A2, A3, A4> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4) {
-			final Invokable invokable = buildInvokable(type1, type2, type3, type4);
+			final Invokable<C> invokable = buildInvokable(type1, type2, type3, type4);
 			return invokable == null ? null : new HackedMethod4<>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public <A1, A2, A3, A4, A5> HackedMethod5<R, C, T1, T2, T3, A1, A2, A3, A4, A5> withParams(final Class<A1> type1, final Class<A2> type2, final Class<A3> type3, final Class<A4> type4, final Class<A5> type5) {
-			final Invokable invokable = buildInvokable(type1, type2, type3, type4, type5);
+			final Invokable<C> invokable = buildInvokable(type1, type2, type3, type4, type5);
 			return invokable == null ? null : new HackedMethod5<>(invokable);
 		}
 
 		@NonNull @SuppressWarnings("ConstantConditions")
 		@Override public HackedMethodN<R, C, T1, T2, T3> withParams(final Class<?>... types) {
-			final Invokable invokable = buildInvokable(types);
+			final Invokable<C> invokable = buildInvokable(types);
 			return invokable == null ? null : new HackedMethodN<>(invokable);
 		}
 
@@ -976,7 +977,7 @@ public class Hack {
 		private Class<?>[] mThrowTypes;
 		private R mFallbackReturnValue;
 		private boolean mHasFallback;
-		private static final Comparator<Class> CLASS_COMPARATOR = new Comparator<Class>() {
+		private static final Comparator<Class<?>> CLASS_COMPARATOR = new Comparator<Class<?>>() {
 			@Override public int compare(final Class lhs, final Class rhs) {
 				return lhs.toString().compareTo(rhs.toString());
 			}
@@ -1076,11 +1077,11 @@ public class Hack {
 		}
 
 		@SuppressWarnings("unchecked") private Class<C> getRawClass() {
-			try {
+			try { //noinspection ConstantConditions
 				return mClass != null ? mClass : (mClass = (Class<C>) Class.forName(mClassName));
 			} catch (final ClassNotFoundException e) {
 				fail(new AssertionException(e));
-				return (Class) ANY_TYPE;		// Use AnyType as a lazy trick to make fallback working and avoid null.
+				return (Class<C>) ANY_TYPE;		// Use AnyType as a lazy trick to make fallback working and avoid null.
 			}
 		}
 

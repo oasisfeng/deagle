@@ -4,6 +4,7 @@ import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static com.oasisfeng.android.content.pm.Permissions.INTERACT_ACROSS_USERS;
@@ -183,7 +184,7 @@ public class Apps {
 	}
 
 	public static int getFlagsMatchKnownPackages(final Context context) {
-		return GET_UNINSTALLED_PACKAGES | (SDK_INT <= O_MR1 || Permissions.has(context, INTERACT_ACROSS_USERS) ? MATCH_ANY_USER : 0);
+		return MATCH_UNINSTALLED_PACKAGES | (SDK_INT <= O_MR1 || Permissions.has(context, INTERACT_ACROSS_USERS) ? MATCH_ANY_USER : 0);
 	}
 
 	public @CheckResult CharSequence getAppName(final String pkg) {
