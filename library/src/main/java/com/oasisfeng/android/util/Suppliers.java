@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 /**
@@ -64,8 +65,7 @@ public class Suppliers {
 			return value;
 		}
 
-		@Override
-		public String toString() {
+		@Override public @NonNull String toString() {
 			return "Suppliers.memoize(" + delegate + ")";
 		}
 
@@ -101,7 +101,7 @@ public class Suppliers {
 			return value;
 		}
 
-		@Override public String toString() {
+		@Override public @NonNull String toString() {
 			return "Suppliers.memoize(" + delegate + ")";
 		}
 	}
@@ -124,7 +124,7 @@ public class Suppliers {
 	 * @since 2.0
 	 */
 	public static <T> Supplier<T> memoizeWithExpiration(final Supplier<T> delegate, final long duration, final TimeUnit unit) {
-		return new ExpiringMemoizingSupplier<T>(delegate, duration, unit);
+		return new ExpiringMemoizingSupplier<>(delegate, duration, unit);
 	}
 
 	@VisibleForTesting
@@ -168,7 +168,7 @@ public class Suppliers {
 			return value;
 		}
 
-		@Override public String toString() {
+		@Override public @NonNull String toString() {
 			return "Suppliers.memoizeWithExpiration(" + delegate + ", " + durationMillis + "ms)";
 		}
 

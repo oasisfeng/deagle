@@ -91,7 +91,7 @@ public class Apps {
         return (flags & PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 
-    public static Integer getPrivateFlags(final ApplicationInfo app) {
+    public static @Nullable Integer getPrivateFlags(final ApplicationInfo app) {
         if (ApplicationInfo_privateFlags == NO_SUCH_FIELD) return null;
         try {
             if (ApplicationInfo_privateFlags == null) { //noinspection JavaReflectionMemberAccess
