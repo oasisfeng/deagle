@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.oasisfeng.deagle.R;
-
 import androidx.annotation.CheckResult;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -67,7 +65,7 @@ public class WebContent {
 		final Activity activity = findActivity(context);
 		if (activity != null) {	// Chrome custom tabs are only supported in
 			final TypedValue typed_value = new TypedValue();
-			activity.getTheme().resolveAttribute(R.attr.colorPrimary, typed_value, true);
+			activity.getTheme().resolveAttribute(android.R.attr.colorPrimary, typed_value, true);
 			intent = new CustomTabsIntent.Builder(session).setToolbarColor(typed_value.data).setShowTitle(true).build().intent;
 		} else intent = new Intent(Intent.ACTION_VIEW).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setData(uri);
