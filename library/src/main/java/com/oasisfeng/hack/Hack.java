@@ -48,8 +48,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * Then call it during application initialization, thus they are verified all together in an early stage.
  * If any assertion failed, a fall-back strategy is suggested.
  *
- * <p>https://gist.github.com/oasisfeng/75d3774ca5441372f049818de4d52605
- *
  * @see Demo
  *
  * @author Oasis

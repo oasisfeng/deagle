@@ -34,6 +34,8 @@ public class Versions {
     /** @param v version code as of {@link android.os.Build.VERSION#SDK_INT} */
     public static String getAndroidVersionNumber(final int v) {
         switch (v) {
+        case 34: return "14";
+        case 33: return "13";
         case 32: return "12L";
         case 31: return "12";
         case 30: return "11";
