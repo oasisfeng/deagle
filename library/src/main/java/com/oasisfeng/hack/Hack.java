@@ -79,7 +79,10 @@ public class Hack {
 	 * @param <T> the type of your mirror interface
 	 * @see #mirrorStaticMethod(Class, String, Object, Object...)
 	 */
-	public interface Mirror<T> {}
+	public interface Mirror<T> {
+		/* Name must be consistent with dynamic proxy created by HackedObject.with() */
+		default T getRawObject() { throw new IllegalStateException(getClass().getSimpleName() + " is not a mirror"); }
+	}
 	@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE) public @interface SourceClass { String value(); }
 	@Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD) public @interface Fallback { int value(); int TRUE = 1; int FALSE = 0; }
 
@@ -208,6 +211,8 @@ public class Hack {
 			//noinspection unchecked
 			return (M) Proxy.newProxyInstance(mirror_class.getClassLoader(), new Class[] { mirror_class }, new InvocationHandler() {
 				@Override public Object invoke(final Object proxy, final Method mirror_method, final Object[] args) throws Throwable {
+					if (mirror_method.getName().equals("getRawObject") && mirror_method.getParameterCount() == 0)
+						return mSource;
 					final Object source_result;
 					try {
 						final Method source_method = findSourceMethodForMirror(mirror_method, source_class);	// TODO: Cache
