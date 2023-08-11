@@ -194,6 +194,7 @@ public class Hack {
 			if (! Mirror.class.isAssignableFrom(inner_class)) continue;
 			@SuppressWarnings({"unchecked", "rawtypes"}) final Class source_class = ensureSourceClassFromMirror((Class) inner_class);
 			for (final Method mirror_method : inner_class.getMethods()) try {
+				if (mirror_method.isDefault()) continue;
 				findSourceMethodForMirror(mirror_method, source_class);
 			} catch (final NoSuchMethodException e) {
 				if (extractFieldGetterOrSetterFromMethod(mirror_method, source_class) != null) continue;
