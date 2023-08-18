@@ -17,6 +17,7 @@ import java.util.Set;
 import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
@@ -100,22 +101,22 @@ class SessionScope extends MemoryBasedScopeImpl {
 class DeviceBootScope implements Scope {
 
 	@Override public boolean isMarked(@NonNull final String tag) {
-		return PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE) != null;
+		return PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE | FLAG_IMMUTABLE) != null;
 	}
 
 	@Override public boolean mark(@NonNull final String tag) {
 		final Intent intent = makeIntent(tag);
-		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, intent, FLAG_NO_CREATE);
-		PendingIntent.getBroadcast(mContext, 0, intent, FLAG_UPDATE_CURRENT);
+		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, intent, FLAG_NO_CREATE | FLAG_IMMUTABLE);
+		PendingIntent.getBroadcast(mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
 		return mark != null;
 	}
 
 	@Override public void markOnly(@NonNull final String tag) {
-		PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_UPDATE_CURRENT);
+		PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE);
 	}
 
 	@Override public boolean unmark(@NonNull final String tag) {
-		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE);
+		final PendingIntent mark = PendingIntent.getBroadcast(mContext, 0, makeIntent(tag), FLAG_NO_CREATE | FLAG_IMMUTABLE);
 		if (mark == null) return false;
 		mark.cancel();
 		return true;
