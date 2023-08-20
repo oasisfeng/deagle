@@ -8,6 +8,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.CheckResult;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -77,7 +78,7 @@ public class Hack {
 	 * @param <T> the type of your mirror interface
 	 * @see #mirrorStaticMethod(Class, String, Object, Object...)
 	 */
-	public interface Mirror<T> {
+	@Keep public interface Mirror<T> {      // @Keep is required to retain generic interface information in R8 full mode
 		/* Name must be consistent with dynamic proxy created by HackedObject.with() */
 		default T getRawObject() { throw new IllegalStateException(getClass().getSimpleName() + " is not a mirror"); }
 	}
@@ -156,7 +157,8 @@ public class Hack {
 
 	private static @Nullable <T, M extends Mirror<T>> Class<T> findSourceClassFromMirror(final Class<M> mirror_class) {
 		final Type[] generic_interfaces = mirror_class.getGenericInterfaces();	// getGenericInterfaces() has its own cache
-		if (generic_interfaces.length == 0) return null;
+		if (generic_interfaces.length == 0)
+			throw new IllegalArgumentException("No generic interfaces information in " + mirror_class);
 		final Type generic_interface = generic_interfaces[0];
 		if (generic_interface instanceof ParameterizedType) {
 			final ParameterizedType mirror_type = (ParameterizedType) generic_interface;
@@ -174,10 +176,12 @@ public class Hack {
 			return null;
 		}
 
-		final Class<?> enclosing_class = mirror_class.getEnclosingClass();
-		@SuppressWarnings("unchecked") final Class<T> source_enclosing_class = enclosing_class != null ? getSourceClassFromMirror((Class<M>) enclosing_class) : null;
+		Class<?> enclosing_class = mirror_class.getEnclosingClass();
+		if (enclosing_class == null)
+			throw new IllegalArgumentException("Mirror without generic type can only be extended by inner class of Mirror class: " + mirror_class);
+		@SuppressWarnings("unchecked") final Class<T> source_enclosing_class = getSourceClassFromMirror((Class<M>) enclosing_class);
 		if (source_enclosing_class == null)
-			throw new IllegalArgumentException("Mirror without parameter can only be extended by inner class of Mirror class: " + mirror_class);
+			throw new IllegalArgumentException("Source class not found for mirror enclosing class: " + enclosing_class.getName());
 		final Class<?>[] inner_classes = source_enclosing_class.getClasses();
 		final String mirror_class_simple_name = mirror_class.getSimpleName();
 		for (final Class<?> inner_class : inner_classes)
@@ -188,6 +192,7 @@ public class Hack {
 
 	// TODO: Use IdleHandler or low-priority thread
 	public static void verifyAllMirrorsIn(final Class<?> enclosing) {
+		Log.i(TAG, "Verifying all mirrors in " + enclosing.getSimpleName());
 		for (final Class<?> inner_class : enclosing.getClasses()) {
 			if (! Mirror.class.isAssignableFrom(inner_class)) continue;
 			@SuppressWarnings({"unchecked", "rawtypes"}) final Class source_class = ensureSourceClassFromMirror((Class) inner_class);

@@ -1,1 +1,2 @@
--keepnames interface * implements com.oasisfeng.hack.Hack$Mirror { *; }
+-keep interface * extends com.oasisfeng.hack.Hack$Mirror { *; }
+-keepattributes InnerClasses,Signature,*Annotation*
