@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
     namespace 'com.oasisfeng.deagle'
-    compileSdk 31
+    compileSdk 34
 
     defaultConfig {
         minSdkVersion 24
