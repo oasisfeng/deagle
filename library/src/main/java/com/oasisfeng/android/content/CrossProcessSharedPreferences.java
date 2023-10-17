@@ -1,5 +1,7 @@
 package com.oasisfeng.android.content;
 
+import static androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 /**
  * Make changes of SharedPreferences in one process propagate to all other processes with the same SharedPreferences (only after commit/apply).
@@ -78,7 +81,7 @@ public class CrossProcessSharedPreferences {
 
 	private CrossProcessSharedPreferences(final Context context) {
 		mAppContext = context.getApplicationContext();
-		mAppContext.registerReceiver(mUpdateReceiver, new IntentFilter(KActionSharedPrefsUpdated));
+		ContextCompat.registerReceiver(mAppContext, mUpdateReceiver, new IntentFilter(KActionSharedPrefsUpdated), RECEIVER_NOT_EXPORTED);
 	}
 
 	private final BroadcastReceiver mUpdateReceiver = new BroadcastReceiver() { @Override public void onReceive(final Context c, final Intent intent) {
